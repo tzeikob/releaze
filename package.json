@@ -1,0 +1,34 @@
+{
+  "name": "verzion",
+  "version": "0.1.0",
+  "author": "Jake Ob <iakopap@gmail.com>",
+  "description": "A experimental package to bump up NPM packages",
+  "keywords": [
+    "versioning",
+    "changelog",
+    "bump",
+    "semver"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/tzeikob/verzion",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tzeikob/verzion.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tzeikob/verzion/issues",
+    "email": "iakopap@gmail.com"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "license",
+    "readme.md",
+    "index.js"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
