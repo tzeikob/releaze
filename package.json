@@ -25,10 +25,18 @@
   "files": [
     "license",
     "readme.md",
-    "index.js"
+    "index.js",
+    "bin",
+    "lib"
   ],
-  "main": "index.js",
+  "bin": {
+    "verzion": "./bin/verzion.js"
+  },
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cli": "1.0.1"
   }
 }
