@@ -6,7 +6,7 @@ const { version } = require('../package.json');
 function onFatalError(error) {
   process.exitCode = 2;
 
-  console.error(`Oops,something went wrong! \nVerzion: ${version}\n${error}`);
+  console.error(`Oops,something went wrong! \nReleaze: ${version}\n${error}`);
   console.error(error);
 }
 

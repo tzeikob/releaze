@@ -1,5 +1,5 @@
 {
-  "name": "verzion",
+  "name": "releaze",
   "version": "0.1.0",
   "author": "Jake Ob <iakopap@gmail.com>",
   "description": "A experimental package to bump up NPM packages",
@@ -10,13 +10,13 @@
     "semver"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/tzeikob/verzion",
+  "homepage": "https://github.com/tzeikob/releaze",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tzeikob/verzion.git"
+    "url": "git+https://github.com/tzeikob/releaze.git"
   },
   "bugs": {
-    "url": "https://github.com/tzeikob/verzion/issues",
+    "url": "https://github.com/tzeikob/releaze/issues",
     "email": "iakopap@gmail.com"
   },
   "engines": {
@@ -30,7 +30,7 @@
     "lib"
   ],
   "bin": {
-    "verzion": "./bin/verzion.js"
+    "releaze": "./bin/releaze.js"
   },
   "main": "lib/index.js",
   "scripts": {
