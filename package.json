@@ -2,7 +2,7 @@
   "name": "releaze",
   "version": "0.1.0",
   "author": "Jake Ob <iakopap@gmail.com>",
-  "description": "A experimental package to bump up NPM packages",
+  "description": "A experimental package to release new versions",
   "keywords": [
     "versioning",
     "changelog",
