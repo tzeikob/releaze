@@ -34,7 +34,7 @@
   },
   "main": "lib/index.js",
   "scripts": {
-    "test": "jest --coverage test"
+    "test": "jest --verbose --coverage test"
   },
   "dependencies": {
     "cli": "1.0.1"
