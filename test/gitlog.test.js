@@ -1,14 +1,6 @@
 const gitlog = require('../lib/gitlog');
 
-describe('Gitlog', () => {
-  test('should return a not empty list of commit messages', async () => {
-    expect.assertions(1);
-
-    const list = await gitlog();
-
-    expect(list.length).toBeGreaterThan(0);
-  });
-
+describe('gitlog/errors', () => {
   test('should throw an error when `from` argument is an integer value', async () => {
     expect.assertions(2);
 
