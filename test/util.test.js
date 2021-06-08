@@ -1,8 +1,8 @@
 const { isGiven, isNotString } = require('../lib/util/validators');
 
 describe('Call of util/validators.isGiven(value)', () => {
-  test('should return true for any value except null, undefined or empty string', () => {
-    expect.assertions(10);
+  test('should return true for any value except null and undefined', () => {
+    expect.assertions(11);
 
     expect(isGiven(123)).toBe(true);
     expect(isGiven(NaN)).toBe(true);
@@ -14,21 +14,21 @@ describe('Call of util/validators.isGiven(value)', () => {
     expect(isGiven(Symbol('s'))).toBe(true);
     expect(isGiven(() => {})).toBe(true);
     expect(isGiven('str')).toBe(true);
+    expect(isGiven('')).toBe(true);
   });
 
-  test('should return false for value equal to null, undefined or empty string', () => {
-    expect.assertions(4);
+  test('should return false for value equal to null or undefined', () => {
+    expect.assertions(3);
 
     expect(isGiven(null)).toBe(false);
     expect(isGiven(undefined)).toBe(false);
     expect(isGiven()).toBe(false);
-    expect(isGiven('')).toBe(false);
   });
 });
 
 describe('Call of util/validators.isNotString(value)', () => {
-  test('should return true for any value except a string', () => {
-    expect.assertions(12);
+  test('should return true for any value except a non empty string', () => {
+    expect.assertions(13);
 
     expect(isNotString(123)).toBe(true);
     expect(isNotString(NaN)).toBe(true);
@@ -42,12 +42,12 @@ describe('Call of util/validators.isNotString(value)', () => {
     expect(isNotString(null)).toBe(true);
     expect(isNotString(undefined)).toBe(true);
     expect(isNotString()).toBe(true);
+    expect(isNotString('')).toBe(true);
   });
 
-  test('should return false for value equal to a string or empty string', () => {
-    expect.assertions(2);
+  test('should return false for value equal to only a non empty string', () => {
+    expect.assertions(1);
 
     expect(isNotString('str')).toBe(false);
-    expect(isNotString('')).toBe(false);
   });
 });

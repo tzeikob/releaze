@@ -1,45 +1,48 @@
 const gitlog = require('../lib/gitlog');
 
-describe('Call of lib/gitlog(from, to, format)', () => {
-  test('should throw an error when `from` arg is given and is anything but a string', async () => {
-    expect.assertions(9);
+describe('Call of lib/gitlog({ from, to , format })', () => {
+  test('should throw an error when `from` arg is given and is anything but a non empty string', async () => {
+    expect.assertions(10);
 
-    await expect(gitlog(123)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(NaN)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(Infinity)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(true)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(false)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog([])).rejects.toBeInstanceOf(Error);
-    await expect(gitlog({})).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(() => {})).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(Symbol('sym'))).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: 123 })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: NaN })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: Infinity })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: true })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: false })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: [] })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: {} })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: (() => {}) })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: Symbol('sym') })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: '' })).rejects.toBeInstanceOf(Error);
   });
 
-  test('should throw an error when `to` arg is given and is anything but a string', async () => {
-    expect.assertions(9);
+  test('should throw an error when `to` arg is given and is anything but a non empty string', async () => {
+    expect.assertions(10);
 
-    await expect(gitlog(undefined, 123)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(undefined, NaN)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(undefined, Infinity)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(undefined, true)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(undefined, false)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(undefined, [])).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(undefined, {})).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(undefined, () => {})).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(undefined, Symbol('sym'))).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: 123 })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: NaN })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: Infinity })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: true })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: false })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: [] })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: {} })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: (() => {}) })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: Symbol('sym') })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: '' })).rejects.toBeInstanceOf(Error);
   });
 
-  test('should throw an error when both `from` and `to` args given and are anything but a string', async () => {
-    expect.assertions(9);
+  test('should throw an error when `format` arg is given and is anything but a non empty string', async () => {
+    expect.assertions(10);
 
-    await expect(gitlog(123, 123)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(NaN, NaN)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(Infinity, Infinity)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(true, true)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(false, false)).rejects.toBeInstanceOf(Error);
-    await expect(gitlog([], [])).rejects.toBeInstanceOf(Error);
-    await expect(gitlog({}, {})).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(() => {}, () => {})).rejects.toBeInstanceOf(Error);
-    await expect(gitlog(Symbol('sym'), Symbol('sym'))).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: 123 })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: NaN })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: Infinity })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: true })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: false })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: [] })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: {} })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: (() => {}) })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: Symbol('sym') })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ format: '' })).rejects.toBeInstanceOf(Error);
   });
 });
