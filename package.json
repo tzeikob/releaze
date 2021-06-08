@@ -1,6 +1,29 @@
 {
   "name": "releaze",
   "version": "0.1.0",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "jest --verbose --coverage test"
+  },
+  "bin": {
+    "releaze": "./bin/releaze.js"
+  },
+  "files": [
+    "license",
+    "readme.md",
+    "index.js",
+    "bin",
+    "lib"
+  ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "dependencies": {
+    "cli": "1.0.1"
+  },
+  "devDependencies": {
+    "jest": "27.0.4"
+  },
   "author": "Jake Ob <iakopap@gmail.com>",
   "description": "A experimental package to release new versions",
   "keywords": [
@@ -18,28 +41,5 @@
   "bugs": {
     "url": "https://github.com/tzeikob/releaze/issues",
     "email": "iakopap@gmail.com"
-  },
-  "engines": {
-    "node": ">=12.0.0"
-  },
-  "files": [
-    "license",
-    "readme.md",
-    "index.js",
-    "bin",
-    "lib"
-  ],
-  "bin": {
-    "releaze": "./bin/releaze.js"
-  },
-  "main": "lib/index.js",
-  "scripts": {
-    "test": "jest --verbose --coverage test"
-  },
-  "dependencies": {
-    "cli": "1.0.1"
-  },
-  "devDependencies": {
-    "jest": "27.0.4"
   }
 }
