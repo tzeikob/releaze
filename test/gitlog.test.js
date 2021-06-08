@@ -1,7 +1,7 @@
 const gitlog = require('../lib/gitlog');
 
-describe('Call of lib/gitlog({ from, to , format })', () => {
-  test('should throw an error when `from` arg is given and is anything but a non empty string', async () => {
+describe('Error handling in gitlog({ from, to , format })', () => {
+  test('should reject with Error when `from` arg is anything but a non empty string', async () => {
     expect.assertions(10);
 
     await expect(gitlog({ from: 123 })).rejects.toBeInstanceOf(Error);
@@ -16,7 +16,7 @@ describe('Call of lib/gitlog({ from, to , format })', () => {
     await expect(gitlog({ from: '' })).rejects.toBeInstanceOf(Error);
   });
 
-  test('should throw an error when `to` arg is given and is anything but a non empty string', async () => {
+  test('should reject with Error when `to` arg is anything but a non empty string', async () => {
     expect.assertions(10);
 
     await expect(gitlog({ to: 123 })).rejects.toBeInstanceOf(Error);
@@ -31,7 +31,7 @@ describe('Call of lib/gitlog({ from, to , format })', () => {
     await expect(gitlog({ to: '' })).rejects.toBeInstanceOf(Error);
   });
 
-  test('should throw an error when `format` arg is given and is anything but a non empty string', async () => {
+  test('should reject with Error when `format` arg is anything but a non empty string', async () => {
     expect.assertions(10);
 
     await expect(gitlog({ format: 123 })).rejects.toBeInstanceOf(Error);
