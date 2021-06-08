@@ -1,6 +1,6 @@
 const { isGiven, isNotString } = require('../lib/util/validators');
 
-describe('call to util/validators.isGiven(value)', () => {
+describe('Call of util/validators.isGiven(value)', () => {
   test('should return true for any value except null, undefined or empty string', () => {
     expect.assertions(10);
 
@@ -26,7 +26,7 @@ describe('call to util/validators.isGiven(value)', () => {
   });
 });
 
-describe('call to util/validators.isNotString(value)', () => {
+describe('Call of util/validators.isNotString(value)', () => {
   test('should return true for any value except a string', () => {
     expect.assertions(12);
 

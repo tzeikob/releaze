@@ -1,6 +1,6 @@
 const gitlog = require('../lib/gitlog');
 
-describe('Calls of lib/gitlog with invalid input', () => {
+describe('Call of lib/gitlog(from, to, format)', () => {
   test('should throw an error when `from` arg is given and is anything but a string', async () => {
     expect.assertions(9);
 
