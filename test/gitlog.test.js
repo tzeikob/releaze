@@ -14,7 +14,7 @@ afterEach(() => {
 
 describe('Error handling in gitlog({ from, to , format })', () => {
   test('should reject with Error when `from` arg is anything but a non empty string', async () => {
-    expect.assertions(10);
+    expect.assertions(11);
 
     await expect(gitlog({ from: 123 })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ from: NaN })).rejects.toBeInstanceOf(Error);
@@ -26,10 +26,12 @@ describe('Error handling in gitlog({ from, to , format })', () => {
     await expect(gitlog({ from: (() => {}) })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ from: Symbol('sym') })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ from: '' })).rejects.toBeInstanceOf(Error);
+
+    expect(execFile).toHaveBeenCalledTimes(0);
   });
 
   test('should reject with Error when `to` arg is anything but a non empty string', async () => {
-    expect.assertions(10);
+    expect.assertions(11);
 
     await expect(gitlog({ to: 123 })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ to: NaN })).rejects.toBeInstanceOf(Error);
@@ -41,10 +43,12 @@ describe('Error handling in gitlog({ from, to , format })', () => {
     await expect(gitlog({ to: (() => {}) })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ to: Symbol('sym') })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ to: '' })).rejects.toBeInstanceOf(Error);
+
+    expect(execFile).toHaveBeenCalledTimes(0);
   });
 
   test('should reject with Error when `format` arg is anything but a non empty string', async () => {
-    expect.assertions(10);
+    expect.assertions(11);
 
     await expect(gitlog({ format: 123 })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ format: NaN })).rejects.toBeInstanceOf(Error);
@@ -56,6 +60,8 @@ describe('Error handling in gitlog({ from, to , format })', () => {
     await expect(gitlog({ format: (() => {}) })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ format: Symbol('sym') })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ format: '' })).rejects.toBeInstanceOf(Error);
+
+    expect(execFile).toHaveBeenCalledTimes(0);
   });
 
   test('should reject with Error when `git log` process returns stderr as Error', async () => {
