@@ -12,8 +12,8 @@ afterEach(() => {
   execFile.mockReset();
 });
 
-describe('Error handling in gitlog({ from, to , format })', () => {
-  test('should reject with Error when `from` arg is anything but a non empty string', async () => {
+describe('Gitlog should reject with Error', () => {
+  test('when `from` arg is anything but a non empty string', async () => {
     expect.assertions(11);
 
     await expect(gitlog({ from: 123 })).rejects.toBeInstanceOf(Error);
@@ -30,7 +30,7 @@ describe('Error handling in gitlog({ from, to , format })', () => {
     expect(execFile).toHaveBeenCalledTimes(0);
   });
 
-  test('should reject with Error when `to` arg is anything but a non empty string', async () => {
+  test('when `to` arg is anything but a non empty string', async () => {
     expect.assertions(11);
 
     await expect(gitlog({ to: 123 })).rejects.toBeInstanceOf(Error);
@@ -47,7 +47,7 @@ describe('Error handling in gitlog({ from, to , format })', () => {
     expect(execFile).toHaveBeenCalledTimes(0);
   });
 
-  test('should reject with Error when `format` arg is anything but a non empty string', async () => {
+  test('when `format` arg is anything but a non empty string', async () => {
     expect.assertions(11);
 
     await expect(gitlog({ format: 123 })).rejects.toBeInstanceOf(Error);
@@ -64,33 +64,36 @@ describe('Error handling in gitlog({ from, to , format })', () => {
     expect(execFile).toHaveBeenCalledTimes(0);
   });
 
-  test('should reject with Error when `git log` process returns stderr as Error', async () => {
-    execFile.mockReturnValue(Promise.resolve({ stderr: new Error('A stderr occurred') }));
-
+  test('when git log process returns a stderr as Error', async () => {
     expect.assertions(3);
+
+    execFile.mockReturnValue(Promise.resolve({ stderr: new Error('A stderr occurred') }));
 
     await expect(gitlog({})).rejects.toBeInstanceOf(Error);
     await expect(gitlog({})).rejects.toHaveProperty('message', 'Error: A stderr occurred');
+
     expect(execFile).toHaveBeenCalledTimes(2);
   });
 
-  test('should reject with Error when `git log` process returns stderr as non Error', async () => {
-    execFile.mockReturnValue(Promise.resolve({ stderr: 'A stderr occurred' }));
-
+  test('when git log process returns stderr as a non Error', async () => {
     expect.assertions(3);
+
+    execFile.mockReturnValue(Promise.resolve({ stderr: 'A stderr occurred' }));
 
     await expect(gitlog({})).rejects.toBeInstanceOf(Error);
     await expect(gitlog({})).rejects.toHaveProperty('message', 'A stderr occurred');
+
     expect(execFile).toHaveBeenCalledTimes(2);
   });
 
-  test('should reject with Error when `git log` process throws a fatal error', async () => {
-    execFile.mockReturnValue(Promise.reject(new Error('A fatal error occurred')));
-
+  test('when git log process throws a fatal Error', async () => {
     expect.assertions(3);
+
+    execFile.mockReturnValue(Promise.reject(new Error('A fatal error occurred')));
 
     await expect(gitlog({})).rejects.toBeInstanceOf(Error);
     await expect(gitlog({})).rejects.toHaveProperty('message', 'A fatal error occurred');
+
     expect(execFile).toHaveBeenCalledTimes(2);
   });
 });
@@ -127,7 +130,7 @@ describe('Gitlog should spawn once a git log process in `--oneline` mode', () =>
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with `--format` set to default when options is given with nullish format', async () => {
+  test('with `--format` set to default when options is given with nullish `format`', async () => {
     expect.assertions(2);
 
     await gitlog({ format: null });
@@ -136,7 +139,7 @@ describe('Gitlog should spawn once a git log process in `--oneline` mode', () =>
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with `--format` set equal to the given format property in the options', async () => {
+  test('with `--format` set equal to the given `format` property in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ format: '%s %an' });
@@ -145,7 +148,7 @@ describe('Gitlog should spawn once a git log process in `--oneline` mode', () =>
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with a commit range `from^...to` set to the given from and to properties in the options', async () => {
+  test('with a commit range `from^...to` set to the given `from` and `to` properties in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ from: '871647f', to: '84e2fa8' });
@@ -154,7 +157,7 @@ describe('Gitlog should spawn once a git log process in `--oneline` mode', () =>
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with a commit range `from^...` set to the given from property in the options', async () => {
+  test('with a commit range `from^...` set to the given `from` property in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ from: '871647f' });
@@ -163,7 +166,7 @@ describe('Gitlog should spawn once a git log process in `--oneline` mode', () =>
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with a commit range `to` set to the given to property in the options', async () => {
+  test('with a commit range `to` set to the given `to` property in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ to: '84e2fa8' });
