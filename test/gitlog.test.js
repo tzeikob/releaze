@@ -94,3 +94,107 @@ describe('Error handling in gitlog({ from, to , format })', () => {
     expect(execFile).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('Gitlog should spawn once a git log process in `--oneline` mode', () => {
+  beforeEach(() => {
+    execFile.mockReturnValue(Promise.resolve({ stdout: '' }));
+  });
+
+  test('with only `--format` set to default when no options argument is given', async () => {
+    expect.assertions(2);
+
+    await gitlog();
+
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
+    expect(execFile).toHaveBeenCalledTimes(1);
+  });
+
+  test('with only `--format` set to default when an empty options argument is given', async () => {
+    expect.assertions(2);
+
+    await gitlog({});
+
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
+    expect(execFile).toHaveBeenCalledTimes(1);
+  });
+
+  test('with only `--format` set to default when options argument is given with nullish properties', async () => {
+    expect.assertions(2);
+
+    await gitlog({ from: null, to: null, format: null });
+
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
+    expect(execFile).toHaveBeenCalledTimes(1);
+  });
+
+  test('with `--format` set to default when options is given with nullish format', async () => {
+    expect.assertions(2);
+
+    await gitlog({ format: null });
+
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
+    expect(execFile).toHaveBeenCalledTimes(1);
+  });
+
+  test('with `--format` set equal to the given format property in the options', async () => {
+    expect.assertions(2);
+
+    await gitlog({ format: '%s %an' });
+
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%s %an']);
+    expect(execFile).toHaveBeenCalledTimes(1);
+  });
+
+  test('with a commit range `from^...to` set to the given from and to properties in the options', async () => {
+    expect.assertions(2);
+
+    await gitlog({ from: '871647f', to: '84e2fa8' });
+
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f^...84e2fa8']);
+    expect(execFile).toHaveBeenCalledTimes(1);
+  });
+
+  test('with a commit range `from^...` set to the given from property in the options', async () => {
+    expect.assertions(2);
+
+    await gitlog({ from: '871647f' });
+
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f^...']);
+    expect(execFile).toHaveBeenCalledTimes(1);
+  });
+
+  test('with a commit range `to` set to the given to property in the options', async () => {
+    expect.assertions(2);
+
+    await gitlog({ to: '84e2fa8' });
+
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '84e2fa8']);
+    expect(execFile).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Gitlog should resolve to', () => {
+  test('an array of strings when git log process returns a successful stdout', async () => {
+    expect.assertions(2);
+
+    execFile.mockReturnValue(Promise.resolve({ stdout: `line1\n` }));
+
+    await expect(gitlog()).resolves.toEqual(['line1']);
+
+    execFile.mockReturnValue(Promise.resolve({ stdout: `line1\nline2\nline3\n` }));
+
+    await expect(gitlog()).resolves.toEqual(['line1', 'line2', 'line3']);
+  });
+
+  test('an empty array when git log process returns a successful but empty stdout', async () => {
+    expect.assertions(2);
+
+    execFile.mockReturnValue(Promise.resolve({ stdout: `\n` }));
+
+    await expect(gitlog()).resolves.toEqual([]);
+
+    execFile.mockReturnValue(Promise.resolve({ stdout: `` }));
+
+    await expect(gitlog()).resolves.toEqual([]);
+  });
+});
