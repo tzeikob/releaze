@@ -30,6 +30,19 @@ describe('Gitlog should reject with Error', () => {
     expect(execFile).toHaveBeenCalledTimes(0);
   });
 
+  test('when `from` is a not valid git commit hash (sha1) or semver tag name', async () => {
+    expect.assertions(7);
+
+    await expect(gitlog({ from: 'c26GGG' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: 'c262349^' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: '^c262349' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: '01.33.a4' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: '..' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ from: '...' })).rejects.toBeInstanceOf(Error);
+
+    expect(execFile).toHaveBeenCalledTimes(0);
+  });
+
   test('when `to` arg is anything but a non empty string', async () => {
     expect.assertions(11);
 
@@ -43,6 +56,19 @@ describe('Gitlog should reject with Error', () => {
     await expect(gitlog({ to: (() => {}) })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ to: Symbol('sym') })).rejects.toBeInstanceOf(Error);
     await expect(gitlog({ to: '' })).rejects.toBeInstanceOf(Error);
+
+    expect(execFile).toHaveBeenCalledTimes(0);
+  });
+
+  test('when `to` is a not valid git commit hash (sha1) or semver tag name', async () => {
+    expect.assertions(7);
+
+    await expect(gitlog({ to: 'c26GGG' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: 'c262349^' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: '^c262349' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: '01.33.a4' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: '..' })).rejects.toBeInstanceOf(Error);
+    await expect(gitlog({ to: '...' })).rejects.toBeInstanceOf(Error);
 
     expect(execFile).toHaveBeenCalledTimes(0);
   });
@@ -148,25 +174,25 @@ describe('Gitlog should spawn once a git log process in `--oneline` mode', () =>
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with a revision range `from...to` set to the given `from` and `to` properties in the options', async () => {
+  test('with a range notation `from..to` set to the given `from` and `to` properties in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ from: '871647f', to: '84e2fa8' });
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f...84e2fa8']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f..84e2fa8']);
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with a commit range `from...` set to the given `from` property in the options', async () => {
+  test('with a range notation `from..` set to the given `from` property in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ from: '871647f' });
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f...']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f..']);
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with a commit range `to` set to the given `to` property in the options', async () => {
+  test('with a range notation `to` set to the given `to` property in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ to: '84e2fa8' });
