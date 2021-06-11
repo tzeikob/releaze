@@ -148,21 +148,21 @@ describe('Gitlog should spawn once a git log process in `--oneline` mode', () =>
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with a commit range `from^...to` set to the given `from` and `to` properties in the options', async () => {
+  test('with a revision range `from...to` set to the given `from` and `to` properties in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ from: '871647f', to: '84e2fa8' });
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f^...84e2fa8']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f...84e2fa8']);
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('with a commit range `from^...` set to the given `from` property in the options', async () => {
+  test('with a commit range `from...` set to the given `from` property in the options', async () => {
     expect.assertions(2);
 
     await gitlog({ from: '871647f' });
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f^...']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f...']);
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
