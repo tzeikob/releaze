@@ -1,18 +1,24 @@
 #!/usr/bin/env node
+
 'use strict';
 
-const { version } = require('../package.json');
+const cli = require('../lib/cli');
+const pkg = require('../package.json');
 
-function onFatalError(error) {
-  process.exitCode = 2;
+function handleFatalError (error) {
+  const exitCode = 2;
 
-  console.error(`Oops,something went wrong! \nReleaze: ${version}\n${error}`);
-  console.error(error);
+  console.error(`Oops, something went wrong!`);
+  console.error(`Error: ${error.message}`);
+
+  console.error(`\nRun ${pkg.name} --help to get more info`);
+  console.error(`Exit with code ${exitCode}`);
+  process.exit(exitCode);
 }
 
-(async function main() {
-  process.on('uncaughtException', onFatalError);
-  process.on('unhandledRejection', onFatalError);
+(async function main () {
+  process.on('uncaughtException', handleFatalError);
+  process.on('unhandledRejection', handleFatalError);
 
-  process.exitCode = await require('../lib/cli.js');
-}()).catch(onFatalError);
+  await cli.execute(process.argv);
+}()).catch(handleFatalError);
