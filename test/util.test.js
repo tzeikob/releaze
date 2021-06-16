@@ -2,7 +2,7 @@ const {
   isGiven,
   isNotString,
   isNotHashOrTag,
-  isNotSemverRelease
+  isNotSemverReleaseType
 } = require('../lib/util/validators');
 
 describe('Call of isGiven(value)', () => {
@@ -135,41 +135,41 @@ describe('Call of isNotHashOrTag(value)', () => {
   });
 });
 
-describe('Call of isNotSemverRelease(value)', () => {
+describe('Call of isNotSemverReleaseType(value)', () => {
   test('should return false for the string values `major`, `minor` and `patch`', () => {
     expect.assertions(6);
 
-    expect(isNotSemverRelease('major')).toBe(false);
-    expect(isNotSemverRelease('MAJOR')).toBe(false);
-    expect(isNotSemverRelease('minor')).toBe(false);
-    expect(isNotSemverRelease('MINOR')).toBe(false);
-    expect(isNotSemverRelease('patch')).toBe(false);
-    expect(isNotSemverRelease('PATCH')).toBe(false);
+    expect(isNotSemverReleaseType('major')).toBe(false);
+    expect(isNotSemverReleaseType('MAJOR')).toBe(false);
+    expect(isNotSemverReleaseType('minor')).toBe(false);
+    expect(isNotSemverReleaseType('MINOR')).toBe(false);
+    expect(isNotSemverReleaseType('patch')).toBe(false);
+    expect(isNotSemverReleaseType('PATCH')).toBe(false);
   });
 
   test('should return true for any value except `major`, `minor` and `patch`', () => {
     expect.assertions(19);
 
-    expect(isNotSemverRelease()).toBe(true);
-    expect(isNotSemverRelease(null)).toBe(true);
-    expect(isNotSemverRelease(undefined)).toBe(true);
+    expect(isNotSemverReleaseType()).toBe(true);
+    expect(isNotSemverReleaseType(null)).toBe(true);
+    expect(isNotSemverReleaseType(undefined)).toBe(true);
 
-    expect(isNotSemverRelease(123)).toBe(true);
-    expect(isNotSemverRelease(NaN)).toBe(true);
-    expect(isNotSemverRelease(Infinity)).toBe(true);
-    expect(isNotSemverRelease(true)).toBe(true);
-    expect(isNotSemverRelease(false)).toBe(true);
-    expect(isNotSemverRelease([])).toBe(true);
-    expect(isNotSemverRelease({})).toBe(true);
-    expect(isNotSemverRelease(Symbol('s'))).toBe(true);
-    expect(isNotSemverRelease(() => {})).toBe(true);
-    expect(isNotSemverRelease('')).toBe(true);
+    expect(isNotSemverReleaseType(123)).toBe(true);
+    expect(isNotSemverReleaseType(NaN)).toBe(true);
+    expect(isNotSemverReleaseType(Infinity)).toBe(true);
+    expect(isNotSemverReleaseType(true)).toBe(true);
+    expect(isNotSemverReleaseType(false)).toBe(true);
+    expect(isNotSemverReleaseType([])).toBe(true);
+    expect(isNotSemverReleaseType({})).toBe(true);
+    expect(isNotSemverReleaseType(Symbol('s'))).toBe(true);
+    expect(isNotSemverReleaseType(() => {})).toBe(true);
+    expect(isNotSemverReleaseType('')).toBe(true);
 
-    expect(isNotSemverRelease('next')).toBe(true);
-    expect(isNotSemverRelease('new')).toBe(true);
-    expect(isNotSemverRelease('latest')).toBe(true);
-    expect(isNotSemverRelease('majority')).toBe(true);
-    expect(isNotSemverRelease('minority')).toBe(true);
-    expect(isNotSemverRelease('pat')).toBe(true);
+    expect(isNotSemverReleaseType('next')).toBe(true);
+    expect(isNotSemverReleaseType('new')).toBe(true);
+    expect(isNotSemverReleaseType('latest')).toBe(true);
+    expect(isNotSemverReleaseType('majority')).toBe(true);
+    expect(isNotSemverReleaseType('minority')).toBe(true);
+    expect(isNotSemverReleaseType('pat')).toBe(true);
   });
 });
