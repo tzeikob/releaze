@@ -1,4 +1,5 @@
 jest.mock('fs', () => ({
+  existsSync: jest.fn().mockReturnValue(false),
   promises: {
     readFile: jest.fn().mockResolvedValue(),
     writeFile: jest.fn().mockResolvedValue(),
@@ -8,11 +9,17 @@ jest.mock('fs', () => ({
 const fs = require('fs');
 const bump = require('../lib/bump');
 
+const { existsSync } = fs;
 const { readFile, writeFile } = fs.promises;
 
 const pathToPackageJSON = expect.stringMatching(/\/package.json$/);
+const pathToPackageLockJSON = expect.stringMatching(/\/package-lock.json$/);
+const pathToShrinkwrapJSON = expect.stringMatching(/\/npm-shrinkwrap.json$/);
 
 afterEach(() => {
+  existsSync.mockReset();
+  existsSync.mockReturnValue(false);
+
   readFile.mockReset();
   writeFile.mockReset();
 });
@@ -169,7 +176,43 @@ describe('Bump called with a valid release type and package.json should', () => 
     expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
   });
 
-  test('resolve to an object with props to the `previous` and the new `current` semver versions', async () => {
+  test('write also the new `current` version to the package-lock.json if present', async () => {
+    expect.assertions(7);
+
+    readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
+
+    existsSync.mockImplementation((filepath) => filepath.endsWith('package-lock.json'));
+
+    await expect(bump('major')).resolves.toEqual({ previous: '0.1.1', current: '1.0.0' });
+
+    expect(readFile).toHaveBeenCalledTimes(2);
+    expect(existsSync).toHaveBeenCalledTimes(2);
+    expect(writeFile).toHaveBeenCalledTimes(2);
+
+    expect(existsSync).toHaveBeenCalledWith(pathToPackageLockJSON);
+    expect(readFile).toHaveBeenCalledWith(pathToPackageLockJSON);
+    expect(writeFile).toHaveBeenCalledWith(pathToPackageLockJSON, '{\n  "version": "1.0.0"\n}\n');
+  });
+
+  test('write also the new `current` version to the npm-shrinkwrap.json if present', async () => {
+    expect.assertions(7);
+
+    readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
+
+    existsSync.mockImplementation((filepath) => filepath.endsWith('npm-shrinkwrap.json'));
+
+    await expect(bump('major')).resolves.toEqual({ previous: '0.1.1', current: '1.0.0' });
+
+    expect(readFile).toHaveBeenCalledTimes(2);
+    expect(existsSync).toHaveBeenCalledTimes(2);
+    expect(writeFile).toHaveBeenCalledTimes(2);
+
+    expect(existsSync).toHaveBeenCalledWith(pathToShrinkwrapJSON);
+    expect(readFile).toHaveBeenCalledWith(pathToShrinkwrapJSON);
+    expect(writeFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, '{\n  "version": "1.0.0"\n}\n');
+  });
+
+  test('resolve to an object with props the `previous` and the new `current` semver versions', async () => {
     expect.assertions(3);
 
     readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
