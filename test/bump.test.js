@@ -12,9 +12,13 @@ const bump = require('../lib/bump');
 const { existsSync } = fs;
 const { readFile, writeFile } = fs.promises;
 
-const pathToPackageJSON = expect.stringMatching(/\/package.json$/);
-const pathToPackageLockJSON = expect.stringMatching(/\/package-lock.json$/);
-const pathToShrinkwrapJSON = expect.stringMatching(/\/npm-shrinkwrap.json$/);
+const pathEndsWithPackageJSON = expect.stringMatching(/\/package.json$/);
+const pathEndsWithPackageLockJSON = expect.stringMatching(/\/package-lock.json$/);
+const pathEndsWithShrinkwrapJSON = expect.stringMatching(/\/npm-shrinkwrap.json$/);
+
+const startsWithInvalidType = expect.stringMatching(/^Invalid or missing semver release type argument:/);
+const startsWithInvalidJSON = expect.stringMatching(/^Invalid or malformed/);
+const startsWithInvalidVersion = expect.stringMatching(/^Invalid or missing semver version in/);
 
 afterEach(() => {
   existsSync.mockReset();
@@ -29,56 +33,53 @@ describe('Bump should reject with error', () => {
     expect.assertions(8);
 
     await expect(bump()).rejects.toBeInstanceOf(Error);
-    await expect(bump()).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump()).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump(undefined)).rejects.toBeInstanceOf(Error);
-    await expect(bump(undefined)).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(undefined)).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump(null)).rejects.toBeInstanceOf(Error);
-    await expect(bump(null)).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(null)).rejects.toHaveProperty('message', startsWithInvalidType);
 
     expect(readFile).toHaveBeenCalledTimes(0);
     expect(writeFile).toHaveBeenCalledTimes(0);
   });
 
   test('when called with not valid release type argument', async () => {
-    expect.assertions(26);
+    expect.assertions(24);
 
     await expect(bump(123)).rejects.toBeInstanceOf(Error);
-    await expect(bump(123)).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(123)).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump(NaN)).rejects.toBeInstanceOf(Error);
-    await expect(bump(NaN)).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(NaN)).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump(Infinity)).rejects.toBeInstanceOf(Error);
-    await expect(bump(Infinity)).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(Infinity)).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump(true)).rejects.toBeInstanceOf(Error);
-    await expect(bump(true)).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(true)).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump(false)).rejects.toBeInstanceOf(Error);
-    await expect(bump(false)).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(false)).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump([])).rejects.toBeInstanceOf(Error);
-    await expect(bump([])).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump([])).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump({})).rejects.toBeInstanceOf(Error);
-    await expect(bump({})).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
-
-    await expect(bump(Symbol('s'))).rejects.toBeInstanceOf(Error);
-    await expect(bump(Symbol('s'))).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump({})).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump(() => {})).rejects.toBeInstanceOf(Error);
-    await expect(bump(() => {})).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(() => {})).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump('')).rejects.toBeInstanceOf(Error);
-    await expect(bump('')).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump('')).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump(() => {})).rejects.toBeInstanceOf(Error);
-    await expect(bump(() => {})).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump(() => {})).rejects.toHaveProperty('message', startsWithInvalidType);
 
     await expect(bump('majo')).rejects.toBeInstanceOf(Error);
-    await expect(bump('majo')).rejects.toHaveProperty('message', 'Invalid or missing semver release type argument');
+    await expect(bump('majo')).rejects.toHaveProperty('message', startsWithInvalidType);
 
     expect(readFile).toHaveBeenCalledTimes(0);
     expect(writeFile).toHaveBeenCalledTimes(0);
@@ -119,17 +120,17 @@ describe('Bump should reject with error', () => {
     readFile.mockReturnValue(Promise.resolve('123'));
 
     await expect(bump('major')).rejects.toBeInstanceOf(Error);
-    await expect(bump('major')).rejects.toHaveProperty('message', 'Invalid or malformed package.json');
+    await expect(bump('major')).rejects.toHaveProperty('message', startsWithInvalidJSON);
 
     readFile.mockReturnValue(Promise.resolve('null'));
 
     await expect(bump('major')).rejects.toBeInstanceOf(Error);
-    await expect(bump('major')).rejects.toHaveProperty('message', 'Invalid or malformed package.json');
+    await expect(bump('major')).rejects.toHaveProperty('message', startsWithInvalidJSON);
 
     readFile.mockReturnValue(Promise.resolve('[]'));
 
     await expect(bump('major')).rejects.toBeInstanceOf(Error);
-    await expect(bump('major')).rejects.toHaveProperty('message', 'Invalid or malformed package.json');
+    await expect(bump('major')).rejects.toHaveProperty('message', startsWithInvalidJSON);
 
     expect(readFile).toHaveBeenCalledTimes(6);
     expect(writeFile).toHaveBeenCalledTimes(0);
@@ -141,12 +142,12 @@ describe('Bump should reject with error', () => {
     readFile.mockReturnValue(Promise.resolve('{}'));
 
     await expect(bump('major')).rejects.toBeInstanceOf(Error);
-    await expect(bump('major')).rejects.toHaveProperty('message', 'Invalid or missing semver version in package.json');
+    await expect(bump('major')).rejects.toHaveProperty('message', startsWithInvalidVersion);
 
     readFile.mockReturnValue(Promise.resolve('{"version": "123"}'));
 
     await expect(bump('major')).rejects.toBeInstanceOf(Error);
-    await expect(bump('major')).rejects.toHaveProperty('message', 'Invalid or missing semver version in package.json');
+    await expect(bump('major')).rejects.toHaveProperty('message', startsWithInvalidVersion);
 
     expect(readFile).toHaveBeenCalledTimes(4);
     expect(writeFile).toHaveBeenCalledTimes(0);
@@ -162,7 +163,7 @@ describe('Bump called with a valid release type and package.json should', () => 
     await expect(bump('major')).resolves.toEqual({ previous: '0.1.1', current: '1.0.0' });
 
     expect(readFile).toHaveBeenCalledTimes(1);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith(pathEndsWithPackageJSON, 'utf8');
   });
 
   test('write once the new `current` version to the package.json file', async () => {
@@ -173,7 +174,7 @@ describe('Bump called with a valid release type and package.json should', () => 
     await expect(bump('major')).resolves.toEqual({ previous: '0.1.1', current: '1.0.0' });
 
     expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith(pathEndsWithPackageJSON, '{\n  "version": "1.0.0"\n}\n');
   });
 
   test('write also the new `current` version to the package-lock.json if present', async () => {
@@ -189,9 +190,9 @@ describe('Bump called with a valid release type and package.json should', () => 
     expect(existsSync).toHaveBeenCalledTimes(2);
     expect(writeFile).toHaveBeenCalledTimes(2);
 
-    expect(existsSync).toHaveBeenCalledWith(pathToPackageLockJSON);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageLockJSON);
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageLockJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(existsSync).toHaveBeenCalledWith(pathEndsWithPackageLockJSON);
+    expect(readFile).toHaveBeenCalledWith(pathEndsWithPackageLockJSON, 'utf8');
+    expect(writeFile).toHaveBeenCalledWith(pathEndsWithPackageLockJSON, '{\n  "version": "1.0.0"\n}\n');
   });
 
   test('write also the new `current` version to the npm-shrinkwrap.json if present', async () => {
@@ -207,9 +208,9 @@ describe('Bump called with a valid release type and package.json should', () => 
     expect(existsSync).toHaveBeenCalledTimes(2);
     expect(writeFile).toHaveBeenCalledTimes(2);
 
-    expect(existsSync).toHaveBeenCalledWith(pathToShrinkwrapJSON);
-    expect(readFile).toHaveBeenCalledWith(pathToShrinkwrapJSON);
-    expect(writeFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(existsSync).toHaveBeenCalledWith(pathEndsWithShrinkwrapJSON);
+    expect(readFile).toHaveBeenCalledWith(pathEndsWithShrinkwrapJSON, 'utf8');
+    expect(writeFile).toHaveBeenCalledWith(pathEndsWithShrinkwrapJSON, '{\n  "version": "1.0.0"\n}\n');
   });
 
   test('resolve to an object with props the `previous` and the new `current` semver versions', async () => {
