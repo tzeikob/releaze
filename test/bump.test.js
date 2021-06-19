@@ -187,13 +187,27 @@ describe('Bump called with a valid release type and package.json should', () => 
     expect(writeFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, '{\n  "version": "1.0.0"\n}\n');
   });
 
-  test('resolve to an object with props the `previous` and the new `current` semver versions', async () => {
-    expect.assertions(3);
+  test('resolve to an object with `current` version equal to the major bumped `previous` version', async () => {
+    expect.assertions(1);
 
     readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
 
     await expect(bump('major')).resolves.toEqual({ previous: '0.1.1', current: '1.0.0' });
+  });
+
+  test('resolve to an object with `current` version equal to the minor bumped `previous` version', async () => {
+    expect.assertions(1);
+
+    readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
+
     await expect(bump('minor')).resolves.toEqual({ previous: '0.1.1', current: '0.2.0' });
+  });
+
+  test('resolve to an object with `current` version equal to the patch bumped `previous` version', async () => {
+    expect.assertions(1);
+
+    readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
+
     await expect(bump('patch')).resolves.toEqual({ previous: '0.1.1', current: '0.1.2' });
   });
 });
