@@ -129,6 +129,71 @@ describe('Bump should reject with error', () => {
     expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
     expect(writeFile).toHaveBeenCalledTimes(0);
   });
+
+  test('when writing to package.json file failed', async () => {
+    expect.assertions(5);
+
+    readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
+
+    const error = new Error('Unknown error writing to file');
+
+    writeFile.mockReturnValue(Promise.reject(error));
+
+    await expect(bump('major')).rejects.toThrow(error);
+
+    expect(readFile).toHaveBeenCalledTimes(1);
+    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+
+    expect(writeFile).toHaveBeenCalledTimes(1);
+    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
+  });
+
+  test('when writing to existing package-lock.json file failed', async () => {
+    expect.assertions(7);
+
+    readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
+
+    const error = new Error('Unknown error writing to file');
+
+    writeFile
+      .mockReturnValueOnce(Promise.resolve())
+      .mockReturnValueOnce(Promise.reject(error));
+
+    await expect(bump('major')).rejects.toThrow(error);
+
+    expect(readFile).toHaveBeenCalledTimes(2);
+    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith(pathToPackageLockJSON, 'utf8');
+
+    expect(writeFile).toHaveBeenCalledTimes(2);
+    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith(pathToPackageLockJSON, '{\n  "version": "1.0.0"\n}\n');
+  });
+
+  test('when writing to existing npm-shrinkwrap.json file failed', async () => {
+    expect.assertions(9);
+
+    readFile.mockReturnValue(Promise.resolve('{"version": "0.1.1"}'));
+
+    const error = new Error('Unknown error writing to file');
+
+    writeFile
+      .mockReturnValueOnce(Promise.resolve())
+      .mockReturnValueOnce(Promise.resolve())
+      .mockReturnValueOnce(Promise.reject(error));
+
+    await expect(bump('major')).rejects.toThrow(error);
+
+    expect(readFile).toHaveBeenCalledTimes(3);
+    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith(pathToPackageLockJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, 'utf8');
+
+    expect(writeFile).toHaveBeenCalledTimes(3);
+    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith(pathToPackageLockJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, '{\n  "version": "1.0.0"\n}\n');
+  });
 });
 
 describe('Bump called with a valid release type should', () => {
