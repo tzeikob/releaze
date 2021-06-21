@@ -136,18 +136,29 @@ describe('Call of isNotHashOrTag(value)', () => {
 });
 
 describe('Call of isNotSemverReleaseType(value)', () => {
-  test('should return false for the string values `major`, `minor` and `patch`', () => {
-    expect.assertions(6);
+  test('should return false for the string values `(pre)major`, `(pre)minor`, `(pre)patch` and `prerelease`', () => {
+    expect.assertions(14);
 
     expect(isNotSemverReleaseType('major')).toBe(false);
     expect(isNotSemverReleaseType('MAJOR')).toBe(false);
+    expect(isNotSemverReleaseType('premajor')).toBe(false);
+    expect(isNotSemverReleaseType('PREMAJOR')).toBe(false);
+
     expect(isNotSemverReleaseType('minor')).toBe(false);
     expect(isNotSemverReleaseType('MINOR')).toBe(false);
+    expect(isNotSemverReleaseType('preminor')).toBe(false);
+    expect(isNotSemverReleaseType('PREMINOR')).toBe(false);
+
     expect(isNotSemverReleaseType('patch')).toBe(false);
     expect(isNotSemverReleaseType('PATCH')).toBe(false);
+    expect(isNotSemverReleaseType('prepatch')).toBe(false);
+    expect(isNotSemverReleaseType('PREPATCH')).toBe(false);
+
+    expect(isNotSemverReleaseType('prerelease')).toBe(false);
+    expect(isNotSemverReleaseType('PRERELEASE')).toBe(false);
   });
 
-  test('should return true for any value except `major`, `minor` and `patch`', () => {
+  test('should return true for any value except `(pre)major`, `(pre)minor`, `(pre)patch` and prerelease', () => {
     expect.assertions(19);
 
     expect(isNotSemverReleaseType()).toBe(true);
