@@ -144,75 +144,75 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
   });
 
   test('with only `--format` set to default when no options argument is given', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
-    await log();
+    await expect(log()).resolves.toBeDefined();
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
     expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
   });
 
   test('with only `--format` set to default when an empty options argument is given', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
-    await log({});
+    await expect(log({})).resolves.toBeDefined();
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
     expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
   });
 
   test('with only `--format` set to default when options argument is given with nullish properties', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
-    await log({ from: null, to: null, format: null });
+    await expect(log({ from: null, to: null, format: null })).resolves.toBeDefined();
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
     expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
   });
 
   test('with `--format` set to default when options is given with nullish `format`', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
-    await log({ format: null });
+    await expect(log({ format: null })).resolves.toBeDefined();
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
     expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
   });
 
   test('with `--format` set equal to the given `format` property in the options', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
-    await log({ format: '%s %an' });
+    await expect(log({ format: '%s %an' })).resolves.toBeDefined();
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%s %an']);
     expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%s %an']);
   });
 
   test('with a range notation `from..to` set to the given `from` and `to` properties in the options', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
-    await log({ from: '871647f', to: '84e2fa8' });
+    await expect(log({ from: '871647f', to: '84e2fa8' })).resolves.toBeDefined();
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f..84e2fa8']);
     expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f..84e2fa8']);
   });
 
   test('with a range notation `from..` set to the given `from` property in the options', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
-    await log({ from: '871647f' });
+    await expect(log({ from: '871647f' })).resolves.toBeDefined();
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f..']);
     expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f..']);
   });
 
   test('with a range notation `to` set to the given `to` property in the options', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
-    await log({ to: '84e2fa8' });
+    await expect(log({ to: '84e2fa8' })).resolves.toBeDefined();
 
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '84e2fa8']);
     expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '84e2fa8']);
   });
 });
 
@@ -236,7 +236,7 @@ describe('Log should resolve to', () => {
 
     await expect(log()).resolves.toEqual([]);
 
-    execFile.mockReturnValue(Promise.resolve({ stdout: `` }));
+    execFile.mockReturnValue(Promise.resolve({ stdout: '' }));
 
     await expect(log()).resolves.toEqual([]);
   });
