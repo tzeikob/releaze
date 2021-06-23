@@ -1,11 +1,12 @@
-jest.mock('util');
-jest.mock('child_process');
+jest.mock('util', () => ({
+  promisify: jest.fn().mockImplementation((fn) => fn)
+}));
 
-const { promisify } = require('util');
+jest.mock('child_process', () => ({
+  execFile: jest.fn().mockResolvedValue()
+}));
+
 const { execFile } = require('child_process');
-
-promisify.mockImplementation((fn) => fn);
-
 const log = require('../lib/log.js');
 
 afterEach(() => {
@@ -16,16 +17,18 @@ describe('Log should reject with Error', () => {
   test('when `from` arg is anything but a non empty string', async () => {
     expect.assertions(11);
 
-    await expect(log({ from: 123 })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: NaN })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: Infinity })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: true })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: false })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: [] })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: {} })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: (() => {}) })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: Symbol('sym') })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: '' })).rejects.toBeInstanceOf(Error);
+    const reason = 'Invalid from range argument';
+
+    await expect(log({ from: 123 })).rejects.toThrow(reason);
+    await expect(log({ from: NaN })).rejects.toThrow(reason);
+    await expect(log({ from: Infinity })).rejects.toThrow(reason);
+    await expect(log({ from: true })).rejects.toThrow(reason);
+    await expect(log({ from: false })).rejects.toThrow(reason);
+    await expect(log({ from: [] })).rejects.toThrow(reason);
+    await expect(log({ from: {} })).rejects.toThrow(reason);
+    await expect(log({ from: (() => {}) })).rejects.toThrow(reason);
+    await expect(log({ from: Symbol('sym') })).rejects.toThrow(reason);
+    await expect(log({ from: '' })).rejects.toThrow(reason);
 
     expect(execFile).toHaveBeenCalledTimes(0);
   });
@@ -33,12 +36,14 @@ describe('Log should reject with Error', () => {
   test('when `from` is a not valid git commit hash (sha1) or semver tag name', async () => {
     expect.assertions(7);
 
-    await expect(log({ from: 'c26GGG' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: 'c262349^' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: '^c262349' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: '01.33.a4' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: '..' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ from: '...' })).rejects.toBeInstanceOf(Error);
+    const reason = 'Invalid from range argument';
+
+    await expect(log({ from: 'c26GGG' })).rejects.toThrow(reason);
+    await expect(log({ from: 'c262349^' })).rejects.toThrow(reason);
+    await expect(log({ from: '^c262349' })).rejects.toThrow(reason);
+    await expect(log({ from: '01.33.a4' })).rejects.toThrow(reason);
+    await expect(log({ from: '..' })).rejects.toThrow(reason);
+    await expect(log({ from: '...' })).rejects.toThrow(reason);
 
     expect(execFile).toHaveBeenCalledTimes(0);
   });
@@ -46,16 +51,18 @@ describe('Log should reject with Error', () => {
   test('when `to` arg is anything but a non empty string', async () => {
     expect.assertions(11);
 
-    await expect(log({ to: 123 })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: NaN })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: Infinity })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: true })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: false })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: [] })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: {} })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: (() => {}) })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: Symbol('sym') })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: '' })).rejects.toBeInstanceOf(Error);
+    const reason = 'Invalid to range argument';
+
+    await expect(log({ to: 123 })).rejects.toThrow(reason);
+    await expect(log({ to: NaN })).rejects.toThrow(reason);
+    await expect(log({ to: Infinity })).rejects.toThrow(reason);
+    await expect(log({ to: true })).rejects.toThrow(reason);
+    await expect(log({ to: false })).rejects.toThrow(reason);
+    await expect(log({ to: [] })).rejects.toThrow(reason);
+    await expect(log({ to: {} })).rejects.toThrow(reason);
+    await expect(log({ to: (() => {}) })).rejects.toThrow(reason);
+    await expect(log({ to: Symbol('sym') })).rejects.toThrow(reason);
+    await expect(log({ to: '' })).rejects.toThrow(reason);
 
     expect(execFile).toHaveBeenCalledTimes(0);
   });
@@ -63,12 +70,14 @@ describe('Log should reject with Error', () => {
   test('when `to` is a not valid git commit hash (sha1) or semver tag name', async () => {
     expect.assertions(7);
 
-    await expect(log({ to: 'c26GGG' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: 'c262349^' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: '^c262349' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: '01.33.a4' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: '..' })).rejects.toBeInstanceOf(Error);
-    await expect(log({ to: '...' })).rejects.toBeInstanceOf(Error);
+    const reason = 'Invalid to range argument';
+
+    await expect(log({ to: 'c26GGG' })).rejects.toThrow(reason);
+    await expect(log({ to: 'c262349^' })).rejects.toThrow(reason);
+    await expect(log({ to: '^c262349' })).rejects.toThrow(reason);
+    await expect(log({ to: '01.33.a4' })).rejects.toThrow(reason);
+    await expect(log({ to: '..' })).rejects.toThrow(reason);
+    await expect(log({ to: '...' })).rejects.toThrow(reason);
 
     expect(execFile).toHaveBeenCalledTimes(0);
   });
@@ -76,51 +85,56 @@ describe('Log should reject with Error', () => {
   test('when `format` arg is anything but a non empty string', async () => {
     expect.assertions(11);
 
-    await expect(log({ format: 123 })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: NaN })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: Infinity })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: true })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: false })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: [] })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: {} })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: (() => {}) })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: Symbol('sym') })).rejects.toBeInstanceOf(Error);
-    await expect(log({ format: '' })).rejects.toBeInstanceOf(Error);
+    const reason = 'Invalid format argument';
+
+    await expect(log({ format: 123 })).rejects.toThrow(reason);
+    await expect(log({ format: NaN })).rejects.toThrow(reason);
+    await expect(log({ format: Infinity })).rejects.toThrow(reason);
+    await expect(log({ format: true })).rejects.toThrow(reason);
+    await expect(log({ format: false })).rejects.toThrow(reason);
+    await expect(log({ format: [] })).rejects.toThrow(reason);
+    await expect(log({ format: {} })).rejects.toThrow(reason);
+    await expect(log({ format: (() => {}) })).rejects.toThrow(reason);
+    await expect(log({ format: Symbol('sym') })).rejects.toThrow(reason);
+    await expect(log({ format: '' })).rejects.toThrow(reason);
 
     expect(execFile).toHaveBeenCalledTimes(0);
   });
 
   test('when git log process returns a stderr as Error', async () => {
-    expect.assertions(3);
+    expect.assertions(2);
 
-    execFile.mockReturnValue(Promise.resolve({ stderr: new Error('A stderr occurred') }));
+    const error = new Error('A stderr occurred');
 
-    await expect(log({})).rejects.toBeInstanceOf(Error);
-    await expect(log({})).rejects.toHaveProperty('message', 'Error: A stderr occurred');
+    execFile.mockReturnValue(Promise.resolve({ stderr: error }));
 
-    expect(execFile).toHaveBeenCalledTimes(2);
+    await expect(log({})).rejects.toThrow(`Error: ${error.message}`);
+
+    expect(execFile).toHaveBeenCalledTimes(1);
   });
 
   test('when git log process returns stderr as a non Error', async () => {
-    expect.assertions(3);
+    expect.assertions(2);
 
-    execFile.mockReturnValue(Promise.resolve({ stderr: 'A stderr occurred' }));
+    const reason = 'A stderr occurred';
 
-    await expect(log({})).rejects.toBeInstanceOf(Error);
-    await expect(log({})).rejects.toHaveProperty('message', 'A stderr occurred');
+    execFile.mockReturnValue(Promise.resolve({ stderr: reason }));
 
-    expect(execFile).toHaveBeenCalledTimes(2);
+    await expect(log({})).rejects.toThrow(reason);
+
+    expect(execFile).toHaveBeenCalledTimes(1);
   });
 
   test('when git log process throws a fatal Error', async () => {
-    expect.assertions(3);
+    expect.assertions(2);
 
-    execFile.mockReturnValue(Promise.reject(new Error('A fatal error occurred')));
+    const error = new Error('A fatal error occurred');
 
-    await expect(log({})).rejects.toBeInstanceOf(Error);
-    await expect(log({})).rejects.toHaveProperty('message', 'A fatal error occurred');
+    execFile.mockReturnValue(Promise.reject(error));
 
-    expect(execFile).toHaveBeenCalledTimes(2);
+    await expect(log({})).rejects.toThrow(error);
+
+    expect(execFile).toHaveBeenCalledTimes(1);
   });
 });
 
