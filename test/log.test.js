@@ -243,6 +243,15 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     expect(execFile).toHaveBeenCalledTimes(1);
     expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'HEAD..HEAD']);
   });
+
+  test('with no range notation given an empty range input', async () => {
+    expect.assertions(3);
+
+    await expect(log({})).resolves.toBeDefined();
+
+    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
+  });
 });
 
 describe('Log should resolve to', () => {
