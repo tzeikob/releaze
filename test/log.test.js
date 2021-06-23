@@ -149,7 +149,7 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     await expect(log()).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
   });
 
   test('with only `--format` set to default when an empty options argument is given', async () => {
@@ -158,7 +158,7 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     await expect(log({})).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
   });
 
   test('with only `--format` set to default when options argument is given with nullish properties', async () => {
@@ -167,7 +167,7 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     await expect(log({ from: null, to: null, format: null })).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
   });
 
   test('with `--format` set to default when options is given with nullish `format`', async () => {
@@ -176,7 +176,7 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     await expect(log({ format: null })).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
   });
 
   test('with `--format` set equal to the given `format` property in the options', async () => {
@@ -185,7 +185,7 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     await expect(log({ format: '%s %an' })).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%s %an']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%s %an']);
   });
 
   test('with a range notation `from..to` set to the given `from` and `to` properties in the options', async () => {
@@ -194,7 +194,7 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     await expect(log({ from: '871647f', to: '84e2fa8' })).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f..84e2fa8']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..84e2fa8']);
   });
 
   test('with a range notation `from..` set to the given `from` property in the options', async () => {
@@ -203,7 +203,7 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     await expect(log({ from: '871647f' })).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '871647f..']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..']);
   });
 
   test('with a range notation `to` set to the given `to` property in the options', async () => {
@@ -212,7 +212,7 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     await expect(log({ to: '84e2fa8' })).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--oneline', '--format=%h %s', '84e2fa8']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '84e2fa8']);
   });
 });
 
