@@ -32,12 +32,19 @@ describe('Bump should reject with error', () => {
   });
 
   test('very early when called with not valid release type argument', async () => {
-    expect.assertions(12);
+    expect.assertions(19);
 
     const reason = 'Invalid or missing semver release type argument';
 
     await expect(bump('')).rejects.toThrow(reason);
     await expect(bump('majo')).rejects.toThrow(reason);
+    await expect(bump('MAJOR')).rejects.toThrow(reason);
+    await expect(bump('PREMAJOR')).rejects.toThrow(reason);
+    await expect(bump('MINOR')).rejects.toThrow(reason);
+    await expect(bump('PREMINOR')).rejects.toThrow(reason);
+    await expect(bump('PATCH')).rejects.toThrow(reason);
+    await expect(bump('PREPATCH')).rejects.toThrow(reason);
+    await expect(bump('PRERELEASE')).rejects.toThrow(reason);
 
     await expect(bump(123)).rejects.toThrow(reason);
     await expect(bump(NaN)).rejects.toThrow(reason);

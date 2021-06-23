@@ -144,29 +144,22 @@ describe('Call of isNotHashOrTag(value)', () => {
 
 describe('Call of isNotSemverReleaseType(value)', () => {
   test('should return false for the string values `(pre)major`, `(pre)minor`, `(pre)patch` and `prerelease`', () => {
-    expect.assertions(14);
+    expect.assertions(7);
 
     expect(isNotSemverReleaseType('major')).toBe(false);
-    expect(isNotSemverReleaseType('MAJOR')).toBe(false);
     expect(isNotSemverReleaseType('premajor')).toBe(false);
-    expect(isNotSemverReleaseType('PREMAJOR')).toBe(false);
 
     expect(isNotSemverReleaseType('minor')).toBe(false);
-    expect(isNotSemverReleaseType('MINOR')).toBe(false);
     expect(isNotSemverReleaseType('preminor')).toBe(false);
-    expect(isNotSemverReleaseType('PREMINOR')).toBe(false);
 
     expect(isNotSemverReleaseType('patch')).toBe(false);
-    expect(isNotSemverReleaseType('PATCH')).toBe(false);
     expect(isNotSemverReleaseType('prepatch')).toBe(false);
-    expect(isNotSemverReleaseType('PREPATCH')).toBe(false);
 
     expect(isNotSemverReleaseType('prerelease')).toBe(false);
-    expect(isNotSemverReleaseType('PRERELEASE')).toBe(false);
   });
 
   test('should return true for any value except `(pre)major`, `(pre)minor`, `(pre)patch` and prerelease', () => {
-    expect.assertions(19);
+    expect.assertions(26);
 
     expect(isNotSemverReleaseType()).toBe(true);
     expect(isNotSemverReleaseType(null)).toBe(true);
@@ -189,5 +182,16 @@ describe('Call of isNotSemverReleaseType(value)', () => {
     expect(isNotSemverReleaseType('majority')).toBe(true);
     expect(isNotSemverReleaseType('minority')).toBe(true);
     expect(isNotSemverReleaseType('pat')).toBe(true);
+
+    expect(isNotSemverReleaseType('MAJOR')).toBe(true);
+    expect(isNotSemverReleaseType('PREMAJOR')).toBe(true);
+
+    expect(isNotSemverReleaseType('MINOR')).toBe(true);
+    expect(isNotSemverReleaseType('PREMINOR')).toBe(true);
+
+    expect(isNotSemverReleaseType('PATCH')).toBe(true);
+    expect(isNotSemverReleaseType('PREPATCH')).toBe(true);
+
+    expect(isNotSemverReleaseType('PRERELEASE')).toBe(true);
   });
 });
