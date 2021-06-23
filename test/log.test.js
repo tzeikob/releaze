@@ -34,7 +34,7 @@ describe('Log should reject with Error', () => {
   });
 
   test('when `from` is a not valid git commit hash (sha1) or semver tag name', async () => {
-    expect.assertions(7);
+    expect.assertions(8);
 
     const reason = 'Invalid from range argument';
 
@@ -44,6 +44,7 @@ describe('Log should reject with Error', () => {
     await expect(log({ from: '01.33.a4' })).rejects.toThrow(reason);
     await expect(log({ from: '..' })).rejects.toThrow(reason);
     await expect(log({ from: '...' })).rejects.toThrow(reason);
+    await expect(log({ from: 'head' })).rejects.toThrow(reason);
 
     expect(execFile).toHaveBeenCalledTimes(0);
   });
@@ -68,7 +69,7 @@ describe('Log should reject with Error', () => {
   });
 
   test('when `to` is a not valid git commit hash (sha1) or semver tag name', async () => {
-    expect.assertions(7);
+    expect.assertions(8);
 
     const reason = 'Invalid to range argument';
 
@@ -78,6 +79,7 @@ describe('Log should reject with Error', () => {
     await expect(log({ to: '01.33.a4' })).rejects.toThrow(reason);
     await expect(log({ to: '..' })).rejects.toThrow(reason);
     await expect(log({ to: '...' })).rejects.toThrow(reason);
+    await expect(log({ to: 'head' })).rejects.toThrow(reason);
 
     expect(execFile).toHaveBeenCalledTimes(0);
   });
@@ -197,13 +199,13 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
     expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..84e2fa8']);
   });
 
-  test('with a range notation `from..` set to the given `from` property in the options', async () => {
+  test('with a range notation `from..HEAD` set to the given `from` property in the options', async () => {
     expect.assertions(3);
 
     await expect(log({ from: '871647f' })).resolves.toBeDefined();
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..']);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..HEAD']);
   });
 
   test('with a range notation `to` set to the given `to` property in the options', async () => {
@@ -213,6 +215,33 @@ describe('Log should spawn once a git log process in `--oneline` mode', () => {
 
     expect(execFile).toHaveBeenCalledTimes(1);
     expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '84e2fa8']);
+  });
+
+  test('with a range notation `from..to` where `to` set to `HEAD`', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: 'v0.1.0', to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'v0.1.0..HEAD']);
+  });
+
+  test('with a range notation `to` where `to` set to `HEAD`', async () => {
+    expect.assertions(3);
+
+    await expect(log({ to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'HEAD']);
+  });
+
+  test('with a range notation `from..to` where both `from` and `to` set to `HEAD`', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: 'HEAD', to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'HEAD..HEAD']);
   });
 });
 
