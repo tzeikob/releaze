@@ -13,7 +13,7 @@ afterEach(() => {
   execFile.mockReset();
 });
 
-describe('Log should reject with Error', () => {
+describe('Log should reject with error', () => {
   test('when `from` arg is anything but a non empty string', async () => {
     expect.assertions(11);
 
