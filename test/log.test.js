@@ -139,7 +139,7 @@ describe('Log should reject with error', () => {
     expect(execFile).toHaveBeenCalledTimes(1);
   });
 
-  test('very early when running within a no git repository', async () => {
+  test('when running within a no git repository', async () => {
     expect.assertions(3);
 
     const error = new Error('fatal: not a git repository (or any of the parent directories): .git');
@@ -149,7 +149,7 @@ describe('Log should reject with error', () => {
     await expect(log({})).rejects.toThrow(error);
 
     expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', expect.any(Array));
+    expect(execFile).toHaveBeenCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
   });
 });
 
