@@ -251,6 +251,14 @@ describe('Bump called with a valid release type should', () => {
     expect(writeFile).toHaveBeenCalledTimes(1);
     expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
   });
+
+  test('should normalize versions given in alternative `v1.0.0` form to `1.0.0`', async () => {
+    expect.assertions(1);
+  
+    readFile.mockReturnValue(Promise.resolve('{"version": "v0.1.1"}'));
+  
+    await expect(bump('major')).resolves.toEqual({ previous: '0.1.1', current: '1.0.0' });
+  });
 });
 
 describe('Bump called with a major release type should', () => {
