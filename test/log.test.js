@@ -138,6 +138,19 @@ describe('Log should reject with error', () => {
 
     expect(execFile).toHaveBeenCalledTimes(1);
   });
+
+  test('very early when running within a no git repository', async () => {
+    expect.assertions(3);
+
+    const error = new Error('fatal: not a git repository (or any of the parent directories): .git');
+
+    execFile.mockReturnValue(Promise.reject(error));
+
+    await expect(log({})).rejects.toThrow(error);
+
+    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledWith('git', expect.any(Array));
+  });
 });
 
 describe('Log should spawn once a git log process in `--oneline` mode', () => {
