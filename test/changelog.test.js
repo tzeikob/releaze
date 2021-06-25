@@ -89,7 +89,7 @@ describe('Changelog should reject with an error', () => {
     expect(writeFile).toHaveBeenCalledTimes(0);
   });
 
-  test('when reading from `CHANGELOG.md` failed for a fatal reason', async () => {
+  test('when reading from `CHANGELOG.md` failed with a fatal reason', async () => {
     expect.assertions(1);
 
     const error = new Error('Unknown fatal error occurred reading from CHANGELOG.md');
@@ -150,26 +150,26 @@ describe('Changelog called with valid `version` and `logs` should', () => {
 
     await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
 
-    const newContent = [
+    const content = [
       '#v2.0.0',
       '* 54ff0cd Restrict bump release types to lowercase only',
       '* d41ab22 Accept alias HEAD as input to the log op'
     ].join('\n');
 
-    expect(writeFile).toHaveBeenCalledWith(pathToChangelogMD, `${newContent}`);
+    expect(writeFile).toHaveBeenCalledWith(pathToChangelogMD, `${content}`);
     expect(writeFile).toHaveBeenCalledTimes(1);
   });
 
-  test('append the logs on top to an existing `CHANGELOG.md` in the correct format', async () => {
+  test('append the logs on top of an existing `CHANGELOG.md` in the correct format', async () => {
     expect.assertions(3);
 
-    content = [
+    oldContent = [
       '#v1.5.2',
       '* 81ad3fb Refactor log tests to assert every await call',
       '* 3b5b25f Refactor log tests to assert with toThrow instead'
     ].join('\n');
 
-    readFile.mockReturnValue(Promise.resolve(content));
+    readFile.mockReturnValue(Promise.resolve(oldContent));
     writeFile.mockReturnValue(Promise.resolve());
 
     const logs = [
@@ -185,7 +185,7 @@ describe('Changelog called with valid `version` and `logs` should', () => {
       '* d41ab22 Accept alias HEAD as input to the log op'
     ].join('\n');
 
-    expect(writeFile).toHaveBeenCalledWith(pathToChangelogMD, `${newContent}\n${content}`);
+    expect(writeFile).toHaveBeenCalledWith(pathToChangelogMD, `${newContent}\n${oldContent}`);
     expect(writeFile).toHaveBeenCalledTimes(1);
   });
 });
