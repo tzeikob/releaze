@@ -135,20 +135,19 @@ describe('Tag called with valid input should try to', () => {
     expect(execFile).toHaveBeenCalledWith('git', ['commit', '-m', `Bump to v${version}`]);
   });
 
-  test('commit with message equal to the given template `message` argument', async () => {
+  test('commit with interpolated message equal to the given template `message` argument', async () => {
     expect.assertions(2);
 
     const version = '1.0.0';
     const message = 'Bump to new version v%s';
+    const interpolated = message.replace('/%s/g', version);
 
     await expect(tag(version, message)).resolves.toBeUndefined();
-
-    const interpolated = message.replace('/%s/g', version);
 
     expect(execFile).toHaveBeenCalledWith('git', ['commit', '-m', interpolated]);
   });
 
-  test('create a new annotation tag given a name in the `v{version}` form and default message', async () => {
+  test('create an anno tag with name `v{version}` and the default message', async () => {
     expect.assertions(2);
 
     const version = '1.0.0';
@@ -158,21 +157,20 @@ describe('Tag called with valid input should try to', () => {
     expect(execFile).toHaveBeenCalledWith('git', ['tag', '-a', `v${version}`, '-m', `Bump to v${version}`]);
   });
 
-  test('create a new annotation tag given a name in the `v{version}` form and template message', async () => {
+  test('create an anno tag with name `v{version}` and %s interpolated message', async () => {
     expect.assertions(2);
 
     const version = '1.0.0';
     const message = 'Bump to new version v%s';
+    const interpolated = message.replace(/%s/g, version);
 
     await expect(tag(version, message)).resolves.toBeUndefined();
-
-    const interpolated = message.replace(/%s/g, version);
 
     expect(execFile).toHaveBeenCalledWith('git', ['tag', '-a', `v${version}`, '-m', interpolated]);
   });
 
   test('stage changes then commit them and finally create a new tag on it', async () => {
-    expect.assertions(7);
+    expect.assertions(8);
 
     const version = '1.0.0';
 
