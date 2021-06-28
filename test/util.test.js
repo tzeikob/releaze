@@ -59,7 +59,7 @@ describe('Call of isNotString(value)', () => {
 
 describe('Call of isNotHashOrTag(value)', () => {
   test('should return true for any value except a non empty string', () => {
-    expect.assertions(14);
+    expect.assertions(13);
 
     expect(isNotHashOrTag(123)).toBe(true);
     expect(isNotHashOrTag(NaN)).toBe(true);
@@ -74,7 +74,6 @@ describe('Call of isNotHashOrTag(value)', () => {
     expect(isNotHashOrTag(undefined)).toBe(true);
     expect(isNotHashOrTag()).toBe(true);
     expect(isNotHashOrTag('')).toBe(true);
-    expect(isNotHashOrTag('head')).toBe(true);
   });
 
   test('should return true for a not valid git commit hash (sha1)', () => {
@@ -106,13 +105,14 @@ describe('Call of isNotHashOrTag(value)', () => {
   });
 
   test('should return true for a not valid semver tag name', () => {
-    expect.assertions(5);
+    expect.assertions(6);
 
     expect(isNotHashOrTag('v01.02.03')).toBe(true);
     expect(isNotHashOrTag('01.02.03')).toBe(true);
     expect(isNotHashOrTag('.1.3')).toBe(true);
     expect(isNotHashOrTag('3')).toBe(true);
     expect(isNotHashOrTag('123')).toBe(true);
+    expect(isNotHashOrTag('head')).toBe(true);
   });
 
   test('should return false for a valid git commit hash (sha1)', () => {
