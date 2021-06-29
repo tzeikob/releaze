@@ -2,7 +2,9 @@ const {
   isGiven,
   isNotString,
   isNotHashOrTag,
-  isNotSemverReleaseType
+  isNotSemverReleaseType,
+  isNotSemver,
+  isNotArray
 } = require('../lib/util/validators');
 
 describe('Call of isGiven(value)', () => {
@@ -193,5 +195,78 @@ describe('Call of isNotSemverReleaseType(value)', () => {
     expect(isNotSemverReleaseType('PREPATCH')).toBe(true);
 
     expect(isNotSemverReleaseType('PRERELEASE')).toBe(true);
+  });
+});
+
+describe('Call of isNotSemver(value) should', () => {
+  test('return true for any value except a non empty string', () => {
+    expect.assertions(13);
+
+    expect(isNotSemver(123)).toBe(true);
+    expect(isNotSemver(NaN)).toBe(true);
+    expect(isNotSemver(Infinity)).toBe(true);
+    expect(isNotSemver(true)).toBe(true);
+    expect(isNotSemver(false)).toBe(true);
+    expect(isNotSemver([])).toBe(true);
+    expect(isNotSemver({})).toBe(true);
+    expect(isNotSemver(Symbol('s'))).toBe(true);
+    expect(isNotSemver(() => {})).toBe(true);
+    expect(isNotSemver(null)).toBe(true);
+    expect(isNotSemver(undefined)).toBe(true);
+    expect(isNotSemver()).toBe(true);
+    expect(isNotSemver('')).toBe(true);
+  });
+
+  test('return true for a not valid semver number', () => {
+    expect.assertions(8);
+
+    expect(isNotSemver('v01.02.03')).toBe(true);
+    expect(isNotSemver('01.02.03')).toBe(true);
+    expect(isNotSemver('.1.3')).toBe(true);
+    expect(isNotSemver('1.3')).toBe(true);
+    expect(isNotSemver('3')).toBe(true);
+    expect(isNotSemver('123')).toBe(true);
+    expect(isNotSemver('HEAD')).toBe(true);
+    expect(isNotSemver('head')).toBe(true);
+  });
+
+  test('return false for a valid semver number', () => {
+    expect.assertions(6);
+
+    expect(isNotSemver('v9.9.9')).toBe(false);
+    expect(isNotSemver('v1.2.3')).toBe(false);
+    expect(isNotSemver('v1.2.3-next.2.beta.0+build.exp')).toBe(false);
+
+    expect(isNotSemver('9.9.9')).toBe(false);
+    expect(isNotSemver('1.2.3')).toBe(false);
+    expect(isNotSemver('1.2.3-next.2.beta.0+build.exp')).toBe(false);
+  });
+});
+
+describe('Call of isNotArray(value) should', () => {
+  test('return true for any value except an array', () => {
+    expect.assertions(12);
+
+    expect(isNotArray(123)).toBe(true);
+    expect(isNotArray(NaN)).toBe(true);
+    expect(isNotArray(Infinity)).toBe(true);
+    expect(isNotArray(true)).toBe(true);
+    expect(isNotArray(false)).toBe(true);
+    expect(isNotArray({})).toBe(true);
+    expect(isNotArray(Symbol('s'))).toBe(true);
+    expect(isNotArray(() => {})).toBe(true);
+    expect(isNotArray(null)).toBe(true);
+    expect(isNotArray(undefined)).toBe(true);
+    expect(isNotArray()).toBe(true);
+    expect(isNotArray('')).toBe(true);
+  });
+
+  test('return false for any valid array value', () => {
+    expect.assertions(4);
+
+    expect(isNotArray([])).toBe(false);
+    expect(isNotArray(['a', 'b', 'c'])).toBe(false);
+    expect(isNotArray([1])).toBe(false);
+    expect(isNotArray([[1],[2]])).toBe(false);
   });
 });
