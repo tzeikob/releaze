@@ -8,8 +8,10 @@ jest.mock('../lib/util/exec', () => jest.fn().mockResolvedValue());
 
 const fs = require('fs');
 const path = require('path');
+const semver = require('semver');
 const { when } = require('jest-when');
 const exec = require('../lib/util/exec');
+const ExecError = require('../lib/errors/exec-error');
 const tag = require('../lib/tag.js');
 
 const { access } = fs.promises;
@@ -24,19 +26,20 @@ afterEach(() => {
   exec.mockReset();
 });
 
-describe('Tag should reject with an error', () => {
-  test('early when called with no `version` argument', async () => {
-    expect.assertions(2);
+describe('Tag called with invalid input should reject early with error', () => {
+  test('when `version` argument is not given', async () => {
+    expect.assertions(3);
 
     const reason = 'Invalid or missing semver version argument';
 
     await expect(tag()).rejects.toThrow(reason);
 
     expect(exec).toHaveBeenCalledTimes(0);
+    expect(access).toHaveBeenCalledTimes(0);
   });
 
-  test('early when called with invalid `version` argument', async () => {
-    expect.assertions(13);
+  test('when invalid non semver `version` argument is given', async () => {
+    expect.assertions(14);
 
     const reason = 'Invalid or missing semver version argument';
 
@@ -56,10 +59,11 @@ describe('Tag should reject with an error', () => {
     await expect(tag(() => {})).rejects.toThrow(reason);
 
     expect(exec).toHaveBeenCalledTimes(0);
+    expect(access).toHaveBeenCalledTimes(0);
   });
 
-  test('early when called with invalid template `message` argument', async () => {
-    expect.assertions(10);
+  test('when invalid non string template `message` argument is given', async () => {
+    expect.assertions(11);
 
     const reason = 'Invalid non string message argument';
 
@@ -75,23 +79,28 @@ describe('Tag should reject with an error', () => {
     await expect(tag('1.0.0', () => {})).rejects.toThrow(reason);
 
     expect(exec).toHaveBeenCalledTimes(0);
+    expect(access).toHaveBeenCalledTimes(0);
   });
+});
 
-  test('immediately when `exec` with `git add package.json` throws a fatal error', async () => {
-    expect.assertions(3);
+describe('Tag should try to stage files in the git repo and reject with an error', () => {
+  test('when `exec` for `git add package.json` throws a fatal exec error', async () => {
+    expect.assertions(4);
 
     const reason = 'A fatal error occurred';
 
-    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockRejectedValue(new Error(reason));
+    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockRejectedValue(new ExecError(reason));
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
+    expect(access).toHaveBeenCalledTimes(0);
+
     expect(exec).toHaveBeenCalledTimes(1);
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
   });
 
-  test('immediately when `exec` with `git add CHANGELOG.md` throws a fatal error', async () => {
-    expect.assertions(4);
+  test('when `exec` for `git add CHANGELOG.md` throws a fatal exec error', async () => {
+    expect.assertions(6);
 
     when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue();
 
@@ -99,17 +108,20 @@ describe('Tag should reject with an error', () => {
 
     const reason = 'A fatal error occurred';
 
-    when(exec).calledWith('git', ['add', pathToChangelogMD]).mockRejectedValue(new Error(reason));
+    when(exec).calledWith('git', ['add', pathToChangelogMD]).mockRejectedValue(new ExecError(reason));
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
+    expect(access).toHaveBeenCalledTimes(1);
+    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
+
     expect(exec).toHaveBeenCalledTimes(2);
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToChangelogMD]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToChangelogMD]);
   });
 
-  test('immediately when `exec` with `git add package-lock.json` throws a fatal error', async () => {
-    expect.assertions(4);
+  test('when `exec` for `git add package-lock.json` throws a fatal exec error', async () => {
+    expect.assertions(7);
 
     when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue();
 
@@ -118,17 +130,21 @@ describe('Tag should reject with an error', () => {
 
     const reason = 'A fatal error occurred';
 
-    when(exec).calledWith('git', ['add', pathToPackageLockJSON]).mockRejectedValue(new Error(reason));
+    when(exec).calledWith('git', ['add', pathToPackageLockJSON]).mockRejectedValue(new ExecError(reason));
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
+    expect(access).toHaveBeenCalledTimes(2);
+    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
+    expect(access).toHaveBeenCalledWith(pathToPackageLockJSON);
+
     expect(exec).toHaveBeenCalledTimes(2);
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToPackageLockJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageLockJSON]);
   });
 
-  test('immediately when `exec` with `git add npm-shrinkwrap.json` throws a fatal error', async () => {
-    expect.assertions(4);
+  test('when `exec` for `git add npm-shrinkwrap.json` throws a fatal exec error', async () => {
+    expect.assertions(8);
 
     when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue();
 
@@ -138,19 +154,24 @@ describe('Tag should reject with an error', () => {
 
     const reason = 'A fatal error occurred';
 
-    when(exec).calledWith('git', ['add', pathToShrinkwrapJSON]).mockRejectedValue(new Error(reason));
+    when(exec).calledWith('git', ['add', pathToShrinkwrapJSON]).mockRejectedValue(new ExecError(reason));
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
+    expect(access).toHaveBeenCalledTimes(3);
+    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
+    expect(access).toHaveBeenCalledWith(pathToPackageLockJSON);
+    expect(access).toHaveBeenCalledWith(pathToShrinkwrapJSON);
+
     expect(exec).toHaveBeenCalledTimes(2);
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToShrinkwrapJSON]);
   });
 });
 
-describe('Tag should not reject with error', () => {
-  test('when there is no `CHANGELOG.md` file', async () => {
-    expect.assertions(7);
+describe('Tag should not try to add a missing file in the git repo', () => {
+  test('skipping `git add CHANGELOG.md` for missing `CHANGELOG.md` file', async () => {
+    expect.assertions(6);
 
     when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue({});
 
@@ -166,16 +187,15 @@ describe('Tag should not reject with error', () => {
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
     expect(access).toHaveBeenCalledTimes(3);
-    expect(access).toHaveBeenNthCalledWith(1, pathToChangelogMD);
+    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
 
-    expect(exec).toHaveBeenCalledTimes(3);
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToPackageLockJSON]);
-    expect(exec).toHaveBeenNthCalledWith(3, 'git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageLockJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToShrinkwrapJSON]);
   });
 
-  test('when there is no `package-lock.json` file', async () => {
-    expect.assertions(7);
+  test('skipping `git add package-lock.json` for missing `package-lock.json` file', async () => {
+    expect.assertions(6);
 
     when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue({});
 
@@ -191,16 +211,15 @@ describe('Tag should not reject with error', () => {
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
     expect(access).toHaveBeenCalledTimes(3);
-    expect(access).toHaveBeenNthCalledWith(2, pathToPackageLockJSON);
+    expect(access).toHaveBeenCalledWith(pathToPackageLockJSON);
 
-    expect(exec).toHaveBeenCalledTimes(3);
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToChangelogMD]);
-    expect(exec).toHaveBeenNthCalledWith(3, 'git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToChangelogMD]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToShrinkwrapJSON]);
   });
 
-  test('when there is no `npm-shrinkwrap.json` file', async () => {
-    expect.assertions(7);
+  test('skipping `git add npm-shrinkwrap.json` for missing `npm-shrinkwrap.json` file', async () => {
+    expect.assertions(6);
 
     when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue({});
 
@@ -216,11 +235,198 @@ describe('Tag should not reject with error', () => {
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
     expect(access).toHaveBeenCalledTimes(3);
-    expect(access).toHaveBeenNthCalledWith(3, pathToShrinkwrapJSON);
+    expect(access).toHaveBeenCalledWith(pathToShrinkwrapJSON);
 
-    expect(exec).toHaveBeenCalledTimes(3);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToChangelogMD]);
+    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageLockJSON]);
+  });
+});
+
+describe('Tag should try to commit the changes in the git repo', () => {
+  test('with the default message if the `message` arg is not given', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+
+    await expect(tag(version)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['commit', '-m', `Bump to v${version}`]);
+  });
+
+  test('with the message equal to the given `message` arg', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+    const message = `Bump new version to ${version}`;
+
+    await expect(tag(version, message)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['commit', '-m', message]);
+  });
+
+  test('with a message interpolating the given `version` via `%s` notation', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+    const message = 'Bump to new v%s';
+
+    await expect(tag(version, message)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['commit', '-m', `Bump to new v${version}`]);
+  });
+
+  test('with `version` injected into the `message` via interpolation in clean semver form', async () => {
+    expect.assertions(2);
+
+    const version = 'v1.0.0';
+    const message = 'Bump to new v%s';
+
+    await expect(tag(version, message)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['commit', '-m', `Bump to new v${semver.clean(version)}`]);
+  });
+
+  test('right after any `git add` is executed', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+
+    await expect(tag(version)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenNthCalledWith(5, 'git', ['commit', '-m', expect.any(String)]);
+  });
+
+  test('rejecting with an error when `exec` for `git commit` throws a fatal exec error', async () => {
+    expect.assertions(2);
+
+    const reason = 'A fatal error occurred';
+
+    when(exec).calledWith('git', ['commit', '-m', expect.any(String)]).mockRejectedValue(new ExecError(reason));
+
+    const version = '1.0.0';
+
+    await expect(tag(version)).rejects.toThrow(reason);
+
+    expect(exec).toHaveBeenNthCalledWith(5, 'git', ['commit', '-m', expect.any(String)]);
+  });
+});
+
+describe('Tag should try to create an anno tag in the git repo', () => {
+  test('with tag name equal to the given `version` in `v1.0.0` form', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+
+    await expect(tag(version)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', `v${version}`, '-m', expect.any(String)]);
+  });
+
+  test('with tag name equal to the given `version` in `v1.0.0` form even for not clean semver numbers', async () => {
+    expect.assertions(2);
+
+    const version = 'v1.0.0';
+
+    await expect(tag(version)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', `v${semver.clean(version)}`, '-m', expect.any(String)]);
+  });
+
+  test('with the default message if `message` arg is not given', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+    const message = `Bump to v${version}`;
+
+    await expect(tag(version, message)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', expect.any(String), '-m', message]);
+  });
+
+  test('with the message equal to the given `message` arg', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+    const message = `Bump new version to ${version}`;
+
+    await expect(tag(version, message)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', expect.any(String), '-m', message]);
+  });
+
+  test('with a message interpolating the given `version` via `%s` notation', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+    const message = 'Bump to new v%s';
+
+    await expect(tag(version, message)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', expect.any(String), '-m', `Bump to new v${version}`]);
+  });
+
+  test('with `version` injected into the `message` via interpolation in clean semver form', async () => {
+    expect.assertions(2);
+
+    const version = 'v1.0.0';
+    const message = 'Bump to new v%s';
+
+    await expect(tag(version, message)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', expect.any(String), '-m', `Bump to new v${semver.clean(version)}`]);
+  });
+
+  test('right after the `git commit` is executed', async () => {
+    expect.assertions(2);
+
+    const version = '1.0.0';
+
+    await expect(tag(version)).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenNthCalledWith(6, 'git', ['tag', '-a', expect.any(String), '-m', expect.any(String)]);
+  });
+
+  test('rejecting with an error when `exec` for `git tag` throws a fatal exec error', async () => {
+    expect.assertions(2);
+
+    const reason = 'A fatal error occurred';
+
+    when(exec)
+      .calledWith('git', ['tag', '-a', expect.any(String), '-m', expect.any(String)])
+      .mockRejectedValue(new ExecError(reason));
+
+    const version = '1.0.0';
+
+    await expect(tag(version)).rejects.toThrow(reason);
+
+    expect(exec).toHaveBeenNthCalledWith(6, 'git', ['tag', '-a', expect.any(String), '-m', expect.any(String)]);
+  });
+});
+
+describe('Tag should resolve to undefined', () => {
+  test('accessing the files `CHANGELOG.md`, `package-lock.json` and `npm-shrinkwrap.json` once', async () => {
+    expect.assertions(5);
+
+    await expect(tag('1.0.0')).resolves.toBeUndefined();
+
+    expect(access).toHaveBeenCalledTimes(3);
+    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
+    expect(access).toHaveBeenCalledWith(pathToPackageLockJSON);
+    expect(access).toHaveBeenCalledWith(pathToShrinkwrapJSON);
+  });
+
+  test('having git add, commit and tag commands executed in the that given order', async () => {
+    expect.assertions(8);
+
+    await expect(tag('1.0.0')).resolves.toBeUndefined();
+
+    expect(exec).toHaveBeenCalledTimes(6);
     expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
     expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToChangelogMD]);
     expect(exec).toHaveBeenNthCalledWith(3, 'git', ['add', pathToPackageLockJSON]);
+    expect(exec).toHaveBeenNthCalledWith(4, 'git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).toHaveBeenNthCalledWith(5, 'git', ['commit', '-m', expect.any(String)]);
+    expect(exec).toHaveBeenNthCalledWith(6, 'git', ['tag', '-a', expect.any(String), '-m', expect.any(String)]);
   });
 });
