@@ -9,7 +9,6 @@ jest.mock('../lib/util/exec', () => jest.fn().mockResolvedValue());
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
-const { when } = require('jest-when');
 const exec = require('../lib/util/exec');
 const ExecError = require('../lib/errors/exec-error');
 const tag = require('../lib/tag.js');
@@ -34,8 +33,8 @@ describe('Tag called with invalid input should reject early with error', () => {
 
     await expect(tag()).rejects.toThrow(reason);
 
-    expect(exec).toHaveBeenCalledTimes(0);
     expect(access).toHaveBeenCalledTimes(0);
+    expect(exec).toHaveBeenCalledTimes(0);
   });
 
   test('when invalid non semver `version` argument is given', async () => {
@@ -58,8 +57,8 @@ describe('Tag called with invalid input should reject early with error', () => {
     await expect(tag(Symbol('s'))).rejects.toThrow(reason);
     await expect(tag(() => {})).rejects.toThrow(reason);
 
-    expect(exec).toHaveBeenCalledTimes(0);
     expect(access).toHaveBeenCalledTimes(0);
+    expect(exec).toHaveBeenCalledTimes(0);
   });
 
   test('when invalid non string template `message` argument is given', async () => {
@@ -78,8 +77,8 @@ describe('Tag called with invalid input should reject early with error', () => {
     await expect(tag('1.0.0', Symbol('s'))).rejects.toThrow(reason);
     await expect(tag('1.0.0', () => {})).rejects.toThrow(reason);
 
-    expect(exec).toHaveBeenCalledTimes(0);
     expect(access).toHaveBeenCalledTimes(0);
+    expect(exec).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -87,9 +86,8 @@ describe('Tag should try to stage files in the git repo and reject with an error
   test('when `exec` for `git add package.json` throws a fatal exec error', async () => {
     expect.assertions(4);
 
-    const reason = 'A fatal error occurred';
-
-    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockRejectedValue(new ExecError(reason));
+    const reason = 'An error occurred executing `git add package.json`';
+    exec.mockRejectedValueOnce(new ExecError(reason));
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
@@ -102,13 +100,12 @@ describe('Tag should try to stage files in the git repo and reject with an error
   test('when `exec` for `git add CHANGELOG.md` throws a fatal exec error', async () => {
     expect.assertions(6);
 
-    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue();
+    exec.mockResolvedValueOnce('package.json staged successfully');
 
-    when(access).calledWith(pathToChangelogMD).mockResolvedValue();
+    access.mockResolvedValueOnce('CHANGELOG.md exists');
 
-    const reason = 'A fatal error occurred';
-
-    when(exec).calledWith('git', ['add', pathToChangelogMD]).mockRejectedValue(new ExecError(reason));
+    const reason = 'An error occurred executing `git add CHANGELOG.md`';
+    exec.mockRejectedValueOnce(new ExecError(reason));
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
@@ -116,130 +113,103 @@ describe('Tag should try to stage files in the git repo and reject with an error
     expect(access).toHaveBeenCalledWith(pathToChangelogMD);
 
     expect(exec).toHaveBeenCalledTimes(2);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToChangelogMD]);
+    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToChangelogMD]);
   });
 
   test('when `exec` for `git add package-lock.json` throws a fatal exec error', async () => {
     expect.assertions(7);
 
-    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue();
+    exec.mockResolvedValueOnce('package.json staged successfully');
 
-    when(access).calledWith(pathToChangelogMD).mockRejectedValue(new Error('File not found'));
-    when(access).calledWith(pathToPackageLockJSON).mockResolvedValue();
+    access.mockRejectedValueOnce(new Error('CHANGELOG.md file not found'));
 
-    const reason = 'A fatal error occurred';
+    access.mockResolvedValueOnce('package-lock.json exists');
 
-    when(exec).calledWith('git', ['add', pathToPackageLockJSON]).mockRejectedValue(new ExecError(reason));
+    const reason = 'An error occurred executing `git add package-lock.js`';
+    exec.mockRejectedValueOnce(new ExecError(reason));
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
     expect(access).toHaveBeenCalledTimes(2);
-    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
-    expect(access).toHaveBeenCalledWith(pathToPackageLockJSON);
+    expect(access).toHaveBeenNthCalledWith(1, pathToChangelogMD);
+    expect(access).toHaveBeenNthCalledWith(2, pathToPackageLockJSON);
 
     expect(exec).toHaveBeenCalledTimes(2);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageLockJSON]);
+    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToPackageLockJSON]);
   });
 
   test('when `exec` for `git add npm-shrinkwrap.json` throws a fatal exec error', async () => {
     expect.assertions(8);
 
-    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue();
+    exec.mockResolvedValueOnce('package.json staged successfully');
 
-    when(access).calledWith(pathToChangelogMD).mockRejectedValue(new Error('File not found'));
-    when(access).calledWith(pathToPackageLockJSON).mockRejectedValue(new Error('File not found'));
-    when(access).calledWith(pathToShrinkwrapJSON).mockResolvedValue();
+    access.mockRejectedValueOnce(new Error('CHANGELOG.md file not found'));
+    access.mockRejectedValueOnce(new Error('package-lock.json file not found'));
 
-    const reason = 'A fatal error occurred';
+    access.mockResolvedValueOnce('npm-shrinkwrap.json exists');
 
-    when(exec).calledWith('git', ['add', pathToShrinkwrapJSON]).mockRejectedValue(new ExecError(reason));
+    const reason = 'An error occurred executing `git add npm-shrinkwrap.json`';
+    exec.mockRejectedValueOnce(new ExecError(reason));
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
     expect(access).toHaveBeenCalledTimes(3);
-    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
-    expect(access).toHaveBeenCalledWith(pathToPackageLockJSON);
-    expect(access).toHaveBeenCalledWith(pathToShrinkwrapJSON);
+    expect(access).toHaveBeenNthCalledWith(1, pathToChangelogMD);
+    expect(access).toHaveBeenNthCalledWith(2, pathToPackageLockJSON);
+    expect(access).toHaveBeenNthCalledWith(3, pathToShrinkwrapJSON);
 
     expect(exec).toHaveBeenCalledTimes(2);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToShrinkwrapJSON]);
   });
 });
 
 describe('Tag should not try to add a missing file in the git repo', () => {
   test('skipping `git add CHANGELOG.md` for missing `CHANGELOG.md` file', async () => {
-    expect.assertions(6);
+    expect.assertions(2);
 
-    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue({});
+    exec.mockResolvedValueOnce('package.json staged successfully');
 
-    const reason = `ENOENT: no such file or directory, access '${pathToChangelogMD}'`;
-    when(access).calledWith(pathToChangelogMD).mockRejectedValue(new Error(reason));
-
-    when(access).calledWith(pathToPackageLockJSON).mockResolvedValue();
-    when(exec).calledWith('git', ['add', pathToPackageLockJSON]).mockResolvedValue({});
-
-    when(access).calledWith(pathToShrinkwrapJSON).mockResolvedValue();
-    when(exec).calledWith('git', ['add', pathToShrinkwrapJSON]).mockResolvedValue({});
+    access.mockRejectedValueOnce(new Error('CHANGELOG.md file not found'));
 
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
-    expect(access).toHaveBeenCalledTimes(3);
-    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
-
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageLockJSON]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).not.toHaveBeenCalledWith('git', ['add', pathToChangelogMD]);
   });
 
   test('skipping `git add package-lock.json` for missing `package-lock.json` file', async () => {
-    expect.assertions(6);
+    expect.assertions(2);
 
-    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue({});
+    exec.mockResolvedValueOnce('package.json staged successfully');
 
-    when(access).calledWith(pathToChangelogMD).mockResolvedValue();
-    when(exec).calledWith('git', ['add', pathToChangelogMD]).mockResolvedValue({});
+    access.mockResolvedValueOnce('CHANGELOG.md exists');
+    exec.mockResolvedValueOnce('CHANGELOG.md staged successfully');
 
-    const reason = `ENOENT: no such file or directory, access '${pathToPackageLockJSON}'`;
-    when(access).calledWith(pathToPackageLockJSON).mockRejectedValue(new Error(reason));
-
-    when(access).calledWith(pathToShrinkwrapJSON).mockResolvedValue();
-    when(exec).calledWith('git', ['add', pathToShrinkwrapJSON]).mockResolvedValue({});
+    access.mockRejectedValueOnce(new Error('package-lock.json file not found'));
 
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
-    expect(access).toHaveBeenCalledTimes(3);
-    expect(access).toHaveBeenCalledWith(pathToPackageLockJSON);
-
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToChangelogMD]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).not.toHaveBeenCalledWith('git', ['add', pathToPackageLockJSON]);
   });
 
   test('skipping `git add npm-shrinkwrap.json` for missing `npm-shrinkwrap.json` file', async () => {
-    expect.assertions(6);
+    expect.assertions(2);
 
-    when(exec).calledWith('git', ['add', pathToPackageJSON]).mockResolvedValue({});
+    exec.mockResolvedValueOnce('package.json staged successfully');
 
-    when(access).calledWith(pathToChangelogMD).mockResolvedValue();
-    when(exec).calledWith('git', ['add', pathToChangelogMD]).mockResolvedValue({});
+    access.mockResolvedValueOnce('CHANGELOG.md exists');
+    exec.mockResolvedValueOnce('CHANGELOG.md staged successfully');
 
-    when(access).calledWith(pathToPackageLockJSON).mockResolvedValue();
-    when(exec).calledWith('git', ['add', pathToPackageLockJSON]).mockResolvedValue({});
+    access.mockResolvedValueOnce('package-lock.json exists');
+    exec.mockResolvedValueOnce('package-lock.json staged successfully');
 
-    const reason = `ENOENT: no such file or directory, access '${pathToShrinkwrapJSON}'`;
-    when(access).calledWith(pathToShrinkwrapJSON).mockRejectedValue(new Error(reason));
+    access.mockRejectedValueOnce(new Error('npm-shrinkwrap.json file not found'));
 
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
-    expect(access).toHaveBeenCalledTimes(3);
-    expect(access).toHaveBeenCalledWith(pathToShrinkwrapJSON);
-
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToChangelogMD]);
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageLockJSON]);
+    expect(exec).not.toHaveBeenCalledWith('git', ['add', pathToShrinkwrapJSON]);
   });
 });
 
@@ -300,9 +270,19 @@ describe('Tag should try to commit the changes in the git repo', () => {
   test('rejecting with an error when `exec` for `git commit` throws a fatal exec error', async () => {
     expect.assertions(2);
 
-    const reason = 'A fatal error occurred';
+    exec.mockResolvedValueOnce('package.json staged successfully');
+    
+    access.mockResolvedValueOnce('CHANGELOG.md exists');
+    exec.mockResolvedValueOnce('CHANGELOG.md staged successfully');
 
-    when(exec).calledWith('git', ['commit', '-m', expect.any(String)]).mockRejectedValue(new ExecError(reason));
+    access.mockResolvedValueOnce('package-lock.json exists');
+    exec.mockResolvedValueOnce('package-lock.json staged successfully');
+
+    access.mockResolvedValueOnce('npm-shrinkwrap.json exists');
+    exec.mockResolvedValueOnce('npm-shrinkwrap.json staged successfully');
+
+    const reason = 'An error occurred executing git commit';
+    exec.mockRejectedValueOnce(new ExecError(reason));
 
     const version = '1.0.0';
 
@@ -390,11 +370,21 @@ describe('Tag should try to create an anno tag in the git repo', () => {
   test('rejecting with an error when `exec` for `git tag` throws a fatal exec error', async () => {
     expect.assertions(2);
 
-    const reason = 'A fatal error occurred';
+    exec.mockResolvedValueOnce('package.json staged successfully');
+    
+    access.mockResolvedValueOnce('CHANGELOG.md exists');
+    exec.mockResolvedValueOnce('CHANGELOG.md staged successfully');
 
-    when(exec)
-      .calledWith('git', ['tag', '-a', expect.any(String), '-m', expect.any(String)])
-      .mockRejectedValue(new ExecError(reason));
+    access.mockResolvedValueOnce('package-lock.json exists');
+    exec.mockResolvedValueOnce('package-lock.json staged successfully');
+
+    access.mockResolvedValueOnce('npm-shrinkwrap.json exists');
+    exec.mockResolvedValueOnce('npm-shrinkwrap.json staged successfully');
+
+    exec.mockResolvedValueOnce('commit changes successfully');
+
+    const reason = 'An error occurred executing git tag';
+    exec.mockRejectedValueOnce(new ExecError(reason));
 
     const version = '1.0.0';
 
