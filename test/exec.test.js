@@ -107,10 +107,10 @@ describe('Exec should resolve', () => {
   test('with the `stdout` value the `child_process/execFile` calls back given no `args` argument', async () => {
     expect.assertions(1);
 
-    const stdout = 'v14.6.1';
+    const stdout = 'Thu Jul  1 10:52:41 EEST 2021';
 
     execFile.mockImplementation((file, args, cb) => cb(null, stdout, null));
 
-    await expect(exec('node')).resolves.toBe(stdout);
+    await expect(exec('date')).resolves.toBe(stdout);
   });
 });
