@@ -32,15 +32,15 @@ describe('Tag should resolve to undefined', () => {
 
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledTimes(6);
+    expect(exec).toBeCalledTimes(6);
 
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToChangelogMD]);
-    expect(exec).toHaveBeenNthCalledWith(3, 'git', ['add', pathToPackageLockJSON]);
-    expect(exec).toHaveBeenNthCalledWith(4, 'git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(2, 'git', ['add', pathToChangelogMD]);
+    expect(exec).nthCalledWith(3, 'git', ['add', pathToPackageLockJSON]);
+    expect(exec).nthCalledWith(4, 'git', ['add', pathToShrinkwrapJSON]);
 
-    expect(exec).toHaveBeenNthCalledWith(5, 'git', ['commit', '-m', any(String)]);
-    expect(exec).toHaveBeenNthCalledWith(6, 'git', ['tag', '-a', any(String), '-m', any(String)]);
+    expect(exec).nthCalledWith(5, 'git', ['commit', '-m', any(String)]);
+    expect(exec).nthCalledWith(6, 'git', ['tag', '-a', any(String), '-m', any(String)]);
   });
 
   test('have missing CHANGELOG.md, package-lock.json and npm-shrinkwrap.json skipped from staging', async () => {
@@ -52,22 +52,22 @@ describe('Tag should resolve to undefined', () => {
 
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
-    expect(access).toHaveBeenCalledTimes(3);
-    expect(exec).toHaveBeenCalledTimes(3);
+    expect(access).toBeCalledTimes(3);
+    expect(exec).toBeCalledTimes(3);
 
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
 
-    expect(access).toHaveBeenNthCalledWith(1, pathToChangelogMD);
-    expect(exec).not.toHaveBeenCalledWith('git', ['add', pathToChangelogMD]);
+    expect(access).nthCalledWith(1, pathToChangelogMD);
+    expect(exec).not.toBeCalledWith('git', ['add', pathToChangelogMD]);
 
-    expect(access).toHaveBeenNthCalledWith(2, pathToPackageLockJSON);
-    expect(exec).not.toHaveBeenCalledWith('git', ['add', pathToPackageLockJSON]);
+    expect(access).nthCalledWith(2, pathToPackageLockJSON);
+    expect(exec).not.toBeCalledWith('git', ['add', pathToPackageLockJSON]);
 
-    expect(access).toHaveBeenNthCalledWith(3, pathToShrinkwrapJSON);
-    expect(exec).not.toHaveBeenCalledWith('git', ['add', pathToShrinkwrapJSON]);
+    expect(access).nthCalledWith(3, pathToShrinkwrapJSON);
+    expect(exec).not.toBeCalledWith('git', ['add', pathToShrinkwrapJSON]);
 
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['commit', '-m', any(String)]);
-    expect(exec).toHaveBeenNthCalledWith(3, 'git', ['tag', '-a', any(String), '-m', any(String)]);
+    expect(exec).nthCalledWith(2, 'git', ['commit', '-m', any(String)]);
+    expect(exec).nthCalledWith(3, 'git', ['tag', '-a', any(String), '-m', any(String)]);
   });
 });
 
@@ -79,7 +79,7 @@ describe('Tag should try to commit changes', () => {
 
     await expect(tag(version)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['commit', '-m', `Bump to v${version}`]);
+    expect(exec).toBeCalledWith('git', ['commit', '-m', `Bump to v${version}`]);
   });
 
   test('with message equal to the given message arg', async () => {
@@ -90,7 +90,7 @@ describe('Tag should try to commit changes', () => {
 
     await expect(tag(version, message)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['commit', '-m', message]);
+    expect(exec).toBeCalledWith('git', ['commit', '-m', message]);
   });
 
   test('with template message using interpolation via `%s` notation', async () => {
@@ -101,7 +101,7 @@ describe('Tag should try to commit changes', () => {
 
     await expect(tag(version, message)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['commit', '-m', `Bump to new v${version}`]);
+    expect(exec).toBeCalledWith('git', ['commit', '-m', `Bump to new v${version}`]);
   });
 
   test('with version injected into the message template in a clean semver form', async () => {
@@ -112,7 +112,7 @@ describe('Tag should try to commit changes', () => {
 
     await expect(tag(version, message)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['commit', '-m', `Bump to new v${semver.clean(version)}`]);
+    expect(exec).toBeCalledWith('git', ['commit', '-m', `Bump to new v${semver.clean(version)}`]);
   });
 });
 
@@ -124,7 +124,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     await expect(tag(version)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', `v${version}`, '-m', any(String)]);
+    expect(exec).toBeCalledWith('git', ['tag', '-a', `v${version}`, '-m', any(String)]);
   });
 
   test('having the given version arg be cleaned via semver before used as tag name', async () => {
@@ -134,7 +134,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     await expect(tag(version)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', `v${semver.clean(version)}`, '-m', any(String)]);
+    expect(exec).toBeCalledWith('git', ['tag', '-a', `v${semver.clean(version)}`, '-m', any(String)]);
   });
 
   test('with the default message if the message arg is not given', async () => {
@@ -144,7 +144,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     await expect(tag(version)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to v${version}`]);
+    expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to v${version}`]);
   });
 
   test('with message equal to the given message arg', async () => {
@@ -155,7 +155,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     await expect(tag(version, message)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', any(String), '-m', message]);
+    expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', message]);
   });
 
   test('with a template message using interpolation via `%s` notation', async () => {
@@ -166,7 +166,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     await expect(tag(version, message)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to new v${version}`]);
+    expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to new v${version}`]);
   });
 
   test('having the given version arg be cleaned via semver before used in the template message', async () => {
@@ -177,7 +177,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     await expect(tag(version, message)).resolves.toBeUndefined();
 
-    expect(exec).toHaveBeenCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to new v${semver.clean(version)}`]);
+    expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to new v${semver.clean(version)}`]);
   });
 });
 
@@ -189,8 +189,8 @@ describe('Tag called with invalid input should reject early with error', () => {
 
     await expect(tag()).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(0);
-    expect(exec).toHaveBeenCalledTimes(0);
+    expect(access).toBeCalledTimes(0);
+    expect(exec).toBeCalledTimes(0);
   });
 
   test('when invalid non semver version argument is given', async () => {
@@ -213,8 +213,8 @@ describe('Tag called with invalid input should reject early with error', () => {
     await expect(tag(Symbol('s'))).rejects.toThrow(reason);
     await expect(tag(() => {})).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(0);
-    expect(exec).toHaveBeenCalledTimes(0);
+    expect(access).toBeCalledTimes(0);
+    expect(exec).toBeCalledTimes(0);
   });
 
   test('when invalid non string template message argument is given', async () => {
@@ -233,8 +233,8 @@ describe('Tag called with invalid input should reject early with error', () => {
     await expect(tag('1.0.0', Symbol('s'))).rejects.toThrow(reason);
     await expect(tag('1.0.0', () => {})).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(0);
-    expect(exec).toHaveBeenCalledTimes(0);
+    expect(access).toBeCalledTimes(0);
+    expect(exec).toBeCalledTimes(0);
   });
 });
 
@@ -247,10 +247,10 @@ describe('Tag should reject early with error', () => {
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(0);
-    expect(exec).toHaveBeenCalledTimes(1);
+    expect(access).toBeCalledTimes(0);
+    expect(exec).toBeCalledTimes(1);
 
-    expect(exec).toHaveBeenCalledWith('git', ['add', pathToPackageJSON]);
+    expect(exec).toBeCalledWith('git', ['add', pathToPackageJSON]);
   });
 
   test('when `git add CHANGELOG.md` throws a fatal exec error', async () => {
@@ -264,13 +264,13 @@ describe('Tag should reject early with error', () => {
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(1);
-    expect(exec).toHaveBeenCalledTimes(2);
+    expect(access).toBeCalledTimes(1);
+    expect(exec).toBeCalledTimes(2);
 
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
 
-    expect(access).toHaveBeenCalledWith(pathToChangelogMD);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToChangelogMD]);
+    expect(access).toBeCalledWith(pathToChangelogMD);
+    expect(exec).nthCalledWith(2, 'git', ['add', pathToChangelogMD]);
   });
 
   test('when `git add package-lock.json` throws a fatal exec error', async () => {
@@ -286,15 +286,15 @@ describe('Tag should reject early with error', () => {
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(2);
-    expect(exec).toHaveBeenCalledTimes(2);
+    expect(access).toBeCalledTimes(2);
+    expect(exec).toBeCalledTimes(2);
 
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
 
-    expect(access).toHaveBeenNthCalledWith(1, pathToChangelogMD);
+    expect(access).nthCalledWith(1, pathToChangelogMD);
 
-    expect(access).toHaveBeenNthCalledWith(2, pathToPackageLockJSON);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToPackageLockJSON]);
+    expect(access).nthCalledWith(2, pathToPackageLockJSON);
+    expect(exec).nthCalledWith(2, 'git', ['add', pathToPackageLockJSON]);
   });
 
   test('when `git add npm-shrinkwrap.json` throws a fatal exec error', async () => {
@@ -311,16 +311,16 @@ describe('Tag should reject early with error', () => {
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(3);
-    expect(exec).toHaveBeenCalledTimes(2);
+    expect(access).toBeCalledTimes(3);
+    expect(exec).toBeCalledTimes(2);
 
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
 
-    expect(access).toHaveBeenNthCalledWith(1, pathToChangelogMD);
-    expect(access).toHaveBeenNthCalledWith(2, pathToPackageLockJSON);
+    expect(access).nthCalledWith(1, pathToChangelogMD);
+    expect(access).nthCalledWith(2, pathToPackageLockJSON);
 
-    expect(access).toHaveBeenNthCalledWith(3, pathToShrinkwrapJSON);
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['add', pathToShrinkwrapJSON]);
+    expect(access).nthCalledWith(3, pathToShrinkwrapJSON);
+    expect(exec).nthCalledWith(2, 'git', ['add', pathToShrinkwrapJSON]);
   });
 
   test('when `git commit` throws a fatal exec error', async () => {
@@ -337,16 +337,16 @@ describe('Tag should reject early with error', () => {
   
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(3);
-    expect(exec).toHaveBeenCalledTimes(2);
+    expect(access).toBeCalledTimes(3);
+    expect(exec).toBeCalledTimes(2);
   
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
 
-    expect(access).toHaveBeenNthCalledWith(1, pathToChangelogMD);
-    expect(access).toHaveBeenNthCalledWith(2, pathToPackageLockJSON);
-    expect(access).toHaveBeenNthCalledWith(3, pathToShrinkwrapJSON);
+    expect(access).nthCalledWith(1, pathToChangelogMD);
+    expect(access).nthCalledWith(2, pathToPackageLockJSON);
+    expect(access).nthCalledWith(3, pathToShrinkwrapJSON);
 
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['commit', '-m', any(String)]);
+    expect(exec).nthCalledWith(2, 'git', ['commit', '-m', any(String)]);
   });
 
   test('when `git tag` throws a fatal exec error', async () => {
@@ -365,16 +365,16 @@ describe('Tag should reject early with error', () => {
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
-    expect(access).toHaveBeenCalledTimes(3);
-    expect(exec).toHaveBeenCalledTimes(3);
+    expect(access).toBeCalledTimes(3);
+    expect(exec).toBeCalledTimes(3);
 
-    expect(exec).toHaveBeenNthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
 
-    expect(access).toHaveBeenNthCalledWith(1, pathToChangelogMD);
-    expect(access).toHaveBeenNthCalledWith(2, pathToPackageLockJSON);
-    expect(access).toHaveBeenNthCalledWith(3, pathToShrinkwrapJSON);
+    expect(access).nthCalledWith(1, pathToChangelogMD);
+    expect(access).nthCalledWith(2, pathToPackageLockJSON);
+    expect(access).nthCalledWith(3, pathToShrinkwrapJSON);
 
-    expect(exec).toHaveBeenNthCalledWith(2, 'git', ['commit', '-m', any(String)]);
-    expect(exec).toHaveBeenNthCalledWith(3, 'git', ['tag', '-a', any(String), '-m', any(String)]);
+    expect(exec).nthCalledWith(2, 'git', ['commit', '-m', any(String)]);
+    expect(exec).nthCalledWith(3, 'git', ['tag', '-a', any(String), '-m', any(String)]);
   });
 });
