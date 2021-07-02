@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/releaze.svg)](https://www.npmjs.com/package/releaze)
 [![downloads](https://img.shields.io/npm/dm/releaze.svg)](https://www.npmjs.com/package/releaze)
+[![tested with jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
 [![build](https://travis-ci.com/tzeikob/releaze.svg?branch=master)](https://travis-ci.com/tzeikob/releaze)
 
 This is an experimental package to be used as utility for side tasks related to releasing and publishing new versions.
