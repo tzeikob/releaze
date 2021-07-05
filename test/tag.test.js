@@ -1,3 +1,10 @@
+const fs = require('fs');
+const path = require('path');
+const semver = require('semver');
+const exec = require('../lib/util/exec');
+const ExecError = require('../lib/errors/exec-error');
+const tag = require('../lib/tag.js');
+
 jest.mock('fs', () => ({
   promises: {
     access: jest.fn().mockResolvedValue()
@@ -5,13 +12,6 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('../lib/util/exec', () => jest.fn().mockResolvedValue());
-
-const fs = require('fs');
-const path = require('path');
-const semver = require('semver');
-const exec = require('../lib/util/exec');
-const ExecError = require('../lib/errors/exec-error');
-const tag = require('../lib/tag.js');
 
 const { access } = fs.promises;
 const { any } = expect;

@@ -1,7 +1,7 @@
-jest.mock('child_process');
-
 const { execFile } = require('child_process');
 const exec = require('../lib/util/exec');
+
+jest.mock('child_process');
 
 afterEach(() => {
   execFile.mockReset();
