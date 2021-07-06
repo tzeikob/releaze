@@ -9,19 +9,26 @@ const {
 
 describe('Call of isGiven(value)', () => {
   test('should return true for any value except null and undefined', () => {
-    expect.assertions(11);
+    expect.assertions(14);
+
+    expect(isGiven('str')).toBe(true);
+    expect(isGiven('')).toBe(true);
 
     expect(isGiven(123)).toBe(true);
+    expect(isGiven(0)).toBe(true);
+    expect(isGiven(-0)).toBe(true);
+    expect(isGiven(0n)).toBe(true);
     expect(isGiven(NaN)).toBe(true);
     expect(isGiven(Infinity)).toBe(true);
+
     expect(isGiven(true)).toBe(true);
     expect(isGiven(false)).toBe(true);
+
     expect(isGiven([])).toBe(true);
     expect(isGiven({})).toBe(true);
     expect(isGiven(Symbol('s'))).toBe(true);
+
     expect(isGiven(() => {})).toBe(true);
-    expect(isGiven('str')).toBe(true);
-    expect(isGiven('')).toBe(true);
   });
 
   test('should return false for value equal to null or undefined', () => {
