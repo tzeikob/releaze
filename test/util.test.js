@@ -41,21 +41,30 @@ describe('Call of isGiven(value)', () => {
 });
 
 describe('Call of isNotString(value)', () => {
-  test('should return true for any value except a non empty string', () => {
-    expect.assertions(13);
+  test('should return true for any value except a non string', () => {
+    expect.assertions(12);
 
     expect(isNotString(123)).toBe(true);
     expect(isNotString(NaN)).toBe(true);
     expect(isNotString(Infinity)).toBe(true);
+
     expect(isNotString(true)).toBe(true);
     expect(isNotString(false)).toBe(true);
+
     expect(isNotString([])).toBe(true);
     expect(isNotString({})).toBe(true);
     expect(isNotString(Symbol('s'))).toBe(true);
+
     expect(isNotString(() => {})).toBe(true);
+
     expect(isNotString(null)).toBe(true);
     expect(isNotString(undefined)).toBe(true);
     expect(isNotString()).toBe(true);
+  });
+
+  test('should return true for empty string value', () => {
+    expect.assertions(1);
+
     expect(isNotString('')).toBe(true);
   });
 
