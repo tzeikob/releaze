@@ -82,15 +82,20 @@ describe('Call of isNotHashOrTag(value)', () => {
     expect(isNotHashOrTag(123)).toBe(true);
     expect(isNotHashOrTag(NaN)).toBe(true);
     expect(isNotHashOrTag(Infinity)).toBe(true);
+
     expect(isNotHashOrTag(true)).toBe(true);
     expect(isNotHashOrTag(false)).toBe(true);
+
     expect(isNotHashOrTag([])).toBe(true);
     expect(isNotHashOrTag({})).toBe(true);
     expect(isNotHashOrTag(Symbol('s'))).toBe(true);
+
     expect(isNotHashOrTag(() => {})).toBe(true);
+
     expect(isNotHashOrTag(null)).toBe(true);
     expect(isNotHashOrTag(undefined)).toBe(true);
     expect(isNotHashOrTag()).toBe(true);
+
     expect(isNotHashOrTag('')).toBe(true);
   });
 
@@ -186,14 +191,17 @@ describe('Call of isNotSemverReleaseType(value)', () => {
     expect(isNotSemverReleaseType(123)).toBe(true);
     expect(isNotSemverReleaseType(NaN)).toBe(true);
     expect(isNotSemverReleaseType(Infinity)).toBe(true);
+
     expect(isNotSemverReleaseType(true)).toBe(true);
     expect(isNotSemverReleaseType(false)).toBe(true);
+
     expect(isNotSemverReleaseType([])).toBe(true);
     expect(isNotSemverReleaseType({})).toBe(true);
     expect(isNotSemverReleaseType(Symbol('s'))).toBe(true);
-    expect(isNotSemverReleaseType(() => {})).toBe(true);
-    expect(isNotSemverReleaseType('')).toBe(true);
 
+    expect(isNotSemverReleaseType(() => {})).toBe(true);
+
+    expect(isNotSemverReleaseType('')).toBe(true);
     expect(isNotSemverReleaseType('next')).toBe(true);
     expect(isNotSemverReleaseType('new')).toBe(true);
     expect(isNotSemverReleaseType('latest')).toBe(true);
@@ -221,15 +229,20 @@ describe('Call of isNotSemver(value) should', () => {
     expect(isNotSemver(123)).toBe(true);
     expect(isNotSemver(NaN)).toBe(true);
     expect(isNotSemver(Infinity)).toBe(true);
+
     expect(isNotSemver(true)).toBe(true);
     expect(isNotSemver(false)).toBe(true);
+
     expect(isNotSemver([])).toBe(true);
     expect(isNotSemver({})).toBe(true);
     expect(isNotSemver(Symbol('s'))).toBe(true);
+
     expect(isNotSemver(() => {})).toBe(true);
+
     expect(isNotSemver(null)).toBe(true);
     expect(isNotSemver(undefined)).toBe(true);
     expect(isNotSemver()).toBe(true);
+
     expect(isNotSemver('')).toBe(true);
   });
 
@@ -266,14 +279,19 @@ describe('Call of isNotArray(value) should', () => {
     expect(isNotArray(123)).toBe(true);
     expect(isNotArray(NaN)).toBe(true);
     expect(isNotArray(Infinity)).toBe(true);
+
     expect(isNotArray(true)).toBe(true);
     expect(isNotArray(false)).toBe(true);
+
     expect(isNotArray({})).toBe(true);
     expect(isNotArray(Symbol('s'))).toBe(true);
+
     expect(isNotArray(() => {})).toBe(true);
+
     expect(isNotArray(null)).toBe(true);
     expect(isNotArray(undefined)).toBe(true);
     expect(isNotArray()).toBe(true);
+
     expect(isNotArray('')).toBe(true);
   });
 
