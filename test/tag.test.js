@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const semver = require('semver');
 const exec = require('../lib/util/exec');
 const ExecError = require('../lib/errors/exec-error');
@@ -16,11 +15,6 @@ jest.mock('../lib/util/exec', () => jest.fn().mockResolvedValue());
 const { access } = fs.promises;
 const { any } = expect;
 
-const pathToPackageJSON = path.join(process.cwd(), 'package.json');
-const pathToChangelogMD = path.join(process.cwd(), 'CHANGELOG.md');
-const pathToPackageLockJSON = path.join(process.cwd(), 'package-lock.json');
-const pathToShrinkwrapJSON = path.join(process.cwd(), 'npm-shrinkwrap.json');
-
 afterEach(() => {
   access.mockReset();
   exec.mockReset();
@@ -34,10 +28,10 @@ describe('Tag should resolve to undefined', () => {
 
     expect(exec).toBeCalledTimes(6);
 
-    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
-    expect(exec).nthCalledWith(2, 'git', ['add', pathToChangelogMD]);
-    expect(exec).nthCalledWith(3, 'git', ['add', pathToPackageLockJSON]);
-    expect(exec).nthCalledWith(4, 'git', ['add', pathToShrinkwrapJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', 'package.json']);
+    expect(exec).nthCalledWith(2, 'git', ['add', 'CHANGELOG.md']);
+    expect(exec).nthCalledWith(3, 'git', ['add', 'package-lock.json']);
+    expect(exec).nthCalledWith(4, 'git', ['add', 'npm-shrinkwrap.json']);
 
     expect(exec).nthCalledWith(5, 'git', ['commit', '-m', any(String)]);
     expect(exec).nthCalledWith(6, 'git', ['tag', '-a', any(String), '-m', any(String)]);
@@ -55,16 +49,16 @@ describe('Tag should resolve to undefined', () => {
     expect(access).toBeCalledTimes(3);
     expect(exec).toBeCalledTimes(3);
 
-    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', 'package.json']);
 
-    expect(access).nthCalledWith(1, pathToChangelogMD);
-    expect(exec).not.toBeCalledWith('git', ['add', pathToChangelogMD]);
+    expect(access).nthCalledWith(1, 'CHANGELOG.md');
+    expect(exec).not.toBeCalledWith('git', ['add', 'CHANGELOG.md']);
 
-    expect(access).nthCalledWith(2, pathToPackageLockJSON);
-    expect(exec).not.toBeCalledWith('git', ['add', pathToPackageLockJSON]);
+    expect(access).nthCalledWith(2, 'package-lock.json');
+    expect(exec).not.toBeCalledWith('git', ['add', 'package-lock.json']);
 
-    expect(access).nthCalledWith(3, pathToShrinkwrapJSON);
-    expect(exec).not.toBeCalledWith('git', ['add', pathToShrinkwrapJSON]);
+    expect(access).nthCalledWith(3, 'npm-shrinkwrap.json');
+    expect(exec).not.toBeCalledWith('git', ['add', 'npm-shrinkwrap.json']);
 
     expect(exec).nthCalledWith(2, 'git', ['commit', '-m', any(String)]);
     expect(exec).nthCalledWith(3, 'git', ['tag', '-a', any(String), '-m', any(String)]);
@@ -250,7 +244,7 @@ describe('Tag should reject early with error', () => {
     expect(access).toBeCalledTimes(0);
     expect(exec).toBeCalledTimes(1);
 
-    expect(exec).toBeCalledWith('git', ['add', pathToPackageJSON]);
+    expect(exec).toBeCalledWith('git', ['add', 'package.json']);
   });
 
   test('when `git add CHANGELOG.md` throws a fatal exec error', async () => {
@@ -267,10 +261,10 @@ describe('Tag should reject early with error', () => {
     expect(access).toBeCalledTimes(1);
     expect(exec).toBeCalledTimes(2);
 
-    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', 'package.json']);
 
-    expect(access).toBeCalledWith(pathToChangelogMD);
-    expect(exec).nthCalledWith(2, 'git', ['add', pathToChangelogMD]);
+    expect(access).toBeCalledWith('CHANGELOG.md');
+    expect(exec).nthCalledWith(2, 'git', ['add', 'CHANGELOG.md']);
   });
 
   test('when `git add package-lock.json` throws a fatal exec error', async () => {
@@ -289,12 +283,12 @@ describe('Tag should reject early with error', () => {
     expect(access).toBeCalledTimes(2);
     expect(exec).toBeCalledTimes(2);
 
-    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', 'package.json']);
 
-    expect(access).nthCalledWith(1, pathToChangelogMD);
+    expect(access).nthCalledWith(1, 'CHANGELOG.md');
 
-    expect(access).nthCalledWith(2, pathToPackageLockJSON);
-    expect(exec).nthCalledWith(2, 'git', ['add', pathToPackageLockJSON]);
+    expect(access).nthCalledWith(2, 'package-lock.json');
+    expect(exec).nthCalledWith(2, 'git', ['add', 'package-lock.json']);
   });
 
   test('when `git add npm-shrinkwrap.json` throws a fatal exec error', async () => {
@@ -314,13 +308,13 @@ describe('Tag should reject early with error', () => {
     expect(access).toBeCalledTimes(3);
     expect(exec).toBeCalledTimes(2);
 
-    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', 'package.json']);
 
-    expect(access).nthCalledWith(1, pathToChangelogMD);
-    expect(access).nthCalledWith(2, pathToPackageLockJSON);
+    expect(access).nthCalledWith(1, 'CHANGELOG.md');
+    expect(access).nthCalledWith(2, 'package-lock.json');
 
-    expect(access).nthCalledWith(3, pathToShrinkwrapJSON);
-    expect(exec).nthCalledWith(2, 'git', ['add', pathToShrinkwrapJSON]);
+    expect(access).nthCalledWith(3, 'npm-shrinkwrap.json');
+    expect(exec).nthCalledWith(2, 'git', ['add', 'npm-shrinkwrap.json']);
   });
 
   test('when `git commit` throws a fatal exec error', async () => {
@@ -340,11 +334,11 @@ describe('Tag should reject early with error', () => {
     expect(access).toBeCalledTimes(3);
     expect(exec).toBeCalledTimes(2);
   
-    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', 'package.json']);
 
-    expect(access).nthCalledWith(1, pathToChangelogMD);
-    expect(access).nthCalledWith(2, pathToPackageLockJSON);
-    expect(access).nthCalledWith(3, pathToShrinkwrapJSON);
+    expect(access).nthCalledWith(1, 'CHANGELOG.md');
+    expect(access).nthCalledWith(2, 'package-lock.json');
+    expect(access).nthCalledWith(3, 'npm-shrinkwrap.json');
 
     expect(exec).nthCalledWith(2, 'git', ['commit', '-m', any(String)]);
   });
@@ -368,11 +362,11 @@ describe('Tag should reject early with error', () => {
     expect(access).toBeCalledTimes(3);
     expect(exec).toBeCalledTimes(3);
 
-    expect(exec).nthCalledWith(1, 'git', ['add', pathToPackageJSON]);
+    expect(exec).nthCalledWith(1, 'git', ['add', 'package.json']);
 
-    expect(access).nthCalledWith(1, pathToChangelogMD);
-    expect(access).nthCalledWith(2, pathToPackageLockJSON);
-    expect(access).nthCalledWith(3, pathToShrinkwrapJSON);
+    expect(access).nthCalledWith(1, 'CHANGELOG.md');
+    expect(access).nthCalledWith(2, 'package-lock.json');
+    expect(access).nthCalledWith(3, 'npm-shrinkwrap.json');
 
     expect(exec).nthCalledWith(2, 'git', ['commit', '-m', any(String)]);
     expect(exec).nthCalledWith(3, 'git', ['tag', '-a', any(String), '-m', any(String)]);
