@@ -15,19 +15,20 @@ afterEach(() => {
   writeFile.mockReset();
 });
 
-describe('Bump should reject with error', () => {
-  test('very early when called with no release type argument', async () => {
+describe('Bump should reject early with error', () => {
+  test('when called with no release type argument', async () => {
     expect.assertions(3);
 
     const reason = 'Invalid or missing semver release type argument';
+
     await expect(bump()).rejects.toThrow(reason);
 
     expect(readFile).toHaveBeenCalledTimes(0);
     expect(writeFile).toHaveBeenCalledTimes(0);
   });
 
-  test('very early when called with not valid release type argument', async () => {
-    expect.assertions(19);
+  test('when called with not valid release type argument', async () => {
+    expect.assertions(11);
 
     const reason = 'Invalid or missing semver release type argument';
 
@@ -40,32 +41,6 @@ describe('Bump should reject with error', () => {
     await expect(bump('PATCH')).rejects.toThrow(reason);
     await expect(bump('PREPATCH')).rejects.toThrow(reason);
     await expect(bump('PRERELEASE')).rejects.toThrow(reason);
-
-    await expect(bump(123)).rejects.toThrow(reason);
-    await expect(bump(NaN)).rejects.toThrow(reason);
-    await expect(bump(Infinity)).rejects.toThrow(reason);
-    await expect(bump(true)).rejects.toThrow(reason);
-
-    await expect(bump([])).rejects.toThrow(reason);
-    await expect(bump({})).rejects.toThrow(reason);
-    await expect(bump(Symbol('s'))).rejects.toThrow(reason);
-    await expect(bump(() => {})).rejects.toThrow(reason);
-
-    expect(readFile).toHaveBeenCalledTimes(0);
-    expect(writeFile).toHaveBeenCalledTimes(0);
-  });
-
-  test('very early when called with a non string `preid` key', async () => {
-    expect.assertions(8);
-
-    const reason = 'Invalid non string preid key for a pre based bump';
-
-    await expect(bump('prerelease', 123)).rejects.toThrow(reason);
-    await expect(bump('prerelease', true)).rejects.toThrow(reason);
-    await expect(bump('prerelease', [])).rejects.toThrow(reason);
-    await expect(bump('prerelease', {})).rejects.toThrow(reason);
-    await expect(bump('prerelease', Symbol('s'))).rejects.toThrow(reason);
-    await expect(bump('prerelease', () => {})).rejects.toThrow(reason);
 
     expect(readFile).toHaveBeenCalledTimes(0);
     expect(writeFile).toHaveBeenCalledTimes(0);
