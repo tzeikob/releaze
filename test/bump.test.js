@@ -6,14 +6,9 @@ jest.mock('fs', () => ({
 }));
 
 const fs = require('fs');
-const path = require('path');
 const bump = require('../lib/bump');
 
 const { readFile, writeFile } = fs.promises;
-
-const pathToPackageJSON = path.join(process.cwd(), 'package.json');
-const pathToPackageLockJSON = path.join(process.cwd(), 'package-lock.json');
-const pathToShrinkwrapJSON = path.join(process.cwd(), 'npm-shrinkwrap.json');
 
 afterEach(() => {
   readFile.mockReset();
@@ -86,7 +81,7 @@ describe('Bump should reject with error', () => {
     await expect(bump('major')).rejects.toThrow(error);
 
     expect(readFile).toHaveBeenCalledTimes(1);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
     expect(writeFile).toHaveBeenCalledTimes(0);
   });
 
@@ -98,14 +93,14 @@ describe('Bump should reject with error', () => {
     await expect(bump('major')).rejects.toThrow(SyntaxError);
 
     expect(readFile).toHaveBeenCalledTimes(1);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
     expect(writeFile).toHaveBeenCalledTimes(0);
   });
 
   test('when there is an NPM package.json file which parsed to a not valid JSON object', async () => {
     expect.assertions(6);
 
-    const reason = `Invalid or malformed JSON file: ${pathToPackageJSON}`;
+    const reason = 'Invalid or malformed JSON file: package.json';
 
     readFile.mockReturnValue(Promise.resolve('123'));
     await expect(bump('major')).rejects.toThrow(reason);
@@ -117,14 +112,14 @@ describe('Bump should reject with error', () => {
     await expect(bump('major')).rejects.toThrow(reason);
 
     expect(readFile).toHaveBeenCalledTimes(3);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
     expect(writeFile).toHaveBeenCalledTimes(0);
   });
 
   test('when there is an NPM package.json file but has no or invalid semver version number', async () => {
     expect.assertions(5);
 
-    const reason = `Invalid or missing semver version in JSON file: ${pathToPackageJSON}`;
+    const reason = 'Invalid or missing semver version in JSON file: package.json';
 
     readFile.mockReturnValue(Promise.resolve('{}'));
     await expect(bump('major')).rejects.toThrow(reason);
@@ -133,7 +128,7 @@ describe('Bump should reject with error', () => {
     await expect(bump('major')).rejects.toThrow(reason);
 
     expect(readFile).toHaveBeenCalledTimes(2);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
     expect(writeFile).toHaveBeenCalledTimes(0);
   });
 
@@ -149,10 +144,10 @@ describe('Bump should reject with error', () => {
     await expect(bump('major')).rejects.toThrow(error);
 
     expect(readFile).toHaveBeenCalledTimes(1);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
 
     expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('package.json', '{\n  "version": "1.0.0"\n}\n');
   });
 
   test('when writing to existing package-lock.json file failed', async () => {
@@ -169,12 +164,12 @@ describe('Bump should reject with error', () => {
     await expect(bump('major')).rejects.toThrow(error);
 
     expect(readFile).toHaveBeenCalledTimes(2);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
-    expect(readFile).toHaveBeenCalledWith(pathToPackageLockJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package-lock.json', 'utf8');
 
     expect(writeFile).toHaveBeenCalledTimes(2);
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageLockJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('package.json', '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('package-lock.json', '{\n  "version": "1.0.0"\n}\n');
   });
 
   test('when writing to existing npm-shrinkwrap.json file failed', async () => {
@@ -192,14 +187,14 @@ describe('Bump should reject with error', () => {
     await expect(bump('major')).rejects.toThrow(error);
 
     expect(readFile).toHaveBeenCalledTimes(3);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
-    expect(readFile).toHaveBeenCalledWith(pathToPackageLockJSON, 'utf8');
-    expect(readFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package-lock.json', 'utf8');
+    expect(readFile).toHaveBeenCalledWith('npm-shrinkwrap.json', 'utf8');
 
     expect(writeFile).toHaveBeenCalledTimes(3);
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageLockJSON, '{\n  "version": "1.0.0"\n}\n');
-    expect(writeFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('package.json', '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('package-lock.json', '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('npm-shrinkwrap.json', '{\n  "version": "1.0.0"\n}\n');
   });
 });
 
@@ -212,9 +207,9 @@ describe('Bump called with a valid release type should', () => {
     await expect(bump('major')).resolves.toBeDefined();
 
     expect(readFile).toHaveBeenCalledTimes(3);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
-    expect(readFile).toHaveBeenCalledWith(pathToPackageLockJSON, 'utf8');
-    expect(readFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package-lock.json', 'utf8');
+    expect(readFile).toHaveBeenCalledWith('npm-shrinkwrap.json', 'utf8');
   });
 
   test('write the new version to package.json, package-lock.json and npm-shrinkwrap.json file', async () => {
@@ -225,9 +220,9 @@ describe('Bump called with a valid release type should', () => {
     await expect(bump('major')).resolves.toBeDefined();
 
     expect(writeFile).toHaveBeenCalledTimes(3);
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageLockJSON, '{\n  "version": "1.0.0"\n}\n');
-    expect(writeFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('package.json', '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('package-lock.json', '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('npm-shrinkwrap.json', '{\n  "version": "1.0.0"\n}\n');
   });
 
   test('ignore missing package-lock.json and npm-shrinkwrap.json files if not present', async () => {
@@ -244,12 +239,12 @@ describe('Bump called with a valid release type should', () => {
     await expect(bump('major')).resolves.toBeDefined();
 
     expect(readFile).toHaveBeenCalledTimes(3);
-    expect(readFile).toHaveBeenCalledWith(pathToPackageJSON, 'utf8');
-    expect(readFile).toHaveBeenCalledWith(pathToPackageLockJSON, 'utf8');
-    expect(readFile).toHaveBeenCalledWith(pathToShrinkwrapJSON, 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package.json', 'utf8');
+    expect(readFile).toHaveBeenCalledWith('package-lock.json', 'utf8');
+    expect(readFile).toHaveBeenCalledWith('npm-shrinkwrap.json', 'utf8');
 
     expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(pathToPackageJSON, '{\n  "version": "1.0.0"\n}\n');
+    expect(writeFile).toHaveBeenCalledWith('package.json', '{\n  "version": "1.0.0"\n}\n');
   });
 
   test('should normalize versions given in alternative `v1.0.0` form to `1.0.0`', async () => {
