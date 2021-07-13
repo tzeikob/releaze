@@ -27,16 +27,16 @@ describe('Tag should resolve to undefined', () => {
     expect(exec).nthCalledWith(6, 'git', ['tag', '-a', any(String), '-m', any(String)]);
   });
 
-  test('even if the CHANGELOG file is missing or failed to be staged', async () => {
+  test('even if the CHANGELOG.md file is missing and so failed to be staged', async () => {
     expect.assertions(8);
 
-    exec
-      .mockResolvedValueOnce('package.json staged successfully')
-      .mockRejectedValueOnce(new Error('failed to stage missing CHANGELOG.md'))
-      .mockResolvedValueOnce('package-lock.json staged successfully')
-      .mockResolvedValueOnce('npm-shrinkwrap.json staged successfully')
-      .mockResolvedValueOnce('commit changes successfully')
-      .mockResolvedValueOnce('tag created successfully');
+    exec.mockImplementation(async (file, args) => {
+      const command = [file, ...args].join(' ');
+
+      if (command === 'git add CHANGELOG.md') {
+        throw new Error('Failed to stage file: CHANGELOG.md');
+      }
+    });
 
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
@@ -51,16 +51,16 @@ describe('Tag should resolve to undefined', () => {
     expect(exec).nthCalledWith(6, 'git', ['tag', '-a', any(String), '-m', any(String)]);
   });
 
-  test('even if package lock files are missing or failed to be staged', async () => {
+  test('even if package lock files are missing and so failed to be staged', async () => {
     expect.assertions(8);
 
-    exec
-      .mockResolvedValueOnce('package.json staged successfully')
-      .mockResolvedValueOnce('CHANGELOG.md staged successfully')
-      .mockRejectedValueOnce(new Error('failed to stage missing package-lock.json'))
-      .mockRejectedValueOnce(new Error('failed to stage missing npm-shrinkwrap.json'))
-      .mockResolvedValueOnce('commit changes successfully')
-      .mockResolvedValueOnce('tag created successfully');
+    exec.mockImplementation(async (file, args) => {
+      const command = [file, ...args].join(' ');
+
+      if (command.match(/git add (package-lock|npm-shrinkwrap).json/)) {
+        throw new Error('Failed to stage file: lock file');
+      }
+    });
 
     await expect(tag('1.0.0')).resolves.toBeUndefined();
 
@@ -215,9 +215,15 @@ describe('Tag should reject early with error', () => {
   test('when `git add package.json` throws a fatal exec error', async () => {
     expect.assertions(3);
 
-    const reason = 'An error occurred executing `git add package.json`';
+    const reason = 'Failed to stage file: package.json';
 
-    exec.mockRejectedValueOnce(new Error(reason));
+    exec.mockImplementation(async (file, args) => {
+      const command = [file, ...args].join(' ');
+
+      if (command === 'git add package.json') {
+        throw new Error(reason);
+      }
+    });
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
@@ -231,12 +237,13 @@ describe('Tag should reject early with error', () => {
 
     const reason = 'An error occurred executing git commit';
 
-    exec
-      .mockResolvedValueOnce('package.json staged successfully')
-      .mockResolvedValueOnce('CHANGELOG.md staged successfully')
-      .mockResolvedValueOnce('package-lock.json staged successfully')
-      .mockResolvedValueOnce('npm-shrinkwrap.json staged successfully')
-      .mockRejectedValueOnce(new Error(reason));
+    exec.mockImplementation(async (file, args) => {
+      const command = [file, ...args].join(' ');
+
+      if (command.startsWith('git commit')) {
+        throw new Error(reason);
+      }
+    });
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
@@ -255,13 +262,13 @@ describe('Tag should reject early with error', () => {
 
     const reason = 'An error occurred executing git tag';
 
-    exec
-      .mockResolvedValueOnce('package.json staged successfully')
-      .mockResolvedValueOnce('CHANGELOG.md staged successfully')
-      .mockResolvedValueOnce('package-lock.json staged successfully')
-      .mockResolvedValueOnce('npm-shrinkwrap.json staged successfully')
-      .mockResolvedValueOnce('commit changes successfully')
-      .mockRejectedValueOnce(new Error(reason));
+    exec.mockImplementation(async (file, args) => {
+      const command = [file, ...args].join(' ');
+
+      if (command.startsWith('git tag')) {
+        throw new Error(reason);
+      }
+    });
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
