@@ -1,5 +1,6 @@
 const {
   isGiven,
+  isNotGiven,
   isNotString,
   isNotHashOrTag,
   isNotSemverReleaseType,
@@ -37,6 +38,39 @@ describe('Call of isGiven(value)', () => {
     expect(isGiven(null)).toBe(false);
     expect(isGiven(undefined)).toBe(false);
     expect(isGiven()).toBe(false);
+  });
+});
+
+describe('Call of isNotGiven(value)', () => {
+  test('should return false for any value except null and undefined', () => {
+    expect.assertions(14);
+
+    expect(isNotGiven('str')).toBe(false);
+    expect(isNotGiven('')).toBe(false);
+
+    expect(isNotGiven(123)).toBe(false);
+    expect(isNotGiven(0)).toBe(false);
+    expect(isNotGiven(-0)).toBe(false);
+    expect(isNotGiven(0n)).toBe(false);
+    expect(isNotGiven(NaN)).toBe(false);
+    expect(isNotGiven(Infinity)).toBe(false);
+
+    expect(isNotGiven(true)).toBe(false);
+    expect(isNotGiven(false)).toBe(false);
+
+    expect(isNotGiven([])).toBe(false);
+    expect(isNotGiven({})).toBe(false);
+    expect(isNotGiven(Symbol('s'))).toBe(false);
+
+    expect(isNotGiven(() => {})).toBe(false);
+  });
+
+  test('should return true for value equal to null or undefined', () => {
+    expect.assertions(3);
+
+    expect(isNotGiven(null)).toBe(true);
+    expect(isNotGiven(undefined)).toBe(true);
+    expect(isNotGiven()).toBe(true);
   });
 });
 
