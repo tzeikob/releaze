@@ -73,14 +73,14 @@ describe('Bump called with any valid semver release type should', () => {
     const error = new Error("ENOENT: no such file or directory, open '*.json'");
     error.code = 'ENOENT';
 
-    readFile.mockImplementation((filepath) => {
+    readFile.mockImplementation(async (filepath) => {
       switch (filepath) {
         case 'package.json':
-          return Promise.resolve('{"version": "0.1.1"}');
+          return '{"version": "0.1.1"}';
         case 'package-lock.json':
         case 'npm-shrinkwrap.json':
         default:
-          return Promise.reject(error);
+          throw error;
       }
     });
 
