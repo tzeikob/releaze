@@ -5,7 +5,10 @@ const {
   isNotHashOrTag,
   isNotSemverReleaseType,
   isNotSemver,
-  isNotArray
+  isNotArray,
+  isNotBoolean,
+  isNullish,
+  isEmptyString
 } = require('../lib/util/validators');
 
 describe('Call of isGiven(value)', () => {
@@ -336,5 +339,92 @@ describe('Call of isNotArray(value) should', () => {
     expect(isNotArray(['a', 'b', 'c'])).toBe(false);
     expect(isNotArray([1])).toBe(false);
     expect(isNotArray([[1],[2]])).toBe(false);
+  });
+});
+
+describe('Call of isNotBoolean(value) should', () => {
+  test('return true for any value except true or false', () => {
+    expect.assertions(12);
+
+    expect(isNotBoolean(123)).toBe(true);
+    expect(isNotBoolean(NaN)).toBe(true);
+    expect(isNotBoolean(Infinity)).toBe(true);
+
+    expect(isNotBoolean({})).toBe(true);
+    expect(isNotBoolean([])).toBe(true);
+    expect(isNotBoolean(Symbol('s'))).toBe(true);
+
+    expect(isNotBoolean(() => {})).toBe(true);
+
+    expect(isNotBoolean(null)).toBe(true);
+    expect(isNotBoolean(undefined)).toBe(true);
+
+    expect(isNotBoolean('')).toBe(true);
+    expect(isNotBoolean('true')).toBe(true);
+    expect(isNotBoolean('false')).toBe(true);
+  });
+
+  test('return false for the values true and false', () => {
+    expect.assertions(2);
+
+    expect(isNotBoolean(true)).toBe(false);
+    expect(isNotBoolean(false)).toBe(false);
+  });
+});
+
+describe('Call of isNullish(value) should', () => {
+  test('return true for a value equal to null or undefined', () => {
+    expect.assertions(2);
+
+    expect(isNullish(null)).toBe(true);
+    expect(isNullish(undefined)).toBe(true);
+  });
+
+  test('return false for any value except null or undefined', () => {
+    expect.assertions(12);
+
+    expect(isNullish(123)).toBe(false);
+    expect(isNullish(NaN)).toBe(false);
+    expect(isNullish(Infinity)).toBe(false);
+
+    expect(isNullish(true)).toBe(false);
+    expect(isNullish(false)).toBe(false);
+
+    expect(isNullish({})).toBe(false);
+    expect(isNullish([])).toBe(false);
+    expect(isNullish(Symbol('s'))).toBe(false);
+
+    expect(isNullish(() => {})).toBe(false);
+
+    expect(isNullish('')).toBe(false);
+    expect(isNullish('null')).toBe(false);
+    expect(isNullish('undefined')).toBe(false);
+  });
+});
+
+describe('Call of isEmptyString(value) should', () => {
+  test('return true for an empty string value only', () => {
+    expect.assertions(1);
+
+    expect(isEmptyString('')).toBe(true);
+  });
+
+  test('return false for a non empty string value', () => {
+    expect.assertions(10);
+
+    expect(isEmptyString(123)).toBe(false);
+    expect(isEmptyString(NaN)).toBe(false);
+    expect(isEmptyString(Infinity)).toBe(false);
+
+    expect(isEmptyString(true)).toBe(false);
+    expect(isEmptyString(false)).toBe(false);
+
+    expect(isEmptyString({})).toBe(false);
+    expect(isEmptyString([])).toBe(false);
+    expect(isEmptyString(Symbol('s'))).toBe(false);
+
+    expect(isEmptyString(() => {})).toBe(false);
+
+    expect(isEmptyString('hello')).toBe(false);
   });
 });
