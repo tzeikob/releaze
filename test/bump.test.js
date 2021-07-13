@@ -1,12 +1,12 @@
+const fs = require('fs');
+const bump = require('../lib/bump');
+
 jest.mock('fs', () => ({
   promises: {
     readFile: jest.fn().mockResolvedValue(),
     writeFile: jest.fn().mockResolvedValue(),
   }
 }));
-
-const fs = require('fs');
-const bump = require('../lib/bump');
 
 const { readFile, writeFile } = fs.promises;
 const { any } = expect;

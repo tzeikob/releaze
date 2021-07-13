@@ -1,13 +1,13 @@
+const fs = require('fs');
+const path = require('path');
+const changelog = require('../lib/changelog');
+
 jest.mock('fs', () => ({
   promises: {
     readFile: jest.fn().mockResolvedValue(),
     writeFile: jest.fn().mockResolvedValue(),
   }
 }));
-
-const fs = require('fs');
-const path = require('path');
-const changelog = require('../lib/changelog');
 
 const { readFile, writeFile } = fs.promises;
 

@@ -1,3 +1,6 @@
+const { execFile } = require('child_process');
+const log = require('../lib/log.js');
+
 jest.mock('util', () => ({
   promisify: jest.fn().mockImplementation((fn) => fn)
 }));
@@ -5,9 +8,6 @@ jest.mock('util', () => ({
 jest.mock('child_process', () => ({
   execFile: jest.fn().mockResolvedValue()
 }));
-
-const { execFile } = require('child_process');
-const log = require('../lib/log.js');
 
 afterEach(() => {
   execFile.mockReset();
