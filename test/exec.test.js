@@ -15,7 +15,7 @@ describe('Exec should reject with an error', () => {
 
     await (expect(exec())).rejects.toThrow(reason);
 
-    expect(execFile).toHaveBeenCalledTimes(0);
+    expect(execFile).toBeCalledTimes(0);
   });
 
   test('early when called with invalid non string `file` argument', async () => {
@@ -33,7 +33,7 @@ describe('Exec should reject with an error', () => {
     await (expect(exec(Symbol('s')))).rejects.toThrow(reason);
     await (expect(exec(() => {}))).rejects.toThrow(reason);
 
-    expect(execFile).toHaveBeenCalledTimes(0);
+    expect(execFile).toBeCalledTimes(0);
   });
 
   test('early when called with invalid non array `args` argument', async () => {
@@ -49,7 +49,7 @@ describe('Exec should reject with an error', () => {
     await (expect(exec('ls', Symbol('s')))).rejects.toThrow(reason);
     await (expect(exec('ls', () => {}))).rejects.toThrow(reason);
 
-    expect(execFile).toHaveBeenCalledTimes(0);
+    expect(execFile).toBeCalledTimes(0);
   });
 
   test('when `child_process/execFile` calls back with a fatal error', async () => {
@@ -81,7 +81,7 @@ describe('Exec should resolve', () => {
 
     await exec('node', ['-version']);
 
-    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toBeCalledTimes(1);
   });
 
   test('calling `child_process/execFile` with the given file, args and an internal callback', async () => {
@@ -91,7 +91,7 @@ describe('Exec should resolve', () => {
 
     await exec('node', ['-version']);
 
-    expect(execFile).toHaveBeenCalledWith('node', ['-version'], expect.any(Function));
+    expect(execFile).toBeCalledWith('node', ['-version'], expect.any(Function));
   });
 
   test('with the `stdout` value the `child_process/execFile` calls back', async () => {

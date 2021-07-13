@@ -26,8 +26,8 @@ describe('Changelog should reject with an error', () => {
 
     await expect(changelog()).rejects.toThrow(reason);
 
-    expect(readFile).toHaveBeenCalledTimes(0);
-    expect(writeFile).toHaveBeenCalledTimes(0);
+    expect(readFile).toBeCalledTimes(0);
+    expect(writeFile).toBeCalledTimes(0);
   });
 
   test('when called with invalid non-string `version` argument', async () => {
@@ -44,8 +44,8 @@ describe('Changelog should reject with an error', () => {
     await expect(changelog(() => {})).rejects.toThrow(reason);
     await expect(changelog(null)).rejects.toThrow(reason);
 
-    expect(readFile).toHaveBeenCalledTimes(0);
-    expect(writeFile).toHaveBeenCalledTimes(0);
+    expect(readFile).toBeCalledTimes(0);
+    expect(writeFile).toBeCalledTimes(0);
   });
 
   test('when called with no `logs` argument', async () => {
@@ -55,8 +55,8 @@ describe('Changelog should reject with an error', () => {
 
     await expect(changelog('v1.0.0')).rejects.toThrow(reason);
 
-    expect(readFile).toHaveBeenCalledTimes(0);
-    expect(writeFile).toHaveBeenCalledTimes(0);
+    expect(readFile).toBeCalledTimes(0);
+    expect(writeFile).toBeCalledTimes(0);
   });
 
   test('when called with invalid `logs` argument', async () => {
@@ -74,8 +74,8 @@ describe('Changelog should reject with an error', () => {
     await expect(changelog('v1.0.0', () => {})).rejects.toThrow(reason);
     await expect(changelog('v1.0.0', null)).rejects.toThrow(reason);
 
-    expect(readFile).toHaveBeenCalledTimes(0);
-    expect(writeFile).toHaveBeenCalledTimes(0);
+    expect(readFile).toBeCalledTimes(0);
+    expect(writeFile).toBeCalledTimes(0);
   });
 
   test('when called with `logs` argument given as an empty array', async () => {
@@ -85,8 +85,8 @@ describe('Changelog should reject with an error', () => {
 
     await expect(changelog('v1.0.0', [])).rejects.toThrow(reason);
 
-    expect(readFile).toHaveBeenCalledTimes(0);
-    expect(writeFile).toHaveBeenCalledTimes(0);
+    expect(readFile).toBeCalledTimes(0);
+    expect(writeFile).toBeCalledTimes(0);
   });
 
   test('when reading from `CHANGELOG.md` failed with a fatal reason', async () => {
@@ -94,7 +94,7 @@ describe('Changelog should reject with an error', () => {
 
     const error = new Error('Unknown fatal error occurred reading from CHANGELOG.md');
 
-    readFile.mockReturnValue(Promise.reject(error));
+    readFile.mockRejectedValue(error);
 
     await expect(changelog('v1.0.0', ['log1', 'log2'])).rejects.toThrow(error);
   });
@@ -107,31 +107,31 @@ describe('Changelog called with valid `version` and `logs` should', () => {
     const error = new Error("ENOENT: no such file or directory, open 'CHANGELOG.md'");
     error.code = 'ENOENT';
 
-    readFile.mockReturnValue(Promise.reject(error));
-    writeFile.mockReturnValue(Promise.resolve());
+    readFile.mockRejectedValue(error);
+    writeFile.mockResolvedValue();
 
     await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toBeUndefined();
 
-    expect(readFile).toHaveBeenCalledTimes(1);
-    expect(readFile).toHaveBeenCalledWith(pathToChangelogMD, 'utf8');
+    expect(readFile).toBeCalledTimes(1);
+    expect(readFile).toBeCalledWith(pathToChangelogMD, 'utf8');
 
-    expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(pathToChangelogMD, expect.any(String));
+    expect(writeFile).toBeCalledTimes(1);
+    expect(writeFile).toBeCalledWith(pathToChangelogMD, expect.any(String));
   });
 
   test('write once to the existing `CHANGELOG.md` file if such already exists', async () => {
     expect.assertions(5);
     
-    readFile.mockReturnValue(Promise.resolve('log1'));
-    writeFile.mockReturnValue(Promise.resolve());
+    readFile.mockResolvedValue('log1');
+    writeFile.mockResolvedValue();
 
     await expect(changelog('v1.0.0', ['log2', 'log3'])).resolves.toBeUndefined();
 
-    expect(readFile).toHaveBeenCalledTimes(1);
-    expect(readFile).toHaveBeenCalledWith(pathToChangelogMD, 'utf8');
+    expect(readFile).toBeCalledTimes(1);
+    expect(readFile).toBeCalledWith(pathToChangelogMD, 'utf8');
 
-    expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(pathToChangelogMD, expect.any(String));
+    expect(writeFile).toBeCalledTimes(1);
+    expect(writeFile).toBeCalledWith(pathToChangelogMD, expect.any(String));
   });
 
   test('write the logs to a new `CHANGELOG.md` in the correct format', async () => {
@@ -140,8 +140,8 @@ describe('Changelog called with valid `version` and `logs` should', () => {
     const error = new Error("ENOENT: no such file or directory, open 'CHANGELOG.md'");
     error.code = 'ENOENT';
 
-    readFile.mockReturnValue(Promise.reject(error));
-    writeFile.mockReturnValue(Promise.resolve());
+    readFile.mockRejectedValue(error);
+    writeFile.mockResolvedValue();
 
     const logs = [
       '54ff0cd Restrict bump release types to lowercase only',
@@ -156,8 +156,8 @@ describe('Changelog called with valid `version` and `logs` should', () => {
       '* d41ab22 Accept alias HEAD as input to the log op'
     ].join('\n');
 
-    expect(writeFile).toHaveBeenCalledWith(pathToChangelogMD, `${content}`);
-    expect(writeFile).toHaveBeenCalledTimes(1);
+    expect(writeFile).toBeCalledWith(pathToChangelogMD, `${content}`);
+    expect(writeFile).toBeCalledTimes(1);
   });
 
   test('append the logs on top of an existing `CHANGELOG.md` in the correct format', async () => {
@@ -169,8 +169,8 @@ describe('Changelog called with valid `version` and `logs` should', () => {
       '* 3b5b25f Refactor log tests to assert with toThrow instead'
     ].join('\n');
 
-    readFile.mockReturnValue(Promise.resolve(oldContent));
-    writeFile.mockReturnValue(Promise.resolve());
+    readFile.mockResolvedValue(oldContent);
+    writeFile.mockResolvedValue();
 
     const logs = [
       '54ff0cd Restrict bump release types to lowercase only',
@@ -185,7 +185,7 @@ describe('Changelog called with valid `version` and `logs` should', () => {
       '* d41ab22 Accept alias HEAD as input to the log op'
     ].join('\n');
 
-    expect(writeFile).toHaveBeenCalledWith(pathToChangelogMD, `${newContent}\n${oldContent}`);
-    expect(writeFile).toHaveBeenCalledTimes(1);
+    expect(writeFile).toBeCalledWith(pathToChangelogMD, `${newContent}\n${oldContent}`);
+    expect(writeFile).toBeCalledTimes(1);
   });
 });

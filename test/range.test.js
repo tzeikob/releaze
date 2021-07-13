@@ -27,7 +27,7 @@ describe('Range should reject with error', () => {
     await expect(range(Symbol('s'))).rejects.toThrow(reason);
     await expect(range(() => {})).rejects.toThrow(reason);
 
-    expect(execFile).toHaveBeenCalledTimes(0);
+    expect(execFile).toBeCalledTimes(0);
   });
 
   test('very early when running within a no git repository', async () => {
@@ -35,12 +35,12 @@ describe('Range should reject with error', () => {
 
     const error = new Error('fatal: not a git repository (or any of the parent directories): .git');
 
-    execFile.mockReturnValue(Promise.reject(error));
+    execFile.mockRejectedValue(error);
 
     await expect(range()).rejects.toThrow(error);
 
-    expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['tag']);
+    expect(execFile).toBeCalledTimes(1);
+    expect(execFile).toBeCalledWith('git', ['tag']);
   });
 
   test('when git tag process returns a stderr as Error', async () => {
@@ -48,12 +48,12 @@ describe('Range should reject with error', () => {
 
     const error = new Error('A stderr occurred');
 
-    execFile.mockReturnValue(Promise.resolve({ stderr: error }));
+    execFile.mockResolvedValue({ stderr: error });
 
     await expect(range()).rejects.toThrow(`Error: ${error.message}`);
 
-    expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['tag']);
+    expect(execFile).toBeCalledTimes(1);
+    expect(execFile).toBeCalledWith('git', ['tag']);
   });
 
   test('when git tag process returns a stderr as a non Error', async () => {
@@ -61,12 +61,12 @@ describe('Range should reject with error', () => {
 
     const reason = 'A stderr occurred';
 
-    execFile.mockReturnValue(Promise.resolve({ stderr: reason }));
+    execFile.mockResolvedValue({ stderr: reason });
 
     await expect(range()).rejects.toThrow(reason);
 
-    expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['tag']);
+    expect(execFile).toBeCalledTimes(1);
+    expect(execFile).toBeCalledWith('git', ['tag']);
   });
 
   test('when git tag process throws a fatal Error', async () => {
@@ -74,12 +74,12 @@ describe('Range should reject with error', () => {
 
     const error = new Error('A fatal error occurred');
 
-    execFile.mockReturnValue(Promise.reject(error));
+    execFile.mockRejectedValue(error);
 
     await expect(range()).rejects.toThrow(error);
 
-    expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['tag']);
+    expect(execFile).toBeCalledTimes(1);
+    expect(execFile).toBeCalledWith('git', ['tag']);
   });
 });
 
@@ -87,12 +87,12 @@ describe('Range should spawn once a `git tag` process', () => {
   test('with no further arguments', async () => {
     expect.assertions(3);
   
-    execFile.mockReturnValue(Promise.resolve({ stdout: '' }));
+    execFile.mockResolvedValue({ stdout: '' });
   
     await expect(range()).resolves.toBeDefined();
   
-    expect(execFile).toHaveBeenCalledTimes(1);
-    expect(execFile).toHaveBeenCalledWith('git', ['tag']);
+    expect(execFile).toBeCalledTimes(1);
+    expect(execFile).toBeCalledWith('git', ['tag']);
   });
 });
 
@@ -100,7 +100,7 @@ describe('Range called for a stable release should resolve to', () => {
   test('an empty range object in case no tags found in the repository', async () => {
     expect.assertions(1);
 
-    execFile.mockReturnValue(Promise.resolve({ stdout: '' }));
+    execFile.mockResolvedValue({ stdout: '' });
 
     await expect(range()).resolves.toEqual({});
   });
@@ -109,22 +109,22 @@ describe('Range called for a stable release should resolve to', () => {
     expect.assertions(4);
 
     let tags = ['v1.0.0', 'v1.1.0-rc.0', 'v1.1.0-rc.1', 'v1.1.0'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
 
     tags = ['v1.0.0', 'v1.1.0-rc.0', 'v1.1.0-rc.1', 'v1.1.0', 'v1.2.0-rc.0'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
 
     tags = ['v1.1.0', 'v1.2.0-rc.0', 'v1.2.0-rc.1', 'v1.2.0-rc.2'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
 
     tags = ['v1.0.0', 'v1.1.0-rc.0', 'v1.1.0', 'v1.2.0-rc.0', 'v1.2.0-rc.1'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
   });
@@ -133,7 +133,7 @@ describe('Range called for a stable release should resolve to', () => {
     expect.assertions(1);
 
     let tags = ['v1.1.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
   });
@@ -142,7 +142,7 @@ describe('Range called for a stable release should resolve to', () => {
     expect.assertions(1);
 
     let tags = ['v1.1.0', 'exp-0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1', 'stable'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
   });
@@ -152,7 +152,7 @@ describe('Range called for a prerelease release should resolve to', () => {
   test('an empty range object in case no tags found in the repository', async () => {
     expect.assertions(1);
 
-    execFile.mockReturnValue(Promise.resolve({ stdout: '' }));
+    execFile.mockResolvedValue({ stdout: '' });
 
     await expect(range(true)).resolves.toEqual({});
   });
@@ -161,22 +161,22 @@ describe('Range called for a prerelease release should resolve to', () => {
     expect.assertions(4);
 
     let tags = ['v1.0.0', 'v1.1.0-rc.0', 'v1.1.0-rc.1', 'v1.1.0'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range(true)).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
 
     tags = ['v1.0.0', 'v1.1.0-rc.0', 'v1.1.0-rc.1', 'v1.1.0', 'v1.2.0-rc.0'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range(true)).resolves.toEqual({ from: 'v1.2.0-rc.0', to: 'HEAD' });
 
     tags = ['v1.1.0', 'v1.2.0-rc.0', 'v1.2.0-rc.1', 'v1.2.0-rc.2'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range(true)).resolves.toEqual({ from: 'v1.2.0-rc.2', to: 'HEAD' });
 
     tags = ['v1.0.0', 'v1.1.0-rc.0', 'v1.1.0', 'v1.2.0-rc.0', 'v1.2.0-rc.1'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range(true)).resolves.toEqual({ from: 'v1.2.0-rc.1', to: 'HEAD' });
   });
@@ -185,7 +185,7 @@ describe('Range called for a prerelease release should resolve to', () => {
     expect.assertions(1);
 
     let tags = ['v1.1.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range(true)).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
   });
@@ -194,7 +194,7 @@ describe('Range called for a prerelease release should resolve to', () => {
     expect.assertions(1);
 
     let tags = ['v1.1.0', 'exp-0', 'v1.2.0-alpha.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1', 'stable'];
-    execFile.mockReturnValue(Promise.resolve({ stdout: tags.join('\n') }));
+    execFile.mockResolvedValue({ stdout: tags.join('\n') });
 
     await expect(range(true)).resolves.toEqual({ from: 'v1.2.0-alpha.0', to: 'HEAD' });
   });
