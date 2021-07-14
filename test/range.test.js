@@ -1,16 +1,20 @@
 const exec = require('../lib/util/exec');
 const range = require('../lib/range');
 
-jest.mock('../lib/util/exec', () => jest.fn().mockResolvedValue());
+jest.mock('../lib/util/exec');
 
 const { any } = expect;
+
+beforeEach(() => {
+  exec.mockResolvedValue();
+})
 
 afterEach(() => {
   exec.mockReset();
 });
 
-describe('Range should resolve', () => {
-  test('getting as input an optional boolean arg named prerelease', async () => {
+describe('Range should be an async operation', () => {
+  test('getting as input an optional isPrerelease boolean arg', async () => {
     expect.assertions(3);
 
     await expect(range()).resolves.toBeDefined();
@@ -18,7 +22,7 @@ describe('Range should resolve', () => {
     await expect(range(true)).resolves.toBeDefined();
   });
 
-  test('having as resolved value an object with schema `{ from, to }`', async () => {
+  test('resolving to an object with schema `{ from, to }`', async () => {
     expect.assertions(1);
 
     await expect(range()).resolves.toMatchObject({

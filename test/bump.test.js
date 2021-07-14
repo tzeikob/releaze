@@ -3,21 +3,53 @@ const bump = require('../lib/bump');
 
 jest.mock('fs', () => ({
   promises: {
-    readFile: jest.fn().mockResolvedValue(),
-    writeFile: jest.fn().mockResolvedValue(),
+    readFile: jest.fn(),
+    writeFile: jest.fn()
   }
 }));
 
 const { readFile, writeFile } = fs.promises;
 const { any } = expect;
 
+beforeEach(() => {
+  readFile.mockResolvedValue('{"version": "0.1.1"}');
+  writeFile.mockResolvedValue();
+});
+
 afterEach(() => {
   readFile.mockReset();
   writeFile.mockReset();
 });
 
-describe('Bump called with any valid semver release type should', () => {
-  test('read first the current version from the package.json file', async () => {
+describe('Bump should by an async operation', () => {
+  test('getting as input any semver stable release type', async () => {
+    expect.assertions(3);
+
+    await expect(bump('major')).resolves.toBeDefined();
+    await expect(bump('minor')).resolves.toBeDefined();
+    await expect(bump('patch')).resolves.toBeDefined();
+  });
+
+  test('getting as input any semver prerelease release type along with its preid', async () => {
+    expect.assertions(4);
+
+    await expect(bump('premajor', 'alpha')).resolves.toBeDefined();
+    await expect(bump('preminor', 'alpha')).resolves.toBeDefined();
+    await expect(bump('prepatch', 'alpha')).resolves.toBeDefined();
+    await expect(bump('prerelease', 'alpha')).resolves.toBeDefined();
+  });
+
+  test('resolving to an object with schema equal to `{ current, next, isPrerelease }`', async () => {
+    expect.assertions(1);
+
+    await expect(bump('major')).resolves.toMatchObject({
+      current: any(String),
+      next: any(String),
+      isPrerelease: any(Boolean)
+    });
+  });
+
+  test('reading first the current version from the package.json file', async () => {
     expect.assertions(2);
 
     readFile.mockResolvedValue('{"version": "0.1.1"}');
@@ -27,7 +59,7 @@ describe('Bump called with any valid semver release type should', () => {
     expect(readFile).nthCalledWith(1, 'package.json', 'utf8');
   });
 
-  test('clean versions given in prefixed `v0.1.1` form to `0.1.1`', async () => {
+  test('cleaning semver versions given in prefixed `v0.1.1` form to `0.1.1`', async () => {
     expect.assertions(1);
 
     readFile.mockResolvedValue('{"version": "v0.1.1"}');
@@ -35,7 +67,7 @@ describe('Bump called with any valid semver release type should', () => {
     await expect(bump('major')).resolves.toMatchObject({ current: '0.1.1' });
   });
 
-  test('resolve the next version with respect to release type and current version', async () => {
+  test('resolving the next version with respect to release type and current version', async () => {
     expect.assertions(1);
 
     readFile.mockResolvedValue('{"version": "0.1.1"}');
@@ -43,7 +75,15 @@ describe('Bump called with any valid semver release type should', () => {
     await expect(bump('major')).resolves.toMatchObject({ next: '1.0.0' });
   });
 
-  test('update the prop version in package.json file with the next version', async () => {
+  test('resolving if the type of release is prerelease or not (stable)', async () => {
+    expect.assertions(1);
+
+    readFile.mockResolvedValue('{"version": "0.1.1"}');
+
+    await expect(bump('prerelease')).resolves.toMatchObject({ isPrerelease: true });
+  });
+
+  test('updating the prop version in package.json file with the next version', async () => {
     expect.assertions(2);
 
     readFile.mockResolvedValue('{"version": "0.1.1"}');
@@ -53,7 +93,7 @@ describe('Bump called with any valid semver release type should', () => {
     expect(writeFile).toBeCalledWith('package.json', '{\n  "version": "1.0.0"\n}\n');
   });
 
-  test('update the prop version in any package lock files if present', async () => {
+  test('updating the prop version in any package lock files if present', async () => {
     expect.assertions(5);
 
     readFile.mockResolvedValue('{"version": "0.1.1"}');
@@ -67,7 +107,7 @@ describe('Bump called with any valid semver release type should', () => {
     expect(writeFile).toBeCalledWith('npm-shrinkwrap.json', '{\n  "version": "1.0.0"\n}\n');
   });
 
-  test('avoid to update the prop version in a package lock file if not present', async () => {
+  test('avoiding to update the prop version in a package lock file if not present', async () => {
     expect.assertions(5);
 
     const error = new Error("ENOENT: no such file or directory, open '*.json'");
@@ -102,7 +142,8 @@ describe('Bump called with a major release type should', () => {
 
     await expect(bump('major')).resolves.toEqual({
       current: '0.1.1',
-      next: '1.0.0'
+      next: '1.0.0',
+      isPrerelease: false
     });
   });
 
@@ -113,7 +154,8 @@ describe('Bump called with a major release type should', () => {
 
     await expect(bump('major', 'alpha')).resolves.toEqual({
       current: '0.1.1',
-      next: '1.0.0'
+      next: '1.0.0',
+      isPrerelease: false
     });
   });
 
@@ -124,7 +166,8 @@ describe('Bump called with a major release type should', () => {
 
     await expect(bump('major')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '1.0.0'
+      next: '1.0.0',
+      isPrerelease: false
     });
   });
 
@@ -135,7 +178,8 @@ describe('Bump called with a major release type should', () => {
 
     await expect(bump('major', 'alpha')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '1.0.0'
+      next: '1.0.0',
+      isPrerelease: false
     });
   });
 });
@@ -148,7 +192,8 @@ describe('Bump called with a pre major release type should', () => {
 
     await expect(bump('premajor', 'alpha')).resolves.toEqual({
       current: '0.1.1',
-      next: '1.0.0-alpha.0'
+      next: '1.0.0-alpha.0',
+      isPrerelease: true
     });
   });
 
@@ -159,7 +204,8 @@ describe('Bump called with a pre major release type should', () => {
 
     await expect(bump('premajor')).resolves.toEqual({
       current: '0.1.1',
-      next: '1.0.0-0'
+      next: '1.0.0-0',
+      isPrerelease: true
     });
   });
 
@@ -170,7 +216,8 @@ describe('Bump called with a pre major release type should', () => {
 
     await expect(bump('premajor', 'alpha')).resolves.toEqual({
       current: '0.1.1-alpha.0',
-      next: '1.0.0-alpha.0'
+      next: '1.0.0-alpha.0',
+      isPrerelease: true
     });
   });
 
@@ -181,7 +228,8 @@ describe('Bump called with a pre major release type should', () => {
 
     await expect(bump('premajor')).resolves.toEqual({
       current: '0.1.1-alpha.0',
-      next: '1.0.0-0'
+      next: '1.0.0-0',
+      isPrerelease: true
     });
   });
 });
@@ -194,7 +242,8 @@ describe('Bump called with a minor release type should', () => {
 
     await expect(bump('minor')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.2.0'
+      next: '0.2.0',
+      isPrerelease: false
     });
   });
 
@@ -205,7 +254,8 @@ describe('Bump called with a minor release type should', () => {
 
     await expect(bump('minor', 'alpha')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.2.0'
+      next: '0.2.0',
+      isPrerelease: false
     });
   });
 
@@ -216,7 +266,8 @@ describe('Bump called with a minor release type should', () => {
 
     await expect(bump('minor')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '0.2.0'
+      next: '0.2.0',
+      isPrerelease: false
     });
   });
 
@@ -227,7 +278,8 @@ describe('Bump called with a minor release type should', () => {
 
     await expect(bump('minor', 'alpha')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '0.2.0'
+      next: '0.2.0',
+      isPrerelease: false
     });
   });
 });
@@ -240,7 +292,8 @@ describe('Bump called with a pre minor release type should', () => {
 
     await expect(bump('preminor', 'alpha')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.2.0-alpha.0'
+      next: '0.2.0-alpha.0',
+      isPrerelease: true
     });
   });
 
@@ -251,7 +304,8 @@ describe('Bump called with a pre minor release type should', () => {
 
     await expect(bump('preminor')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.2.0-0'
+      next: '0.2.0-0',
+      isPrerelease: true
     });
   });
 
@@ -262,7 +316,8 @@ describe('Bump called with a pre minor release type should', () => {
 
     await expect(bump('preminor', 'alpha')).resolves.toEqual({
       current: '0.1.1-alpha.0',
-      next: '0.2.0-alpha.0'
+      next: '0.2.0-alpha.0',
+      isPrerelease: true
     });
   });
 
@@ -273,7 +328,8 @@ describe('Bump called with a pre minor release type should', () => {
 
     await expect(bump('preminor')).resolves.toEqual({
       current: '0.1.1-alpha.0',
-      next: '0.2.0-0'
+      next: '0.2.0-0',
+      isPrerelease: true
     });
   });
 });
@@ -286,7 +342,8 @@ describe('Bump called with a patch release type should', () => {
 
     await expect(bump('patch')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.1.2'
+      next: '0.1.2',
+      isPrerelease: false
     });
   });
 
@@ -297,7 +354,8 @@ describe('Bump called with a patch release type should', () => {
 
     await expect(bump('patch', 'alpha')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.1.2'
+      next: '0.1.2',
+      isPrerelease: false
     });
   });
 
@@ -308,7 +366,8 @@ describe('Bump called with a patch release type should', () => {
 
     await expect(bump('patch')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '0.1.1'
+      next: '0.1.1',
+      isPrerelease: false
     });
   });
 
@@ -319,7 +378,8 @@ describe('Bump called with a patch release type should', () => {
 
     await expect(bump('patch', 'alpha')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '0.1.1'
+      next: '0.1.1',
+      isPrerelease: false
     });
   });
 });
@@ -332,7 +392,8 @@ describe('Bump called with a pre patch release type should', () => {
 
     await expect(bump('prepatch', 'alpha')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.1.2-alpha.0'
+      next: '0.1.2-alpha.0',
+      isPrerelease: true
     });
   });
 
@@ -343,7 +404,8 @@ describe('Bump called with a pre patch release type should', () => {
 
     await expect(bump('prepatch')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.1.2-0'
+      next: '0.1.2-0',
+      isPrerelease: true
     });
   });
 
@@ -354,7 +416,8 @@ describe('Bump called with a pre patch release type should', () => {
 
     await expect(bump('prepatch', 'alpha')).resolves.toEqual({
       current: '0.1.1-alpha.0',
-      next: '0.1.2-alpha.0'
+      next: '0.1.2-alpha.0',
+      isPrerelease: true
     });
   });
 
@@ -365,7 +428,8 @@ describe('Bump called with a pre patch release type should', () => {
 
     await expect(bump('prepatch')).resolves.toEqual({
       current: '0.1.1-alpha.0',
-      next: '0.1.2-0'
+      next: '0.1.2-0',
+      isPrerelease: true
     });
   });
 });
@@ -378,7 +442,8 @@ describe('Bump called with a pre release type should', () => {
 
     await expect(bump('prerelease')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.1.2-0'
+      next: '0.1.2-0',
+      isPrerelease: true
     });
   });
 
@@ -389,7 +454,8 @@ describe('Bump called with a pre release type should', () => {
 
     await expect(bump('prerelease', 'alpha')).resolves.toEqual({
       current: '0.1.1',
-      next: '0.1.2-alpha.0'
+      next: '0.1.2-alpha.0',
+      isPrerelease: true
     });
   });
 
@@ -400,7 +466,8 @@ describe('Bump called with a pre release type should', () => {
 
     await expect(bump('prerelease')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '0.1.1-alpha.2'
+      next: '0.1.1-alpha.2',
+      isPrerelease: true
     });
   });
 
@@ -411,7 +478,8 @@ describe('Bump called with a pre release type should', () => {
 
     await expect(bump('prerelease', 'alpha')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '0.1.1-alpha.2'
+      next: '0.1.1-alpha.2',
+      isPrerelease: true
     });
   });
 
@@ -422,7 +490,8 @@ describe('Bump called with a pre release type should', () => {
 
     await expect(bump('prerelease', 'beta')).resolves.toEqual({
       current: '0.1.1-alpha.1',
-      next: '0.1.1-beta.0'
+      next: '0.1.1-beta.0',
+      isPrerelease: true
     });
   });
 });
