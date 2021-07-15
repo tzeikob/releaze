@@ -219,7 +219,7 @@ describe('Call of isNotSemverReleaseType(value)', () => {
   });
 
   test('should return true for any value except `(pre)major`, `(pre)minor`, `(pre)patch` and prerelease', () => {
-    expect.assertions(26);
+    expect.assertions(30);
 
     expect(isNotSemverReleaseType()).toBe(true);
     expect(isNotSemverReleaseType(null)).toBe(true);
@@ -247,15 +247,19 @@ describe('Call of isNotSemverReleaseType(value)', () => {
     expect(isNotSemverReleaseType('pat')).toBe(true);
 
     expect(isNotSemverReleaseType('MAJOR')).toBe(true);
+    expect(isNotSemverReleaseType('major major')).toBe(true);
     expect(isNotSemverReleaseType('PREMAJOR')).toBe(true);
 
     expect(isNotSemverReleaseType('MINOR')).toBe(true);
+    expect(isNotSemverReleaseType('minor minor')).toBe(true);
     expect(isNotSemverReleaseType('PREMINOR')).toBe(true);
 
     expect(isNotSemverReleaseType('PATCH')).toBe(true);
+    expect(isNotSemverReleaseType('patch patch')).toBe(true);
     expect(isNotSemverReleaseType('PREPATCH')).toBe(true);
 
     expect(isNotSemverReleaseType('PRERELEASE')).toBe(true);
+    expect(isNotSemverReleaseType('prerelease prerelease')).toBe(true);
   });
 });
 

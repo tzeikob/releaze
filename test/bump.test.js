@@ -509,7 +509,7 @@ describe('Bump should reject with error', () => {
   });
 
   test('when called with not valid release type argument', async () => {
-    expect.assertions(11);
+    expect.assertions(15);
 
     const reason = 'Invalid or missing semver release type argument';
 
@@ -522,6 +522,11 @@ describe('Bump should reject with error', () => {
     await expect(bump('PATCH')).rejects.toThrow(reason);
     await expect(bump('PREPATCH')).rejects.toThrow(reason);
     await expect(bump('PRERELEASE')).rejects.toThrow(reason);
+
+    await expect(bump('major major')).rejects.toThrow(reason);
+    await expect(bump('minor minor')).rejects.toThrow(reason);
+    await expect(bump('patch patch')).rejects.toThrow(reason);
+    await expect(bump('prerelease prerelease')).rejects.toThrow(reason);
 
     expect(readFile).toBeCalledTimes(0);
     expect(writeFile).toBeCalledTimes(0);
