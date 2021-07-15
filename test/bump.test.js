@@ -39,6 +39,41 @@ describe('Bump should by an async operation', () => {
     await expect(bump('prerelease', 'alpha')).resolves.toBeDefined();
   });
 
+  test('where the release type arg should always be given', async () => {
+    expect.assertions(3);
+
+    const reason = 'Invalid or missing semver release type argument';
+
+    await expect(bump()).rejects.toThrow(reason);
+
+    expect(readFile).toBeCalledTimes(0);
+    expect(writeFile).toBeCalledTimes(0);
+  });
+
+  test('where the release type arg should be any (pre)major, (pre)minor, (pre)patch or prerelease value', async () => {
+    expect.assertions(15);
+
+    const reason = 'Invalid or missing semver release type argument';
+
+    await expect(bump('')).rejects.toThrow(reason);
+    await expect(bump('alpha')).rejects.toThrow(reason);
+    await expect(bump('MAJOR')).rejects.toThrow(reason);
+    await expect(bump('PREMAJOR')).rejects.toThrow(reason);
+    await expect(bump('MINOR')).rejects.toThrow(reason);
+    await expect(bump('PREMINOR')).rejects.toThrow(reason);
+    await expect(bump('PATCH')).rejects.toThrow(reason);
+    await expect(bump('PREPATCH')).rejects.toThrow(reason);
+    await expect(bump('PRERELEASE')).rejects.toThrow(reason);
+
+    await expect(bump('major major')).rejects.toThrow(reason);
+    await expect(bump('minor minor')).rejects.toThrow(reason);
+    await expect(bump('patch patch')).rejects.toThrow(reason);
+    await expect(bump('prerelease prerelease')).rejects.toThrow(reason);
+
+    expect(readFile).toBeCalledTimes(0);
+    expect(writeFile).toBeCalledTimes(0);
+  });
+
   test('resolving to an object with schema equal to `{ current, next, isPrerelease }`', async () => {
     expect.assertions(1);
 
@@ -497,41 +532,6 @@ describe('Bump called with a pre release type should', () => {
 });
 
 describe('Bump should reject with error', () => {
-  test('when called with no release type argument', async () => {
-    expect.assertions(3);
-
-    const reason = 'Invalid or missing semver release type argument';
-
-    await expect(bump()).rejects.toThrow(reason);
-
-    expect(readFile).toBeCalledTimes(0);
-    expect(writeFile).toBeCalledTimes(0);
-  });
-
-  test('when called with not valid release type argument', async () => {
-    expect.assertions(15);
-
-    const reason = 'Invalid or missing semver release type argument';
-
-    await expect(bump('')).rejects.toThrow(reason);
-    await expect(bump('alpha')).rejects.toThrow(reason);
-    await expect(bump('MAJOR')).rejects.toThrow(reason);
-    await expect(bump('PREMAJOR')).rejects.toThrow(reason);
-    await expect(bump('MINOR')).rejects.toThrow(reason);
-    await expect(bump('PREMINOR')).rejects.toThrow(reason);
-    await expect(bump('PATCH')).rejects.toThrow(reason);
-    await expect(bump('PREPATCH')).rejects.toThrow(reason);
-    await expect(bump('PRERELEASE')).rejects.toThrow(reason);
-
-    await expect(bump('major major')).rejects.toThrow(reason);
-    await expect(bump('minor minor')).rejects.toThrow(reason);
-    await expect(bump('patch patch')).rejects.toThrow(reason);
-    await expect(bump('prerelease prerelease')).rejects.toThrow(reason);
-
-    expect(readFile).toBeCalledTimes(0);
-    expect(writeFile).toBeCalledTimes(0);
-  });
-
   test('when there is no package.json file found', async () => {
     expect.assertions(4);
 
