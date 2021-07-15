@@ -2,12 +2,56 @@ const semver = require('semver');
 const exec = require('../lib/util/exec');
 const tag = require('../lib/tag.js');
 
-jest.mock('../lib/util/exec', () => jest.fn().mockResolvedValue());
+jest.mock('../lib/util/exec', () => jest.fn());
 
 const { any } = expect;
 
+beforeEach(() => {
+  exec.mockResolvedValue()
+});
+
 afterEach(() => {
   exec.mockReset();
+});
+
+describe('Tag should be an async operation', () => {
+  test('getting as input a version arg', async () => {
+    expect.assertions(1);
+
+    await expect(tag('v1.0.0')).resolves.toBeUndefined();
+  });
+
+  test('where version arg should always be given', async () => {
+    expect.assertions(2);
+
+    const reason = 'Invalid or missing semver version argument';
+
+    await expect(tag()).rejects.toThrow(reason);
+
+    expect(exec).toBeCalledTimes(0);
+  });
+
+  test('where version arg should be a valid semver version number', async () => {
+    expect.assertions(8);
+
+    const reason = 'Invalid or missing semver version argument';
+
+    await expect(tag('123')).rejects.toThrow(reason);
+    await expect(tag('1.3')).rejects.toThrow(reason);
+    await expect(tag('1.alpha.3')).rejects.toThrow(reason);
+    await expect(tag('alpha')).rejects.toThrow(reason);
+    await expect(tag('')).rejects.toThrow(reason);
+    await expect(tag(null)).rejects.toThrow(reason);
+    await expect(tag(123)).rejects.toThrow(reason);
+
+    expect(exec).toBeCalledTimes(0);
+  });
+
+  test('getting an optional message arg', async () => {
+    expect.assertions(1);
+
+    await expect(tag('v1.0.0', 'Bump to v1.0.0')).resolves.toBeUndefined();
+  });
 });
 
 describe('Tag should resolve to undefined', () => {
@@ -186,36 +230,11 @@ describe('Tag should try to create an annotation tag', () => {
   });
 });
 
-describe('Tag called with invalid input should reject early with error', () => {
-  test('when version argument is not given', async () => {
-    expect.assertions(2);
-
-    const reason = 'Invalid or missing semver version argument';
-
-    await expect(tag()).rejects.toThrow(reason);
-
-    expect(exec).toBeCalledTimes(0);
-  });
-
-  test('when invalid non semver version argument is given', async () => {
-    expect.assertions(5);
-
-    const reason = 'Invalid or missing semver version argument';
-
-    await expect(tag('123')).rejects.toThrow(reason);
-    await expect(tag('1.3')).rejects.toThrow(reason);
-    await expect(tag('1.alpha.3')).rejects.toThrow(reason);
-    await expect(tag('alpha')).rejects.toThrow(reason);
-
-    expect(exec).toBeCalledTimes(0);
-  });
-});
-
-describe('Tag should reject early with error', () => {
+describe('Tag should reject with an error', () => {
   test('when `git add package.json` throws a fatal exec error', async () => {
     expect.assertions(3);
 
-    const reason = 'Failed to stage file: package.json';
+    const reason = 'A fatal error occurred executing: git add package.json';
 
     exec.mockImplementation(async (file, args) => {
       const command = [file, ...args].join(' ');
@@ -228,14 +247,13 @@ describe('Tag should reject early with error', () => {
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
     expect(exec).toBeCalledTimes(1);
-
     expect(exec).toBeCalledWith('git', ['add', 'package.json']);
   });
 
   test('when `git commit` throws a fatal exec error', async () => {
     expect.assertions(7);
 
-    const reason = 'An error occurred executing git commit';
+    const reason = 'A fatal error occurred executing: git commit';
 
     exec.mockImplementation(async (file, args) => {
       const command = [file, ...args].join(' ');
@@ -260,7 +278,7 @@ describe('Tag should reject early with error', () => {
   test('when `git tag` throws a fatal exec error', async () => {
     expect.assertions(8);
 
-    const reason = 'An error occurred executing git tag';
+    const reason = 'A fatal error occurred executing: git tag';
 
     exec.mockImplementation(async (file, args) => {
       const command = [file, ...args].join(' ');
