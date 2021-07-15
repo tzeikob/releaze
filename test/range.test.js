@@ -6,7 +6,7 @@ jest.mock('../lib/util/exec');
 const { any } = expect;
 
 beforeEach(() => {
-  exec.mockResolvedValue();
+  exec.mockResolvedValue('v1.0.0\n1.1.0');
 })
 
 afterEach(() => {
@@ -14,12 +14,22 @@ afterEach(() => {
 });
 
 describe('Range should be an async operation', () => {
-  test('getting as input an optional isPrerelease boolean arg', async () => {
+  test('getting as input an optional isPrerelease arg', async () => {
     expect.assertions(3);
 
     await expect(range()).resolves.toBeDefined();
     await expect(range(false)).resolves.toBeDefined();
     await expect(range(true)).resolves.toBeDefined();
+  });
+
+  test('where the isPrerelease arg should be a boolean value', async () => {
+    expect.assertions(2);
+
+    const reason = 'Invalid non boolean isPrerelease argument';
+
+    await expect(range(123)).rejects.toThrow(reason);
+
+    expect(exec).toBeCalledTimes(0);
   });
 
   test('resolving to an object with schema `{ from, to }`', async () => {
@@ -42,12 +52,12 @@ describe('Range should be an async operation', () => {
 });
 
 describe('Range called for a stable release should resolve to', () => {
-  test('an empty range object in case no tags found in the repository', async () => {
+  test('a HEAD bounded range object in case no tags found in the repository', async () => {
     expect.assertions(1);
 
     exec.mockResolvedValue('');
 
-    await expect(range()).resolves.toEqual({ from: '', to: 'HEAD' });
+    await expect(range()).resolves.toEqual({ from: null, to: 'HEAD' });
   });
 
   test('a range with `from` to the last stable tag ignoring any intermediate prereleased tags', async () => {
@@ -83,7 +93,7 @@ describe('Range called for a stable release should resolve to', () => {
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
   });
 
-  test('a valid range object filtering out any tags given a not semver compatible name', async () => {
+  test('a valid range object filtering out any tags given as not semver compatible name', async () => {
     expect.assertions(1);
 
     let tags = ['v1.1.0', 'exp-0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1', 'stable'];
@@ -91,15 +101,24 @@ describe('Range called for a stable release should resolve to', () => {
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
   });
+
+  test('a HEAD bounded range when no stable tag has been found', async () => {
+    expect.assertions(1);
+
+    let tags = ['exp-0', 'exp-1', 'v1.0.0-rc.0', 'v1.0.0-rc.1', 'v1.0.0-rc.2'];
+    exec.mockResolvedValue(tags.join('\n'));
+
+    await expect(range()).resolves.toEqual({ from: null, to: 'HEAD' });
+  });
 });
 
 describe('Range called for a prerelease release should resolve to', () => {
-  test('an empty range object in case no tags found in the repository', async () => {
+  test('a HEAD bounded range object in case no tags found in the repository', async () => {
     expect.assertions(1);
 
     exec.mockResolvedValue('');
 
-    await expect(range(true)).resolves.toEqual({ from: '', to: 'HEAD' });
+    await expect(range(true)).resolves.toEqual({ from: null, to: 'HEAD' });
   });
 
   test('a range with `from` to the last tag either a stable or a prereleased tag', async () => {
@@ -135,7 +154,7 @@ describe('Range called for a prerelease release should resolve to', () => {
     await expect(range(true)).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
   });
 
-  test('a valid range object filtering out any tags given a not semver compatible name', async () => {
+  test('a valid range object filtering out any tags given as not semver compatible name', async () => {
     expect.assertions(1);
 
     let tags = ['v1.1.0', 'exp-0', 'v1.2.0-alpha.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1', 'stable'];
@@ -146,20 +165,10 @@ describe('Range called for a prerelease release should resolve to', () => {
 });
 
 describe('Range should reject with an error', () => {
-  test('early when called with prerelease given as a non boolean value', async () => {
-    expect.assertions(2);
-
-    const reason = 'Invalid non boolean prerelease argument';
-
-    await expect(range(123)).rejects.toThrow(reason);
-
-    expect(exec).toBeCalledTimes(0);
-  });
-
-  test('when git tag process throws an error', async () => {
+  test('when `git tag` process throws a fatal error', async () => {
     expect.assertions(3);
 
-    const reason = 'Failed to list tags: git tag';
+    const reason = 'A fatal error occurred executing: git tag';
 
     exec.mockRejectedValue(new Error(reason));
 

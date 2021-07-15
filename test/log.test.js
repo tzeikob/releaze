@@ -1,294 +1,287 @@
-const { execFile } = require('child_process');
+const exec = require('../lib/util/exec');
 const log = require('../lib/log.js');
 
-jest.mock('util', () => ({
-  promisify: jest.fn().mockImplementation((fn) => fn)
-}));
+jest.mock('../lib/util/exec');
 
-jest.mock('child_process', () => ({
-  execFile: jest.fn().mockResolvedValue()
-}));
+const { arrayContaining } = expect;
 
-afterEach(() => {
-  execFile.mockReset();
+beforeEach(() => {
+  exec.mockResolvedValue('log1\nlog2\nlog3');
 });
 
-describe('Log should reject with error', () => {
-  test('when `from` arg is anything but a non empty string', async () => {
-    expect.assertions(11);
+afterEach(() => {
+  exec.mockReset();
+});
 
-    const reason = 'Invalid from range argument';
+describe('Log should be an async operation', () => {
+  test('getting as input an optional range object arg with schema `{ from, to }`', async () => {
+    expect.assertions(3);
 
-    await expect(log({ from: 123 })).rejects.toThrow(reason);
-    await expect(log({ from: NaN })).rejects.toThrow(reason);
-    await expect(log({ from: Infinity })).rejects.toThrow(reason);
-    await expect(log({ from: true })).rejects.toThrow(reason);
-    await expect(log({ from: false })).rejects.toThrow(reason);
-    await expect(log({ from: [] })).rejects.toThrow(reason);
-    await expect(log({ from: {} })).rejects.toThrow(reason);
-    await expect(log({ from: (() => {}) })).rejects.toThrow(reason);
-    await expect(log({ from: Symbol('sym') })).rejects.toThrow(reason);
-    await expect(log({ from: '' })).rejects.toThrow(reason);
-
-    expect(execFile).toBeCalledTimes(0);
+    await expect(log()).resolves.toBeDefined();
+    await expect(log(null)).resolves.toBeDefined();
+    await expect(log({ from: '84e2fa8', to: 'HEAD' })).resolves.toBeDefined();
   });
 
-  test('when `from` is a not valid git commit hash (sha1) or semver tag name', async () => {
-    expect.assertions(8);
+  test('where both `from` and `to` props in the range arg could be nullish or undefined', async () => {
+    expect.assertions(6);
+
+    await expect(log({})).resolves.toBeDefined();
+    await expect(log({ from: null })).resolves.toBeDefined();
+    await expect(log({ to: null })).resolves.toBeDefined();
+    await expect(log({ from: null, to: null })).resolves.toBeDefined();
+    await expect(log({ from: null, to: '84e2fa8' })).resolves.toBeDefined();
+    await expect(log({ from: '84e2fa8', to: null })).resolves.toBeDefined();
+  });
+
+  test('where `from` prop in range arg should be a valid git ref (hash, semver tag, HEAD)', async () => {
+    expect.assertions(11);
 
     const reason = 'Invalid from range argument';
 
     await expect(log({ from: 'c26GGG' })).rejects.toThrow(reason);
     await expect(log({ from: 'c262349^' })).rejects.toThrow(reason);
     await expect(log({ from: '^c262349' })).rejects.toThrow(reason);
+    await expect(log({ from: 'v1.33.a4' })).rejects.toThrow(reason);
+    await expect(log({ from: '1.33' })).rejects.toThrow(reason);
     await expect(log({ from: '01.33.a4' })).rejects.toThrow(reason);
     await expect(log({ from: '..' })).rejects.toThrow(reason);
     await expect(log({ from: '...' })).rejects.toThrow(reason);
     await expect(log({ from: 'head' })).rejects.toThrow(reason);
+    await expect(log({ from: '' })).rejects.toThrow(reason);
 
-    expect(execFile).toBeCalledTimes(0);
+    expect(exec).toBeCalledTimes(0);
   });
 
-  test('when `to` arg is anything but a non empty string', async () => {
+  test('where `to` prop in range arg should be a valid git ref (hash, semver tag, HEAD)', async () => {
     expect.assertions(11);
-
-    const reason = 'Invalid to range argument';
-
-    await expect(log({ to: 123 })).rejects.toThrow(reason);
-    await expect(log({ to: NaN })).rejects.toThrow(reason);
-    await expect(log({ to: Infinity })).rejects.toThrow(reason);
-    await expect(log({ to: true })).rejects.toThrow(reason);
-    await expect(log({ to: false })).rejects.toThrow(reason);
-    await expect(log({ to: [] })).rejects.toThrow(reason);
-    await expect(log({ to: {} })).rejects.toThrow(reason);
-    await expect(log({ to: (() => {}) })).rejects.toThrow(reason);
-    await expect(log({ to: Symbol('sym') })).rejects.toThrow(reason);
-    await expect(log({ to: '' })).rejects.toThrow(reason);
-
-    expect(execFile).toBeCalledTimes(0);
-  });
-
-  test('when `to` is a not valid git commit hash (sha1) or semver tag name', async () => {
-    expect.assertions(8);
 
     const reason = 'Invalid to range argument';
 
     await expect(log({ to: 'c26GGG' })).rejects.toThrow(reason);
     await expect(log({ to: 'c262349^' })).rejects.toThrow(reason);
     await expect(log({ to: '^c262349' })).rejects.toThrow(reason);
+    await expect(log({ to: 'v1.33.a4' })).rejects.toThrow(reason);
+    await expect(log({ to: '1.33' })).rejects.toThrow(reason);
     await expect(log({ to: '01.33.a4' })).rejects.toThrow(reason);
-    await expect(log({ to: '..' })).rejects.toThrow(reason);
+    await expect(log({ to: '..', })).rejects.toThrow(reason);
     await expect(log({ to: '...' })).rejects.toThrow(reason);
     await expect(log({ to: 'head' })).rejects.toThrow(reason);
+    await expect(log({ to: '' })).rejects.toThrow(reason);
 
-    expect(execFile).toBeCalledTimes(0);
+    expect(exec).toBeCalledTimes(0);
+  });
+  
+  test('where both `from` and `to` props should be a valid git ref (hash, semver tag, HEAD)', async () => {
+    expect.assertions(4);
+
+    await expect(log({ from: '', })).rejects.toThrow(Error);
+    await expect(log({ to: '' })).rejects.toThrow(Error);
+    await expect(log({ from: '', to: '' })).rejects.toThrow(Error);
+
+    expect(exec).toBeCalledTimes(0);
   });
 
-  test('when `format` arg is anything but a non empty string', async () => {
-    expect.assertions(11);
-
-    const reason = 'Invalid format argument';
-
-    await expect(log({ format: 123 })).rejects.toThrow(reason);
-    await expect(log({ format: NaN })).rejects.toThrow(reason);
-    await expect(log({ format: Infinity })).rejects.toThrow(reason);
-    await expect(log({ format: true })).rejects.toThrow(reason);
-    await expect(log({ format: false })).rejects.toThrow(reason);
-    await expect(log({ format: [] })).rejects.toThrow(reason);
-    await expect(log({ format: {} })).rejects.toThrow(reason);
-    await expect(log({ format: (() => {}) })).rejects.toThrow(reason);
-    await expect(log({ format: Symbol('sym') })).rejects.toThrow(reason);
-    await expect(log({ format: '' })).rejects.toThrow(reason);
-
-    expect(execFile).toBeCalledTimes(0);
-  });
-
-  test('when git log process returns a stderr as Error', async () => {
-    expect.assertions(2);
-
-    const error = new Error('A stderr occurred');
-
-    execFile.mockResolvedValue({ stderr: error });
-
-    await expect(log({})).rejects.toThrow(`Error: ${error.message}`);
-
-    expect(execFile).toBeCalledTimes(1);
-  });
-
-  test('when git log process returns stderr as a non Error', async () => {
-    expect.assertions(2);
-
-    const reason = 'A stderr occurred';
-
-    execFile.mockResolvedValue({ stderr: reason });
-
-    await expect(log({})).rejects.toThrow(reason);
-
-    expect(execFile).toBeCalledTimes(1);
-  });
-
-  test('when git log process throws a fatal Error', async () => {
-    expect.assertions(2);
-
-    const error = new Error('A fatal error occurred');
-
-    execFile.mockRejectedValue(error);
-
-    await expect(log({})).rejects.toThrow(error);
-
-    expect(execFile).toBeCalledTimes(1);
-  });
-
-  test('when running within a no git repository', async () => {
-    expect.assertions(3);
-
-    const error = new Error('fatal: not a git repository (or any of the parent directories): .git');
-
-    execFile.mockRejectedValue(error);
-
-    await expect(log({})).rejects.toThrow(error);
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
-  });
-});
-
-describe('Log should spawn once a git log process in `--oneline` mode', () => {
-  beforeEach(() => {
-    execFile.mockResolvedValue({ stdout: '' });
-  });
-
-  test('with only `--format` set to default when no options argument is given', async () => {
+  test('getting as input another optional format arg', async () => {
     expect.assertions(3);
 
     await expect(log()).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
+    await expect(log(null, null)).resolves.toBeDefined();
+    await expect(log(null, '%h $s')).resolves.toBeDefined();
   });
 
-  test('with only `--format` set to default when an empty options argument is given', async () => {
-    expect.assertions(3);
+  test('resolving always to an array', async () => {
+    expect.assertions(1);
 
-    await expect(log({})).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
+    await expect(log()).resolves.toBeInstanceOf(Array);
   });
 
-  test('with only `--format` set to default when options argument is given with nullish properties', async () => {
-    expect.assertions(3);
-
-    await expect(log({ from: null, to: null, format: null })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
-  });
-
-  test('with `--format` set to default when options is given with nullish `format`', async () => {
-    expect.assertions(3);
-
-    await expect(log({ format: null })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
-  });
-
-  test('with `--format` set equal to the given `format` property in the options', async () => {
-    expect.assertions(3);
-
-    await expect(log({ format: '%s %an' })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%s %an']);
-  });
-
-  test('with a range notation `from..to` set to the given `from` and `to` properties in the options', async () => {
-    expect.assertions(3);
-
-    await expect(log({ from: '871647f', to: '84e2fa8' })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..84e2fa8']);
-  });
-
-  test('with a range notation `from..HEAD` set to the given `from` property in the options', async () => {
-    expect.assertions(3);
-
-    await expect(log({ from: '871647f' })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..HEAD']);
-  });
-
-  test('with a range notation `to` set to the given `to` property in the options', async () => {
-    expect.assertions(3);
-
-    await expect(log({ to: '84e2fa8' })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '84e2fa8']);
-  });
-
-  test('with a range notation `from..to` where `to` set to `HEAD`', async () => {
-    expect.assertions(3);
-
-    await expect(log({ from: 'v0.1.0', to: 'HEAD' })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'v0.1.0..HEAD']);
-  });
-
-  test('with a range notation `to` where `to` set to `HEAD`', async () => {
-    expect.assertions(3);
-
-    await expect(log({ to: 'HEAD' })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'HEAD']);
-  });
-
-  test('with a range notation `from..to` where both `from` and `to` set to `HEAD`', async () => {
-    expect.assertions(3);
-
-    await expect(log({ from: 'HEAD', to: 'HEAD' })).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'HEAD..HEAD']);
-  });
-
-  test('with no range notation given an empty range input', async () => {
-    expect.assertions(3);
-
-    await expect(log({})).resolves.toBeDefined();
-
-    expect(execFile).toBeCalledTimes(1);
-    expect(execFile).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
-  });
-});
-
-describe('Log should resolve to', () => {
-  test('an array of strings when git log process returns a successful stdout', async () => {
+  test('resolving to an array of git log strings', async () => {
     expect.assertions(2);
 
-    execFile.mockResolvedValue({ stdout: `line1\n` });
+    exec.mockResolvedValue(`line1\n`);
 
     await expect(log()).resolves.toEqual(['line1']);
 
-    execFile.mockResolvedValue({ stdout: `line1\nline2\nline3\n` });
+    exec.mockResolvedValue(`line1\nline2\nline3\n`);
 
     await expect(log()).resolves.toEqual(['line1', 'line2', 'line3']);
   });
 
-  test('an empty array when git log process returns a successful but empty stdout', async () => {
+  test('resolving to an empty array when `git log` process returns no logs', async () => {
     expect.assertions(2);
 
-    execFile.mockResolvedValue({ stdout: `\n` });
+    exec.mockResolvedValue(`\n`);
 
     await expect(log()).resolves.toEqual([]);
 
-    execFile.mockResolvedValue({ stdout: '' });
+    exec.mockResolvedValue('');
 
     await expect(log()).resolves.toEqual([]);
+  });
+
+  test('have spawn thew `git log` process once with `--no-merges` and `--oneline` opts', async () => {
+    expect.assertions(3);
+
+    await expect(log()).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', arrayContaining(['log', '--no-merges', '--oneline']));
+  });
+});
+
+describe('Log should spawn the `git log` process once with a format template', () => {
+  test('equal to the default format `%h %s` if format arg is not given', async () => {
+    expect.assertions(3);
+
+    await expect(log()).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
+  });
+
+  test('equal to the given format arg', async () => {
+    expect.assertions(3);
+
+    const format = '%h %s';
+
+    await expect(log(null, format)).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', `--format=${format}`]);
+  });
+});
+
+describe('Log should spawn the `git log` process once with a range notation', () => {
+  test('as `ref...ref` when the range arg is given with both `from` and `to` props', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: '871647f', to: '84e2fa8' })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..84e2fa8']);
+  });
+
+  test('as `ref..HEAD` when the range arg is given with only the `from` prop', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: '871647f', to: null })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '871647f..HEAD']);
+  });
+
+  test('as `ref` when the range arg is given with only the `to` prop', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: null, to: '84e2fa8' })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '84e2fa8']);
+  });
+
+  test('as `ref..HEAD` where the range arg has the `to` prop set to `HEAD`', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: '84e2fa8', to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '84e2fa8..HEAD']);
+  });
+
+  test('as `HEAD` when the range arg is given with only `to` prop set to `HEAD`', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: null, to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'HEAD']);
+  });
+
+  test('as `HEAD..HEAD` when the range arg is given with both `from` and `to` set to `HEAD`', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: 'HEAD', to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'HEAD..HEAD']);
+  });
+  
+  test('with no range notation when the range arg is given as empty object', async () => {
+    expect.assertions(3);
+
+    await expect(log({})).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
+  });
+
+  test('with no range notation when the range arg is given with nullish props', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: null, to: null })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
+  });
+
+  test('with no range notation when the range arg is not given', async () => {
+    expect.assertions(3);
+
+    await expect(log()).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s']);
+  });
+});
+
+describe('Log should should support ranges given as semver tag names', () => {
+  test('where both `from` and `to` are given as valid semver versions', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: '1.0.0', to: '2.0.0' })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '1.0.0..2.0.0']);
+  });
+
+  test('where only the `from` is given as valid semver versions', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: '1.0.0', to: null })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '1.0.0..HEAD']);
+  });
+
+  test('where only the `to` is given as valid semver versions', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: null, to: '2.0.0' })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', '2.0.0']);
+  });
+
+  test('where either `from` and `to` are given as valid semver versions in `v1.0.0` form', async () => {
+    expect.assertions(3);
+
+    await expect(log({ from: 'v1.0.0', to: `v2.0.0` })).resolves.toBeDefined();
+
+    expect(exec).toBeCalledTimes(1);
+    expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'v1.0.0..v2.0.0']);
+  });
+});
+
+describe('Log should reject with error', () => {
+  test('when `git log` process throws a fatal error', async () => {
+    expect.assertions(2);
+
+    const reason = 'A fatal error occurred executing: git log';
+
+    exec.mockRejectedValue(new Error(reason));
+
+    await expect(log()).rejects.toThrow(reason);
+
+    expect(exec).toBeCalledTimes(1);
   });
 });
