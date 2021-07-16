@@ -8,7 +8,8 @@ const {
   isNotArray,
   isNotBoolean,
   isNullish,
-  isEmptyString
+  isEmptyString,
+  isNotObject
 } = require('../../lib/util/validators');
 
 describe('Call of isGiven(value)', () => {
@@ -430,5 +431,37 @@ describe('Call of isEmptyString(value) should', () => {
     expect(isEmptyString(() => {})).toBe(false);
 
     expect(isEmptyString('hello')).toBe(false);
+  });
+});
+
+
+describe('Call of isNotObject(value) should', () => {
+  test('return true for any value except a valid object', () => {
+    expect.assertions(11);
+
+    expect(isNotObject(123)).toBe(true);
+    expect(isNotObject(NaN)).toBe(true);
+    expect(isNotObject(Infinity)).toBe(true);
+
+    expect(isNotObject([])).toBe(true);
+    expect(isNotObject(Symbol('s'))).toBe(true);
+
+    expect(isNotObject(() => {})).toBe(true);
+
+    expect(isNotObject(null)).toBe(true);
+    expect(isNotObject(undefined)).toBe(true);
+
+    expect(isNotObject('')).toBe(true);
+    expect(isNotObject('true')).toBe(true);
+    expect(isNotObject('false')).toBe(true);
+  });
+
+  test('return false for any valid object value', () => {
+    expect.assertions(4);
+
+    expect(isNotObject({})).toBe(false);
+    expect(isNotObject({ a: 1 })).toBe(false);
+    expect(isNotObject(new Error())).toBe(false);
+    expect(isNotObject(Object.create(null))).toBe(false);
   });
 });
