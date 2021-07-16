@@ -596,4 +596,40 @@ describe('Bump should reject with error', () => {
 
     expect(readFile).toBeCalledWith('package.json', 'utf8');
   });
+  
+  test('when reading package-lock.json file throws any non `ENOENT` errors', async () => {
+    expect.assertions(2);
+
+    const reason = 'A fatal error occurred reading file: package-lock.json';
+
+    readFile.mockImplementation(async (filepath) => {
+      if (filepath === 'package-lock.json') {
+        throw new Error(reason);
+      }
+
+      return '{"version": "1.0.0"}';
+    });
+
+    await expect(bump('major')).rejects.toThrow(reason);
+
+    expect(readFile).toBeCalledWith('package-lock.json', 'utf8');
+  });
+  
+  test('when reading npm-shrinkwrap.json file throws any non `ENOENT` errors', async () => {
+    expect.assertions(2);
+
+    const reason = 'A fatal error occurred reading file: npm-shrinkwrap.json';
+
+    readFile.mockImplementation(async (filepath) => {
+      if (filepath === 'npm-shrinkwrap.json') {
+        throw new Error(reason);
+      }
+
+      return '{"version": "1.0.0"}';
+    });
+
+    await expect(bump('major')).rejects.toThrow(reason);
+
+    expect(readFile).toBeCalledWith('npm-shrinkwrap.json', 'utf8');
+  });
 });
