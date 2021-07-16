@@ -1,8 +1,8 @@
 const semver = require('semver');
-const exec = require('../lib/util/exec');
-const tag = require('../lib/tag.js');
+const exec = require('../../lib/util/exec');
+const tag = require('../../lib/ops/tag.js');
 
-jest.mock('../lib/util/exec', () => jest.fn());
+jest.mock('../../lib/util/exec', () => jest.fn());
 
 const { any } = expect;
 

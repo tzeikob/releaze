@@ -1,5 +1,5 @@
 const { execFile } = require('child_process');
-const exec = require('../lib/util/exec');
+const exec = require('../../lib/util/exec');
 
 jest.mock('child_process');
 

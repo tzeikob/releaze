@@ -1,5 +1,5 @@
 const fs = require('fs');
-const bump = require('../lib/bump');
+const bump = require('../../lib/ops/bump');
 
 jest.mock('fs', () => ({
   promises: {

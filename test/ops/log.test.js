@@ -1,7 +1,7 @@
-const exec = require('../lib/util/exec');
-const log = require('../lib/log.js');
+const exec = require('../../lib/util/exec');
+const log = require('../../lib/ops/log.js');
 
-jest.mock('../lib/util/exec');
+jest.mock('../../lib/util/exec');
 
 const { arrayContaining } = expect;
 

@@ -9,7 +9,7 @@ const {
   isNotBoolean,
   isNullish,
   isEmptyString
-} = require('../lib/util/validators');
+} = require('../../lib/util/validators');
 
 describe('Call of isGiven(value)', () => {
   test('should return true for any value except null and undefined', () => {

@@ -1,7 +1,7 @@
-const exec = require('../lib/util/exec');
-const range = require('../lib/range');
+const exec = require('../../lib/util/exec');
+const range = require('../../lib/ops/range');
 
-jest.mock('../lib/util/exec');
+jest.mock('../../lib/util/exec');
 
 const { any } = expect;
 

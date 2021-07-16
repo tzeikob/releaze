@@ -1,5 +1,5 @@
 const fs = require('fs');
-const changelog = require('../lib/changelog');
+const changelog = require('../../lib/ops/changelog');
 
 jest.mock('fs', () => ({
   promises: {
