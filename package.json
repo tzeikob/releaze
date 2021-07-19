@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "jest --verbose --coverage --roots test"
+    "test": "jest --verbose --coverage --roots ./test"
   },
   "bin": {
     "releaze": "./bin/releaze.js"
