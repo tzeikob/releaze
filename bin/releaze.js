@@ -20,5 +20,5 @@ function handleFatalError (error) {
   process.on('uncaughtException', handleFatalError);
   process.on('unhandledRejection', handleFatalError);
 
-  await cli.execute(process.argv);
+  await cli.run(process.argv);
 }()).catch(handleFatalError);
