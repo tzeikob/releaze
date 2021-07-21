@@ -68,6 +68,36 @@ describe('Cli module should export an async run operation which', () => {
     expect(changelog).toBeCalledTimes(0);
     expect(tag).toBeCalledTimes(0);
   });
+
+  test('requested the help is skipping any release operations', async () => {
+    expect.assertions(7);
+
+    const args = ['./node', './releaze', '--help'];
+
+    await expect(cli.run(args)).resolves.toBeUndefined();
+
+    expect(check).toBeCalledTimes(0);
+    expect(bump).toBeCalledTimes(0);
+    expect(range).toBeCalledTimes(0);
+    expect(log).toBeCalledTimes(0);
+    expect(changelog).toBeCalledTimes(0);
+    expect(tag).toBeCalledTimes(0);
+  });
+
+  test('requested the version is skipping any release operations', async () => {
+    expect.assertions(7);
+
+    const args = ['./node', './releaze', '--version'];
+
+    await expect(cli.run(args)).resolves.toBeUndefined();
+
+    expect(check).toBeCalledTimes(0);
+    expect(bump).toBeCalledTimes(0);
+    expect(range).toBeCalledTimes(0);
+    expect(log).toBeCalledTimes(0);
+    expect(changelog).toBeCalledTimes(0);
+    expect(tag).toBeCalledTimes(0);
+  });
 });
 
 describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
