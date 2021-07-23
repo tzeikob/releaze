@@ -1,3 +1,5 @@
+'use strict';
+
 const semver = require('semver');
 const exec = require('../../lib/util/exec');
 const tag = require('../../lib/ops/tag.js');

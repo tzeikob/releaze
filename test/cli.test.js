@@ -1,3 +1,5 @@
+'use strict';
+
 const exec = require('../lib/util/exec');
 const check = require('../lib/ops/check');
 const bump = require('../lib/ops/bump');

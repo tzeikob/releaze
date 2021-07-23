@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs');
 const exec = require('../../lib/util/exec');
 const check = require('../../lib/ops/check');

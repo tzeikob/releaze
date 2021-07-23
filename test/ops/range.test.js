@@ -1,3 +1,5 @@
+'use strict';
+
 const exec = require('../../lib/util/exec');
 const range = require('../../lib/ops/range');
 

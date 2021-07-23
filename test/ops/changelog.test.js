@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs');
 const changelog = require('../../lib/ops/changelog');
 
@@ -125,7 +127,7 @@ describe('Changelog called with valid version and logs args should', () => {
   test('append the logs on top of an existing CHANGELOG.md in the correct format', async () => {
     expect.assertions(3);
 
-    oldContent = [
+    const oldContent = [
       '#v1.5.2',
       '* 81ad3fb Refactor log tests to assert every await call',
       '* 3b5b25f Refactor log tests to assert with toThrow instead'

@@ -1,3 +1,5 @@
+'use strict';
+
 const exec = require('../../lib/util/exec');
 const log = require('../../lib/ops/log.js');
 
