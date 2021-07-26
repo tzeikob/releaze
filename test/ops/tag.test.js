@@ -9,7 +9,13 @@ jest.mock('../../lib/util/exec', () => jest.fn());
 const { any } = expect;
 
 beforeEach(() => {
-  exec.mockResolvedValue()
+  exec.mockImplementation(async (file, args) => {
+    const command = [file, ...args].join(' ');
+
+    if (command.startsWith('git commit')) {
+      return '[master d3f884f] message'
+    }
+  });
 });
 
 afterEach(() => {
@@ -20,7 +26,7 @@ describe('Tag should be an async operation', () => {
   test('getting as input a version arg', async () => {
     expect.assertions(1);
 
-    await expect(tag('v1.0.0')).resolves.toBeUndefined();
+    await expect(tag('v1.0.0')).resolves.toBeDefined();
   });
 
   test('where version arg should always be given', async () => {
@@ -52,15 +58,24 @@ describe('Tag should be an async operation', () => {
   test('getting an optional message arg', async () => {
     expect.assertions(1);
 
-    await expect(tag('v1.0.0', 'Bump to v1.0.0')).resolves.toBeUndefined();
+    await expect(tag('v1.0.0', 'Bump to v1.0.0')).resolves.toBeDefined();
+  });
+
+  test('resolving to an object with name and hash props', async () => {
+    expect.assertions(1);
+
+    await expect(tag('v1.0.0')).resolves.toMatchObject({
+      name: any(String),
+      hash: any(String)
+    });
   });
 });
 
-describe('Tag should resolve to undefined', () => {
+describe('Tag should resolve', () => {
   test('have git add, commit and tag commands executed in that given order', async () => {
     expect.assertions(8);
 
-    await expect(tag('1.0.0')).resolves.toBeUndefined();
+    await expect(tag('1.0.0')).resolves.toEqual({ name: 'v1.0.0', hash: 'd3f884f' });
 
     expect(exec).toBeCalledTimes(6);
 
@@ -81,10 +96,12 @@ describe('Tag should resolve to undefined', () => {
 
       if (command === 'git add CHANGELOG.md') {
         throw new Error('Failed to stage file: CHANGELOG.md');
+      } else if (command.startsWith('git commit')) {
+        return '[master d3f884f] message'
       }
     });
 
-    await expect(tag('1.0.0')).resolves.toBeUndefined();
+    await expect(tag('1.0.0')).resolves.toEqual({ name: 'v1.0.0', hash: 'd3f884f' });
 
     expect(exec).toBeCalledTimes(6);
 
@@ -105,10 +122,12 @@ describe('Tag should resolve to undefined', () => {
 
       if (command.match(/git add (package-lock|npm-shrinkwrap).json/)) {
         throw new Error('Failed to stage file: lock file');
+      } else if (command.startsWith('git commit')) {
+        return '[master d3f884f] message'
       }
     });
 
-    await expect(tag('1.0.0')).resolves.toBeUndefined();
+    await expect(tag('1.0.0')).resolves.toEqual({ name: 'v1.0.0', hash: 'd3f884f' });
 
     expect(exec).toBeCalledTimes(6);
 
@@ -128,7 +147,7 @@ describe('Tag should try to commit changes', () => {
 
     const version = '1.0.0';
 
-    await expect(tag(version)).resolves.toBeUndefined();
+    await expect(tag(version)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['commit', '-m', `Bump to v${version}`]);
   });
@@ -139,7 +158,7 @@ describe('Tag should try to commit changes', () => {
     const version = '1.0.0';
     const message = `Bump to new version ${version}`;
 
-    await expect(tag(version, message)).resolves.toBeUndefined();
+    await expect(tag(version, message)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['commit', '-m', message]);
   });
@@ -150,7 +169,7 @@ describe('Tag should try to commit changes', () => {
     const version = '1.0.0';
     const message = 'Bump to new v%s';
 
-    await expect(tag(version, message)).resolves.toBeUndefined();
+    await expect(tag(version, message)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['commit', '-m', `Bump to new v${version}`]);
   });
@@ -161,7 +180,7 @@ describe('Tag should try to commit changes', () => {
     const version = 'v1.0.0';
     const message = 'Bump to new v%s';
 
-    await expect(tag(version, message)).resolves.toBeUndefined();
+    await expect(tag(version, message)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['commit', '-m', `Bump to new v${semver.clean(version)}`]);
   });
@@ -173,7 +192,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     const version = '1.0.0';
 
-    await expect(tag(version)).resolves.toBeUndefined();
+    await expect(tag(version)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['tag', '-a', `v${version}`, '-m', any(String)]);
   });
@@ -183,7 +202,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     const version = 'v1.0.0';
 
-    await expect(tag(version)).resolves.toBeUndefined();
+    await expect(tag(version)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['tag', '-a', `v${semver.clean(version)}`, '-m', any(String)]);
   });
@@ -193,7 +212,7 @@ describe('Tag should try to create an annotation tag', () => {
 
     const version = '1.0.0';
 
-    await expect(tag(version)).resolves.toBeUndefined();
+    await expect(tag(version)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to v${version}`]);
   });
@@ -204,7 +223,7 @@ describe('Tag should try to create an annotation tag', () => {
     const version = '1.0.0';
     const message = `Bump to new version ${version}`;
 
-    await expect(tag(version, message)).resolves.toBeUndefined();
+    await expect(tag(version, message)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', message]);
   });
@@ -215,7 +234,7 @@ describe('Tag should try to create an annotation tag', () => {
     const version = '1.0.0';
     const message = 'Bump to new v%s';
 
-    await expect(tag(version, message)).resolves.toBeUndefined();
+    await expect(tag(version, message)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to new v${version}`]);
   });
@@ -226,7 +245,7 @@ describe('Tag should try to create an annotation tag', () => {
     const version = 'v1.0.0';
     const message = 'Bump to new v%s';
 
-    await expect(tag(version, message)).resolves.toBeUndefined();
+    await expect(tag(version, message)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to new v${semver.clean(version)}`]);
   });
@@ -285,7 +304,9 @@ describe('Tag should reject with an error', () => {
     exec.mockImplementation(async (file, args) => {
       const command = [file, ...args].join(' ');
 
-      if (command.startsWith('git tag')) {
+      if (command.startsWith('git commit')) {
+        return '[master d3f884f] message'
+      } else if (command.startsWith('git tag')) {
         throw new Error(reason);
       }
     });
