@@ -11,7 +11,8 @@ const {
   isNotBoolean,
   isNullish,
   isEmptyString,
-  isNotObject
+  isNotObject,
+  isNotPositiveNumber
 } = require('../../lib/util/validators');
 
 describe('Call of isGiven(value)', () => {
@@ -436,7 +437,6 @@ describe('Call of isEmptyString(value) should', () => {
   });
 });
 
-
 describe('Call of isNotObject(value) should', () => {
   test('return true for any value except a valid object', () => {
     expect.assertions(11);
@@ -465,5 +465,36 @@ describe('Call of isNotObject(value) should', () => {
     expect(isNotObject({ a: 1 })).toBe(false);
     expect(isNotObject(new Error())).toBe(false);
     expect(isNotObject(Object.create(null))).toBe(false);
+  });
+});
+
+describe('Call of isNotPositiveNumber(value) should', () => {
+  test('return true for any value except a valid positive number', () => {
+    expect.assertions(12);
+
+    expect(isNotPositiveNumber(NaN)).toBe(true);
+    expect(isNotPositiveNumber(Infinity)).toBe(true);
+    expect(isNotPositiveNumber(-Infinity)).toBe(true);
+
+    expect(isNotPositiveNumber([])).toBe(true);
+    expect(isNotPositiveNumber(Symbol('s'))).toBe(true);
+
+    expect(isNotPositiveNumber(() => {})).toBe(true);
+
+    expect(isNotPositiveNumber(null)).toBe(true);
+    expect(isNotPositiveNumber(undefined)).toBe(true);
+
+    expect(isNotPositiveNumber('')).toBe(true);
+    expect(isNotPositiveNumber('true')).toBe(true);
+    expect(isNotPositiveNumber('false')).toBe(true);
+    expect(isNotPositiveNumber('1')).toBe(true);
+  });
+
+  test('return false for any valid positive number value', () => {
+    expect.assertions(3);
+
+    expect(isNotPositiveNumber(1)).toBe(false);
+    expect(isNotPositiveNumber(1.5)).toBe(false);
+    expect(isNotPositiveNumber(0.1)).toBe(false);
   });
 });

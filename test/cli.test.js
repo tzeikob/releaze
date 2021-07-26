@@ -8,6 +8,7 @@ const log = require('../lib/ops/log');
 const changelog = require('../lib/ops/changelog');
 const tag = require('../lib/ops/tag');
 const cli = require('../lib/cli');
+const logger = require('../lib/util/logger');
 
 jest.mock('../lib/util/exec');
 jest.mock('../lib/ops/check');
@@ -17,6 +18,12 @@ jest.mock('../lib/ops/log');
 jest.mock('../lib/ops/changelog');
 jest.mock('../lib/ops/tag');
 
+jest.mock('../lib/util/logger', () => ({
+  info: jest.fn(),
+  success: jest.fn(),
+  error: jest.fn()
+}));
+
 beforeEach(() => {
   exec.mockResolvedValue();
   check.mockResolvedValue({ version: '1.0.0' });
@@ -24,7 +31,7 @@ beforeEach(() => {
   range.mockResolvedValue({ from: '1.0.0', to: 'HEAD' });
   log.mockResolvedValue(['log1', 'log2', 'log3']);
   changelog.mockResolvedValue();
-  tag.mockResolvedValue();
+  tag.mockResolvedValue({ name: 'v2.0.0', hash: 'd3f884f' });
 });
 
 afterEach(() => {
@@ -35,6 +42,9 @@ afterEach(() => {
   log.mockReset();
   changelog.mockReset();
   tag.mockReset();
+  logger.info.mockReset();
+  logger.success.mockReset();
+  logger.error.mockReset();
 });
 
 describe('Cli module should export an async run operation which', () => {
@@ -311,6 +321,72 @@ describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
     expect(tag).toBeCalledTimes(1);
     expect(tag).toBeCalledWith('2.0.0-alpha.0', 'Bump to v%s');
     expect(tag).toHaveBeenCalledAfter(changelog);
+  });
+});
+
+describe('Cli should report progress to console via logger', () => {
+  test('when a stable bump release without `--test` is requested', async () => {
+    expect.assertions(12);
+
+    const args = ['./node', './releaze', '--bump', 'major'];
+
+    await expect(cli.run(args)).resolves.toBeUndefined();
+
+    expect(logger.info).toBeCalledTimes(5);
+    expect(logger.success).toBeCalledTimes(4);
+
+    expect(logger.info).nthCalledWith(1, 'Checking npm and git pre-conditions...');
+    expect(logger.success).nthCalledWith(1, 'All npm and git pre-conditions are met.', 2);
+
+    expect(logger.info).nthCalledWith(2, 'Bumping to next major version...');
+    expect(logger.success).nthCalledWith(2, `Version bumped from 1.0.0 \u2933 major 2.0.0.`, 2);
+
+    expect(logger.info).nthCalledWith(3, 'Writing changes to changelog file...');
+    expect(logger.success).nthCalledWith(3, 'The CHANGELOG.md file has been updated.', 2);
+
+    expect(logger.info).nthCalledWith(4, 'Creating a new bump release tag...');
+    expect(logger.success).nthCalledWith(4, `Tag v2.0.0 \u1F812 d3f884f has been created.`, 2);
+
+    expect(logger.info).nthCalledWith(5, 'Release has been completed successfully.');
+  });
+
+  test('when a stable bump release with `--test` is requested', async () => {
+    expect.assertions(14);
+
+    const args = ['./node', './releaze', '--bump', 'major', '--test'];
+
+    await expect(cli.run(args)).resolves.toBeUndefined();
+
+    expect(logger.info).toBeCalledTimes(6);
+    expect(logger.success).toBeCalledTimes(5);
+
+    expect(logger.info).nthCalledWith(1, 'Checking npm and git pre-conditions...');
+    expect(logger.success).nthCalledWith(1, 'All npm and git pre-conditions are met.', 2);
+
+    expect(logger.info).nthCalledWith(2, 'Running all unit and integration tests...');
+    expect(logger.success).nthCalledWith(2, 'All tests have been passed.', 2);
+
+    expect(logger.info).nthCalledWith(3, 'Bumping to next major version...');
+    expect(logger.success).nthCalledWith(3, `Version bumped from 1.0.0 \u2933 major 2.0.0.`, 2);
+
+    expect(logger.info).nthCalledWith(4, 'Writing changes to changelog file...');
+    expect(logger.success).nthCalledWith(4, 'The CHANGELOG.md file has been updated.', 2);
+
+    expect(logger.info).nthCalledWith(5, 'Creating a new bump release tag...');
+    expect(logger.success).nthCalledWith(5, `Tag v2.0.0 \u1F812 d3f884f has been created.`, 2);
+
+    expect(logger.info).nthCalledWith(6, 'Release has been completed successfully.');
+  });
+
+  test('when a pre-release is requested', async () => {
+    expect.assertions(3);
+
+    const args = ['./node', './releaze', '--bump', 'premajor', '--preid', 'alpha'];
+
+    await expect(cli.run(args)).resolves.toBeUndefined();
+
+    expect(logger.info).toBeCalledTimes(5);
+    expect(logger.info).nthCalledWith(2, 'Bumping to next premajor version with alpha preid...');
   });
 });
 
