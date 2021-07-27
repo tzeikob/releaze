@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const logger = require('../../lib/util/logger');
 const bump = require('../../lib/ops/bump');
 
 jest.mock('fs', () => ({
@@ -8,6 +9,12 @@ jest.mock('fs', () => ({
     readFile: jest.fn(),
     writeFile: jest.fn()
   }
+}));
+
+jest.mock('../../lib/util/logger', () => ({
+  info: jest.fn(),
+  success: jest.fn(),
+  error: jest.fn()
 }));
 
 const { readFile, writeFile } = fs.promises;
@@ -21,6 +28,11 @@ beforeEach(() => {
 afterEach(() => {
   readFile.mockReset();
   writeFile.mockReset();
+  logger.info.mockReset();
+  logger.success.mockReset();
+  logger.error.mockReset();
+
+  delete global.verbose;
 });
 
 describe('Bump should by an async operation', () => {
@@ -530,6 +542,29 @@ describe('Bump called with a pre release type should', () => {
       next: '0.1.1-beta.0',
       isPrerelease: true
     });
+  });
+});
+
+describe('Bump should report to console via logger', () => {
+  test('when the verbose property has been enabled globally', async () => {
+    expect.assertions(8);
+
+    readFile.mockResolvedValue('{ "version": "1.0.0" }');
+
+    global.verbose = true;
+
+    await expect(bump('premajor', 'alpha')).resolves.toBeDefined();
+
+    expect(logger.info).toBeCalledTimes(6);
+
+    expect(logger.info).nthCalledWith(1, 'File package.json has been updated to new version:', 2);
+    expect(logger.info).nthCalledWith(2, `{ "version": "1.0.0" } \u2933 { "version": "2.0.0-alpha.0" }`, 4);
+
+    expect(logger.info).nthCalledWith(3, 'File package-lock.json has been updated to new version:', 2);
+    expect(logger.info).nthCalledWith(4, `{ "version": "1.0.0" } \u2933 { "version": "2.0.0-alpha.0" }`, 4);
+
+    expect(logger.info).nthCalledWith(5, 'File npm-shrinkwrap.json has been updated to new version:', 2);
+    expect(logger.info).nthCalledWith(6, `{ "version": "1.0.0" } \u2933 { "version": "2.0.0-alpha.0" }`, 4);
   });
 });
 

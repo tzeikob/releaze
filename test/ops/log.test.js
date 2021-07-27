@@ -1,9 +1,16 @@
 'use strict';
 
 const exec = require('../../lib/util/exec');
+const logger = require('../../lib/util/logger');
 const log = require('../../lib/ops/log.js');
 
 jest.mock('../../lib/util/exec');
+
+jest.mock('../../lib/util/logger', () => ({
+  info: jest.fn(),
+  success: jest.fn(),
+  error: jest.fn()
+}));
 
 const { arrayContaining } = expect;
 
@@ -13,6 +20,11 @@ beforeEach(() => {
 
 afterEach(() => {
   exec.mockReset();
+  logger.info.mockReset();
+  logger.success.mockReset();
+  logger.error.mockReset();
+
+  delete global.verbose;
 });
 
 describe('Log should be an async operation', () => {
@@ -271,6 +283,39 @@ describe('Log should should support ranges given as semver tag names', () => {
 
     expect(exec).toBeCalledTimes(1);
     expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'v1.0.0..v2.0.0']);
+  });
+});
+
+describe('Log should report to console via logger', () => {
+  test('when the verbose property has been enabled globally', async () => {
+    expect.assertions(5);
+
+    exec.mockResolvedValue('log1\nlog2\nlog3');
+
+    global.verbose = true;
+
+    await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(logger.info).toBeCalledTimes(3);
+
+    expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD...', 2);
+    expect(logger.info).nthCalledWith(2, 'Found 3 total git logs:', 2);
+    expect(logger.info).nthCalledWith(3, 'log1', 4);
+  });
+
+  test('when no git logs have been found', async () => {
+    expect.assertions(4);
+
+    exec.mockResolvedValue('');
+
+    global.verbose = true;
+
+    await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(logger.info).toBeCalledTimes(2);
+
+    expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD...', 2);
+    expect(logger.info).nthCalledWith(2, 'No git logs have been found.', 2);
   });
 });
 

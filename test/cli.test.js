@@ -388,6 +388,16 @@ describe('Cli should report progress to console via logger', () => {
     expect(logger.info).toBeCalledTimes(5);
     expect(logger.info).nthCalledWith(2, 'Bumping to next premajor version with alpha preid...');
   });
+
+  test('having the verbose prop enabled in global object if the `--verbose` option is given', async () => {
+    expect.assertions(2);
+
+    const args = ['./node', './releaze', '--bump', 'major', '--verbose'];
+
+    await expect(cli.run(args)).resolves.toBeUndefined();
+
+    expect(global.verbose).toBeTrue();
+  });
 });
 
 describe('Cli should not try to', () => {

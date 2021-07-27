@@ -2,9 +2,16 @@
 
 const semver = require('semver');
 const exec = require('../../lib/util/exec');
+const logger = require('../../lib/util/logger');
 const tag = require('../../lib/ops/tag.js');
 
 jest.mock('../../lib/util/exec', () => jest.fn());
+
+jest.mock('../../lib/util/logger', () => ({
+  info: jest.fn(),
+  success: jest.fn(),
+  error: jest.fn()
+}));
 
 const { any } = expect;
 
@@ -20,6 +27,11 @@ beforeEach(() => {
 
 afterEach(() => {
   exec.mockReset();
+  logger.info.mockReset();
+  logger.success.mockReset();
+  logger.error.mockReset();
+
+  delete global.verbose;
 });
 
 describe('Tag should be an async operation', () => {
@@ -248,6 +260,25 @@ describe('Tag should try to create an annotation tag', () => {
     await expect(tag(version, message)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to new v${semver.clean(version)}`]);
+  });
+});
+
+describe('Tag should report to console via logger', () => {
+  test('when the verbose property has been enabled globally', async () => {
+    expect.assertions(8);
+
+    global.verbose = true;
+
+    await expect(tag('v1.0.0')).resolves.toBeDefined();
+
+    expect(logger.info).toBeCalledTimes(6);
+
+    expect(logger.info).nthCalledWith(1, 'File package.json has been staged.', 2);
+    expect(logger.info).nthCalledWith(2, 'File CHANGELOG.md has been staged.', 2);
+    expect(logger.info).nthCalledWith(3, 'File package-lock.json has been staged.', 2);
+    expect(logger.info).nthCalledWith(4, 'File npm-shrinkwrap.json has been staged.', 2);
+    expect(logger.info).nthCalledWith(5, 'All files have been committed:', 2);
+    expect(logger.info).nthCalledWith(6, '[master d3f884f] message', 4);
   });
 });
 
