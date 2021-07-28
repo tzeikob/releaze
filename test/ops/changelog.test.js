@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const moment = require('moment');
 const changelog = require('../../lib/ops/changelog');
 
 jest.mock('fs', () => ({
@@ -115,7 +116,7 @@ describe('Changelog called with valid version and logs args should', () => {
     await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
 
     const content = [
-      '#v2.0.0',
+      `v2.0.0 - ${moment().format('MMMM D, YYYY')}`,
       '* 54ff0cd Restrict bump release types to lowercase only',
       '* d41ab22 Accept alias HEAD as input to the log op'
     ].join('\n');
@@ -128,7 +129,7 @@ describe('Changelog called with valid version and logs args should', () => {
     expect.assertions(3);
 
     const oldContent = [
-      '#v1.5.2',
+      `v1.5.2 - ${moment().format('MMMM D, YYYY')}`,
       '* 81ad3fb Refactor log tests to assert every await call',
       '* 3b5b25f Refactor log tests to assert with toThrow instead'
     ].join('\n');
@@ -143,7 +144,7 @@ describe('Changelog called with valid version and logs args should', () => {
     await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
 
     const newContent = [
-      '#v2.0.0',
+      `v2.0.0 - ${moment().format('MMMM D, YYYY')}`,
       '* 54ff0cd Restrict bump release types to lowercase only',
       '* d41ab22 Accept alias HEAD as input to the log op'
     ].join('\n');
