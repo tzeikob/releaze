@@ -116,7 +116,7 @@ describe('Changelog called with valid version and logs args should', () => {
     await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
 
     const content = [
-      `v2.0.0 - ${moment().format('MMMM D, YYYY')}`,
+      `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`,
       '* 54ff0cd Restrict bump release types to lowercase only',
       '* d41ab22 Accept alias HEAD as input to the log op'
     ].join('\n');
@@ -129,7 +129,7 @@ describe('Changelog called with valid version and logs args should', () => {
     expect.assertions(3);
 
     const oldContent = [
-      `v1.5.2 - ${moment().format('MMMM D, YYYY')}`,
+      `v1.5.2 - ${moment().format('MMMM D, YYYY')}\n`,
       '* 81ad3fb Refactor log tests to assert every await call',
       '* 3b5b25f Refactor log tests to assert with toThrow instead'
     ].join('\n');
@@ -144,13 +144,13 @@ describe('Changelog called with valid version and logs args should', () => {
     await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
 
     const newContent = [
-      `v2.0.0 - ${moment().format('MMMM D, YYYY')}`,
+      `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`,
       '* 54ff0cd Restrict bump release types to lowercase only',
       '* d41ab22 Accept alias HEAD as input to the log op'
     ].join('\n');
 
     expect(writeFile).toBeCalledTimes(1);
-    expect(writeFile).toBeCalledWith('CHANGELOG.md', `${newContent}\n${oldContent}`);
+    expect(writeFile).toBeCalledWith('CHANGELOG.md', `${newContent}\n\n${oldContent}`);
   });
 });
 
