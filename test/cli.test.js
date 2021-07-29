@@ -339,13 +339,13 @@ describe('Cli should report progress to console via logger', () => {
     expect(logger.success).nthCalledWith(1, 'All npm and git pre-conditions are met.', 2);
 
     expect(logger.info).nthCalledWith(2, 'Bumping to next major version...');
-    expect(logger.success).nthCalledWith(2, `Version bumped from 1.0.0 \u2933 major 2.0.0.`, 2);
+    expect(logger.success).nthCalledWith(2, `Version bumped from 1.0.0 \u2192 major 2.0.0.`, 2);
 
     expect(logger.info).nthCalledWith(3, 'Writing changes to changelog file...');
     expect(logger.success).nthCalledWith(3, 'The CHANGELOG.md file has been updated.', 2);
 
     expect(logger.info).nthCalledWith(4, 'Creating a new bump release tag...');
-    expect(logger.success).nthCalledWith(4, `Tag v2.0.0 \u1F812 d3f884f has been created.`, 2);
+    expect(logger.success).nthCalledWith(4, `Tag v2.0.0 \u2192 d3f884f has been created.`, 2);
 
     expect(logger.info).nthCalledWith(5, 'Release has been completed successfully.');
   });
@@ -367,13 +367,13 @@ describe('Cli should report progress to console via logger', () => {
     expect(logger.success).nthCalledWith(2, 'All tests have been passed.', 2);
 
     expect(logger.info).nthCalledWith(3, 'Bumping to next major version...');
-    expect(logger.success).nthCalledWith(3, `Version bumped from 1.0.0 \u2933 major 2.0.0.`, 2);
+    expect(logger.success).nthCalledWith(3, `Version bumped from 1.0.0 \u2192 major 2.0.0.`, 2);
 
     expect(logger.info).nthCalledWith(4, 'Writing changes to changelog file...');
     expect(logger.success).nthCalledWith(4, 'The CHANGELOG.md file has been updated.', 2);
 
     expect(logger.info).nthCalledWith(5, 'Creating a new bump release tag...');
-    expect(logger.success).nthCalledWith(5, `Tag v2.0.0 \u1F812 d3f884f has been created.`, 2);
+    expect(logger.success).nthCalledWith(5, `Tag v2.0.0 \u2192 d3f884f has been created.`, 2);
 
     expect(logger.info).nthCalledWith(6, 'Release has been completed successfully.');
   });
