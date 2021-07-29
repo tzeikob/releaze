@@ -1,4 +1,5 @@
 v1.0.0-alpha.0 - July 28, 2021
+
 * [`aff9f1e`](https://github.com/tzeikob/releaze/commit/aff9f1e1d9e24e6e668a5ed73f5f1ac900ddd385) Create the changelog file
 * [`85d26d2`](https://github.com/tzeikob/releaze/commit/85d26d213e399a96b45483378e1d02d5ee0511ff) Add a date next to the version in the changelog file (fixes #15)
 * [`0c24d78`](https://github.com/tzeikob/releaze/commit/0c24d7889e8b4e9482f6d9860c00fcf45491bf5c) Report verbosely from within each op (fixes #12)
@@ -87,6 +88,7 @@ v1.0.0-alpha.0 - July 28, 2021
 * [`6bed330`](https://github.com/tzeikob/releaze/commit/6bed330ca7874a772ebc2bc71bd36479abec39e7) Rename to self explanatory names for readability
 * [`4d1f9ca`](https://github.com/tzeikob/releaze/commit/4d1f9ca1f0b1407d2eaafc4c259cf41321d0b86a) Add very first test specs for bump operation (refs #12)
 * [`8828361`](https://github.com/tzeikob/releaze/commit/8828361dcf5119ef60c681241e2f2a94f8a79b32) Replace cli dependency with optionator (fixes #9)
+
 v0.2.0 - June 15, 2021
 
 * [`a2cd645`](https://github.com/tzeikob/releaze/commit/a2cd645942798bac6f53dbd688abc5356d5cb36a) Bump to v0.2.0
