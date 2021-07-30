@@ -20,6 +20,7 @@ beforeEach(() => {
 
 afterEach(() => {
   exec.mockReset();
+
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
@@ -227,6 +228,28 @@ describe('Range should report to console via logger', () => {
     expect(logger.info).nthCalledWith(1, 'Resolving the last git tag...', 2);
     expect(logger.info).nthCalledWith(2, 'No tags have been found.', 2);
     expect(logger.info).nthCalledWith(3, "Git logs bounded to the range { from: null, to: 'HEAD' }", 2);
+  });
+
+  test('except when the verbose property is not set globally', async () => {
+    expect.assertions(6);
+
+    let tags = ['v1.0.0', 'v1.1.0'];
+    exec.mockResolvedValue(tags.join('\n'));
+
+    await expect(range()).resolves.toBeDefined();
+
+    tags = ['exp-0', 'exp-1', 'v1.0.0-rc.0', 'v1.0.0-rc.1', 'v1.0.0-rc.2'];
+    exec.mockResolvedValue(tags.join('\n'));
+
+    await expect(range()).resolves.toBeDefined();
+
+    exec.mockResolvedValue('');
+
+    await expect(range()).resolves.toBeDefined();
+
+    expect(logger.info).toBeCalledTimes(0);
+    expect(logger.success).toBeCalledTimes(0);
+    expect(logger.error).toBeCalledTimes(0);
   });
 });
 

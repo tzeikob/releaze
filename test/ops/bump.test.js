@@ -28,6 +28,7 @@ beforeEach(() => {
 afterEach(() => {
   readFile.mockReset();
   writeFile.mockReset();
+
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
@@ -546,7 +547,7 @@ describe('Bump called with a pre release type should', () => {
 });
 
 describe('Bump should report to console via logger', () => {
-  test('when the verbose property has been enabled globally', async () => {
+  test('only when the verbose property has been enabled globally', async () => {
     expect.assertions(8);
 
     readFile.mockResolvedValue('{ "version": "1.0.0" }');
@@ -565,6 +566,18 @@ describe('Bump should report to console via logger', () => {
 
     expect(logger.info).nthCalledWith(5, 'File npm-shrinkwrap.json has been updated to new version:', 2);
     expect(logger.info).nthCalledWith(6, `{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }`, 4);
+  });
+
+  test('except when the verbose property is not set globally', async () => {
+    expect.assertions(4);
+
+    readFile.mockResolvedValue('{ "version": "1.0.0" }');
+
+    await expect(bump('premajor', 'alpha')).resolves.toBeDefined();
+
+    expect(logger.info).toBeCalledTimes(0);
+    expect(logger.success).toBeCalledTimes(0);
+    expect(logger.error).toBeCalledTimes(0);
   });
 });
 

@@ -27,6 +27,7 @@ beforeEach(() => {
 
 afterEach(() => {
   exec.mockReset();
+
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
@@ -279,6 +280,16 @@ describe('Tag should report to console via logger', () => {
     expect(logger.info).nthCalledWith(4, 'File npm-shrinkwrap.json has been staged.', 2);
     expect(logger.info).nthCalledWith(5, 'All files have been committed:', 2);
     expect(logger.info).nthCalledWith(6, '[master d3f884f] message', 4);
+  });
+
+  test('except when the verbose property is not set globally', async () => {
+    expect.assertions(4);
+
+    await expect(tag('v1.0.0')).resolves.toBeDefined();
+
+    expect(logger.info).toBeCalledTimes(0);
+    expect(logger.success).toBeCalledTimes(0);
+    expect(logger.error).toBeCalledTimes(0);
   });
 });
 

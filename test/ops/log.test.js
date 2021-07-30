@@ -20,6 +20,7 @@ beforeEach(() => {
 
 afterEach(() => {
   exec.mockReset();
+
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
@@ -316,6 +317,22 @@ describe('Log should report to console via logger', () => {
 
     expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD...', 2);
     expect(logger.info).nthCalledWith(2, 'No git logs have been found.', 2);
+  });
+
+  test('except when the verbose property is not set globally', async () => {
+    expect.assertions(5);
+
+    exec.mockResolvedValue('log1\nlog2\nlog3');
+
+    await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
+
+    exec.mockResolvedValue('');
+
+    await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
+
+    expect(logger.info).toBeCalledTimes(0);
+    expect(logger.success).toBeCalledTimes(0);
+    expect(logger.error).toBeCalledTimes(0);
   });
 });
 

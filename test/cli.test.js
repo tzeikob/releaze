@@ -42,9 +42,12 @@ afterEach(() => {
   log.mockReset();
   changelog.mockReset();
   tag.mockReset();
+
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
+
+  delete global.verbose;
 });
 
 describe('Cli module should export an async run operation which', () => {
