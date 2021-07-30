@@ -1,3 +1,13 @@
+v1.0.0-beta.0 - July 30, 2021
+
+* [`6478d7c`](https://github.com/tzeikob/releaze/commit/6478d7c33fd17216bc4d48684ce9a2bae2ff6e6d) Drop --test option to run testing before release (fixes #23)
+* [`66a2e76`](https://github.com/tzeikob/releaze/commit/66a2e760f48546639c809556ffc729e1800262a7) Improve testing for reporting verbosely
+* [`c630cc4`](https://github.com/tzeikob/releaze/commit/c630cc4c0e95699e2fd05dac9a4dd80b95a51e5a) Add lines before/after each changelog headline (fixes #25)
+* [`4fe804e`](https://github.com/tzeikob/releaze/commit/4fe804eb9aee61192e836df9eb97c2ff19a23e7c) Fix missed verbose check in range op
+* [`2362fd8`](https://github.com/tzeikob/releaze/commit/2362fd828984f42bcdc92146e644d1323ed13999) Fix broken unicode arrow chars in output (fixes #24)
+* [`99a7fac`](https://github.com/tzeikob/releaze/commit/99a7fac6b02519789149d3993bba0cb7a8abee96) Improve the syntax in the help output
+* [`5383914`](https://github.com/tzeikob/releaze/commit/538391445e6b34b1760d9018a32861d7fc1eeee8) Fix broken markdown in CHANGELOG.md
+
 v1.0.0-alpha.0 - July 28, 2021
 
 * [`aff9f1e`](https://github.com/tzeikob/releaze/commit/aff9f1e1d9e24e6e668a5ed73f5f1ac900ddd385) Create the changelog file
