@@ -1,6 +1,5 @@
 'use strict';
 
-const exec = require('../lib/util/exec');
 const check = require('../lib/ops/check');
 const bump = require('../lib/ops/bump');
 const range = require('../lib/ops/range');
@@ -10,7 +9,6 @@ const tag = require('../lib/ops/tag');
 const cli = require('../lib/cli');
 const logger = require('../lib/util/logger');
 
-jest.mock('../lib/util/exec');
 jest.mock('../lib/ops/check');
 jest.mock('../lib/ops/bump');
 jest.mock('../lib/ops/range');
@@ -25,7 +23,6 @@ jest.mock('../lib/util/logger', () => ({
 }));
 
 beforeEach(() => {
-  exec.mockResolvedValue();
   check.mockResolvedValue({ version: '1.0.0' });
   bump.mockResolvedValue({ current: '1.0.0', next: '2.0.0', isPrerelease: false });
   range.mockResolvedValue({ from: '1.0.0', to: 'HEAD' });
@@ -35,7 +32,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  exec.mockReset();
   check.mockReset();
   bump.mockReset();
   range.mockReset();
@@ -116,82 +112,6 @@ describe('Cli module should export an async run operation which', () => {
     expect(log).toBeCalledTimes(0);
     expect(changelog).toBeCalledTimes(0);
     expect(tag).toBeCalledTimes(0);
-  });
-});
-
-describe('Cli should take care of testing', () => {
-  test('running testing right after checking the pre-conditions if `--test` opt is given', async () => {
-    expect.assertions(5);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--test'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(check).toBeCalledTimes(1);
-
-    expect(exec).toBeCalledTimes(1);
-    expect(exec).toBeCalledWith('npm', ['test']);
-    expect(exec).toHaveBeenCalledAfter(check);
-  });
-
-  test('rejecting immediately if testing has not been passed', async () => {
-    expect.assertions(10);
-
-    const reason = 'Failed to pass testing';
-
-    exec.mockRejectedValue(new Error(reason));
-
-    const args = ['./node', './releaze', '--bump', 'major', '--test'];
-
-    await expect(cli.run(args)).rejects.toThrow(reason);
-
-    expect(check).toBeCalledTimes(1);
-
-    expect(exec).toBeCalledTimes(1);
-    expect(exec).toBeCalledWith('npm', ['test']);
-    expect(exec).toHaveBeenCalledAfter(check);
-
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-
-  test('skipping testing if `--test` option is missing', async () => {
-    expect.assertions(8);
-
-    const args = ['./node', './releaze', '--bump', 'major'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(check).toBeCalledTimes(1);
-
-    expect(exec).not.toBeCalledWith('npm', ['test']);
-
-    expect(bump).toBeCalledTimes(1);
-    expect(range).toBeCalledTimes(1);
-    expect(log).toBeCalledTimes(1);
-    expect(changelog).toBeCalledTimes(1);
-    expect(tag).toBeCalledTimes(1);
-  });
-
-  test('skipping testing if `--no-test` option is used', async () => {
-    expect.assertions(8);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--no-test'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(check).toBeCalledTimes(1);
-
-    expect(exec).not.toBeCalledWith('npm', ['test']);
-
-    expect(bump).toBeCalledTimes(1);
-    expect(range).toBeCalledTimes(1);
-    expect(log).toBeCalledTimes(1);
-    expect(changelog).toBeCalledTimes(1);
-    expect(tag).toBeCalledTimes(1);
   });
 });
 
@@ -328,7 +248,7 @@ describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
 });
 
 describe('Cli should report progress to console via logger', () => {
-  test('when a stable bump release without `--test` is requested', async () => {
+  test('when a stable bump release is requested', async () => {
     expect.assertions(12);
 
     const args = ['./node', './releaze', '--bump', 'major'];
@@ -351,34 +271,6 @@ describe('Cli should report progress to console via logger', () => {
     expect(logger.success).nthCalledWith(4, `Tag v2.0.0 \u2192 d3f884f has been created.`, 2);
 
     expect(logger.info).nthCalledWith(5, 'Release has been completed successfully.');
-  });
-
-  test('when a stable bump release with `--test` is requested', async () => {
-    expect.assertions(14);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--test'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(logger.info).toBeCalledTimes(6);
-    expect(logger.success).toBeCalledTimes(5);
-
-    expect(logger.info).nthCalledWith(1, 'Checking npm and git pre-conditions...');
-    expect(logger.success).nthCalledWith(1, 'All npm and git pre-conditions are met.', 2);
-
-    expect(logger.info).nthCalledWith(2, 'Running all unit and integration tests...');
-    expect(logger.success).nthCalledWith(2, 'All tests have been passed.', 2);
-
-    expect(logger.info).nthCalledWith(3, 'Bumping to next major version...');
-    expect(logger.success).nthCalledWith(3, `Version bumped from 1.0.0 \u2192 major 2.0.0.`, 2);
-
-    expect(logger.info).nthCalledWith(4, 'Writing changes to changelog file...');
-    expect(logger.success).nthCalledWith(4, 'The CHANGELOG.md file has been updated.', 2);
-
-    expect(logger.info).nthCalledWith(5, 'Creating a new bump release tag...');
-    expect(logger.success).nthCalledWith(5, `Tag v2.0.0 \u2192 d3f884f has been created.`, 2);
-
-    expect(logger.info).nthCalledWith(6, 'Release has been completed successfully.');
   });
 
   test('when a pre-release is requested', async () => {
