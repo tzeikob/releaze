@@ -55,17 +55,6 @@ describe('Changelog should be an async operation', () => {
     expect(readFile).toBeCalledTimes(0);
     expect(writeFile).toBeCalledTimes(0);
   });
-
-  test('where logs arg should not be an empty array', async () => {
-    expect.assertions(3);
-
-    const reason = 'Invalid or missing logs argument';
-
-    await expect(changelog('v1.0.0', [])).rejects.toThrow(reason);
-
-    expect(readFile).toBeCalledTimes(0);
-    expect(writeFile).toBeCalledTimes(0);
-  });
 });
 
 describe('Changelog called with valid version and logs args should', () => {
@@ -116,10 +105,26 @@ describe('Changelog called with valid version and logs args should', () => {
     await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
 
     const content = [
-      `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`,
-      '* 54ff0cd Restrict bump release types to lowercase only',
-      '* d41ab22 Accept alias HEAD as input to the log op'
-    ].join('\n');
+      `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n\n`,
+      '* 54ff0cd Restrict bump release types to lowercase only\n',
+      '* d41ab22 Accept alias HEAD as input to the log op\n'
+    ].join('');
+
+    expect(writeFile).toBeCalledTimes(1);
+    expect(writeFile).toBeCalledWith('CHANGELOG.md', `${content}`);
+  });
+
+  test('write an empty release head to a new CHANGELOG.md when an empty array of logs is given', async () => {
+    expect.assertions(3);
+
+    const error = new Error("ENOENT: no such file or directory, open 'CHANGELOG.md'");
+    error.code = 'ENOENT';
+
+    readFile.mockRejectedValue(error);
+
+    await expect(changelog('v2.0.0', [])).resolves.toBeUndefined();
+
+    const content = `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`;
 
     expect(writeFile).toBeCalledTimes(1);
     expect(writeFile).toBeCalledWith('CHANGELOG.md', `${content}`);
@@ -129,10 +134,10 @@ describe('Changelog called with valid version and logs args should', () => {
     expect.assertions(3);
 
     const oldContent = [
-      `v1.5.2 - ${moment().format('MMMM D, YYYY')}\n`,
-      '* 81ad3fb Refactor log tests to assert every await call',
-      '* 3b5b25f Refactor log tests to assert with toThrow instead'
-    ].join('\n');
+      `v1.5.2 - ${moment().format('MMMM D, YYYY')}\n\n`,
+      '* 81ad3fb Refactor log tests to assert every await call\n',
+      '* 3b5b25f Refactor log tests to assert with toThrow instead\n'
+    ].join('');
 
     readFile.mockResolvedValue(oldContent);
 
@@ -144,13 +149,32 @@ describe('Changelog called with valid version and logs args should', () => {
     await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
 
     const newContent = [
-      `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`,
-      '* 54ff0cd Restrict bump release types to lowercase only',
-      '* d41ab22 Accept alias HEAD as input to the log op'
-    ].join('\n');
+      `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n\n`,
+      '* 54ff0cd Restrict bump release types to lowercase only\n',
+      '* d41ab22 Accept alias HEAD as input to the log op\n'
+    ].join('');
 
     expect(writeFile).toBeCalledTimes(1);
-    expect(writeFile).toBeCalledWith('CHANGELOG.md', `${newContent}\n\n${oldContent}`);
+    expect(writeFile).toBeCalledWith('CHANGELOG.md', `${newContent}\n${oldContent}`);
+  });
+
+  test('append just an empty release head when an empty array of logs is given', async () => {
+    expect.assertions(3);
+
+    const oldContent = [
+      `v1.5.2 - ${moment().format('MMMM D, YYYY')}\n\n`,
+      '* 81ad3fb Refactor log tests to assert every await call\n',
+      '* 3b5b25f Refactor log tests to assert with toThrow instead\n'
+    ].join('');
+
+    readFile.mockResolvedValue(oldContent);
+
+    await expect(changelog('v2.0.0', [])).resolves.toBeUndefined();
+
+    const newContent = `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`;
+
+    expect(writeFile).toBeCalledTimes(1);
+    expect(writeFile).toBeCalledWith('CHANGELOG.md', `${newContent}\n${oldContent}`);
   });
 });
 
