@@ -1,5 +1,6 @@
 'use strict';
 
+const { green, yellow } = require('chalk');
 const check = require('../lib/ops/check');
 const bump = require('../lib/ops/bump');
 const range = require('../lib/ops/range');
@@ -258,19 +259,19 @@ describe('Cli should report progress to console via logger', () => {
     expect(logger.info).toBeCalledTimes(5);
     expect(logger.success).toBeCalledTimes(4);
 
-    expect(logger.info).nthCalledWith(1, 'Checking npm and git pre-conditions...');
-    expect(logger.success).nthCalledWith(1, 'All npm and git pre-conditions are met.', 2);
+    expect(logger.info).nthCalledWith(1, 'Checking npm and git pre-conditions:');
+    expect(logger.success).nthCalledWith(1, 'All npm and git pre-conditions are met', 1);
 
-    expect(logger.info).nthCalledWith(2, 'Bumping to next major version...');
-    expect(logger.success).nthCalledWith(2, `Version bumped from 1.0.0 \u2192 major 2.0.0.`, 2);
+    expect(logger.info).nthCalledWith(2, `Bumping to the next ${yellow('major')} version:`);
+    expect(logger.success).nthCalledWith(2, `Version bumped successfully from ${yellow('1.0.0')} to ${yellow('2.0.0')}`, 1);
 
-    expect(logger.info).nthCalledWith(3, 'Writing changes to changelog file...');
-    expect(logger.success).nthCalledWith(3, 'The CHANGELOG.md file has been updated.', 2);
+    expect(logger.info).nthCalledWith(3, 'Writing changes to changelog file:');
+    expect(logger.success).nthCalledWith(3, `The ${yellow('CHANGELOG.md')} file has been updated`, 1);
 
-    expect(logger.info).nthCalledWith(4, 'Creating a new bump release tag...');
-    expect(logger.success).nthCalledWith(4, `Tag v2.0.0 \u2192 d3f884f has been created.`, 2);
+    expect(logger.info).nthCalledWith(4, 'Creating a new git annotation tag:');
+    expect(logger.success).nthCalledWith(4, `Tag ${yellow('v2.0.0')} has been created on commit with ${yellow('d3f884f')} hash`, 1);
 
-    expect(logger.info).nthCalledWith(5, 'Release has been completed successfully.');
+    expect(logger.info).nthCalledWith(5, `Release ${green('v2.0.0')} has been completed successfully!`);
   });
 
   test('when a pre-release is requested', async () => {
@@ -281,7 +282,7 @@ describe('Cli should report progress to console via logger', () => {
     await expect(cli.run(args)).resolves.toBeUndefined();
 
     expect(logger.info).toBeCalledTimes(5);
-    expect(logger.info).nthCalledWith(2, 'Bumping to next premajor version with alpha preid...');
+    expect(logger.info).nthCalledWith(2, `Bumping to the next ${yellow('premajor')} ${yellow('alpha')} version:`);
   });
 
   test('having the verbose prop enabled in global object if the `--verbose` option is given', async () => {

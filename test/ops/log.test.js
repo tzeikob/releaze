@@ -289,7 +289,7 @@ describe('Log should should support ranges given as semver tag names', () => {
 
 describe('Log should report to console via logger', () => {
   test('when the verbose property has been enabled globally', async () => {
-    expect.assertions(5);
+    expect.assertions(4);
 
     exec.mockResolvedValue('log1\nlog2\nlog3');
 
@@ -297,11 +297,10 @@ describe('Log should report to console via logger', () => {
 
     await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
 
-    expect(logger.info).toBeCalledTimes(3);
+    expect(logger.info).toBeCalledTimes(2);
 
-    expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD...', 2);
-    expect(logger.info).nthCalledWith(2, 'Found 3 total git logs:', 2);
-    expect(logger.info).nthCalledWith(3, 'log1', 4);
+    expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD', 1);
+    expect(logger.info).nthCalledWith(2, 'Found 3 total git log(s)', 1);
   });
 
   test('when no git logs have been found', async () => {
@@ -315,8 +314,8 @@ describe('Log should report to console via logger', () => {
 
     expect(logger.info).toBeCalledTimes(2);
 
-    expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD...', 2);
-    expect(logger.info).nthCalledWith(2, 'No git logs have been found.', 2);
+    expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD', 1);
+    expect(logger.info).nthCalledWith(2, 'No git logs have been found', 1);
   });
 
   test('except when the verbose property is not set globally', async () => {

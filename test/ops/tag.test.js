@@ -274,12 +274,12 @@ describe('Tag should report to console via logger', () => {
 
     expect(logger.info).toBeCalledTimes(6);
 
-    expect(logger.info).nthCalledWith(1, 'File package.json has been staged.', 2);
-    expect(logger.info).nthCalledWith(2, 'File CHANGELOG.md has been staged.', 2);
-    expect(logger.info).nthCalledWith(3, 'File package-lock.json has been staged.', 2);
-    expect(logger.info).nthCalledWith(4, 'File npm-shrinkwrap.json has been staged.', 2);
-    expect(logger.info).nthCalledWith(5, 'All files have been committed:', 2);
-    expect(logger.info).nthCalledWith(6, '[master d3f884f] message', 4);
+    expect(logger.info).nthCalledWith(1, 'File package.json has been staged', 1);
+    expect(logger.info).nthCalledWith(2, 'File CHANGELOG.md has been staged', 1);
+    expect(logger.info).nthCalledWith(3, 'File package-lock.json has been staged', 1);
+    expect(logger.info).nthCalledWith(4, 'File npm-shrinkwrap.json has been staged', 1);
+    expect(logger.info).nthCalledWith(5, 'Staged files have been committed:', 1);
+    expect(logger.info).nthCalledWith(6, '[master d3f884f] message', 2);
   });
 
   test('except when the verbose property is not set globally', async () => {

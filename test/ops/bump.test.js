@@ -558,14 +558,14 @@ describe('Bump should report to console via logger', () => {
 
     expect(logger.info).toBeCalledTimes(6);
 
-    expect(logger.info).nthCalledWith(1, 'File package.json has been updated to new version:', 2);
-    expect(logger.info).nthCalledWith(2, `{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }`, 4);
+    expect(logger.info).nthCalledWith(1, 'File package.json has been updated to new version:', 1);
+    expect(logger.info).nthCalledWith(2, `{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }`, 2);
 
-    expect(logger.info).nthCalledWith(3, 'File package-lock.json has been updated to new version:', 2);
-    expect(logger.info).nthCalledWith(4, `{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }`, 4);
+    expect(logger.info).nthCalledWith(3, 'File package-lock.json has been updated to new version:', 1);
+    expect(logger.info).nthCalledWith(4, `{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }`, 2);
 
-    expect(logger.info).nthCalledWith(5, 'File npm-shrinkwrap.json has been updated to new version:', 2);
-    expect(logger.info).nthCalledWith(6, `{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }`, 4);
+    expect(logger.info).nthCalledWith(5, 'File npm-shrinkwrap.json has been updated to new version:', 1);
+    expect(logger.info).nthCalledWith(6, `{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }`, 2);
   });
 
   test('except when the verbose property is not set globally', async () => {
