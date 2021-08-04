@@ -28,7 +28,7 @@ beforeEach(() => {
   bump.mockResolvedValue({ current: '1.0.0', next: '2.0.0', isPrerelease: false });
   range.mockResolvedValue({ from: '1.0.0', to: 'HEAD' });
   log.mockResolvedValue(['log1', 'log2', 'log3']);
-  changelog.mockResolvedValue();
+  changelog.mockResolvedValue({ filename: 'CHANGELOG.md', append: false });
   tag.mockResolvedValue({ name: 'v2.0.0', hash: 'd3f884f' });
 });
 
@@ -265,8 +265,8 @@ describe('Cli should report progress to console via logger', () => {
     expect(logger.info).nthCalledWith(2, `Bumping to the next ${yellow('major')} version:`);
     expect(logger.success).nthCalledWith(2, `Version bumped successfully from ${yellow('1.0.0')} to ${yellow('2.0.0')}`, 1);
 
-    expect(logger.info).nthCalledWith(3, 'Writing changes to changelog file:');
-    expect(logger.success).nthCalledWith(3, `The ${yellow('CHANGELOG.md')} file has been updated`, 1);
+    expect(logger.info).nthCalledWith(3, 'Writing changes to the changelog file:');
+    expect(logger.success).nthCalledWith(3, `A new ${yellow('CHANGELOG.md')} file has been created`, 1);
 
     expect(logger.info).nthCalledWith(4, 'Creating a new git annotation tag:');
     expect(logger.success).nthCalledWith(4, `Tag ${yellow('v2.0.0')} has been created on commit with ${yellow('d3f884f')} hash`, 1);
@@ -283,6 +283,19 @@ describe('Cli should report progress to console via logger', () => {
 
     expect(logger.info).toBeCalledTimes(5);
     expect(logger.info).nthCalledWith(2, `Bumping to the next ${yellow('premajor')} ${yellow('alpha')} version:`);
+  });
+
+  test('when there is an already an existing changelog file', async () => {
+    expect.assertions(3);
+
+    changelog.mockResolvedValue({ filename: 'CHANGELOG.md', append: true });
+
+    const args = ['./node', './releaze', '--bump', 'major'];
+
+    await expect(cli.run(args)).resolves.toBeUndefined();
+
+    expect(logger.success).toBeCalledTimes(4);
+    expect(logger.success).nthCalledWith(3, `The ${yellow('CHANGELOG.md')} file has been updated`, 1);
   });
 
   test('having the verbose prop enabled in global object if the `--verbose` option is given', async () => {

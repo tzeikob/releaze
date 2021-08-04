@@ -12,6 +12,7 @@ jest.mock('fs', () => ({
 }));
 
 const { readFile, writeFile } = fs.promises;
+const { any } = expect;
 
 beforeEach(() => {
   readFile.mockResolvedValue();
@@ -27,7 +28,7 @@ describe('Changelog should be an async operation', () => {
   test('getting as input a version and a logs args', async () => {
     expect.assertions(1);
 
-    await expect(changelog('v1.0.0', ['log1', 'log2', 'log3'])).resolves.toBeUndefined();
+    await expect(changelog('v1.0.0', ['log1', 'log2', 'log3'])).resolves.toBeDefined();
   });
 
   test('where version arg should always be given and be a string', async () => {
@@ -55,6 +56,15 @@ describe('Changelog should be an async operation', () => {
     expect(readFile).toBeCalledTimes(0);
     expect(writeFile).toBeCalledTimes(0);
   });
+
+  test('resolving to an object', async () => {
+    expect.assertions(1);
+
+    await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toMatchObject({
+      filename: any(String),
+      append: any(Boolean)
+    });
+  });
 });
 
 describe('Changelog called with valid version and logs args should', () => {
@@ -66,7 +76,10 @@ describe('Changelog called with valid version and logs args should', () => {
 
     readFile.mockRejectedValue(error);
 
-    await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toBeUndefined();
+    await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toEqual({
+      filename: 'CHANGELOG.md',
+      append: false
+    });
 
     expect(readFile).toBeCalledTimes(1);
     expect(readFile).toBeCalledWith('CHANGELOG.md', 'utf8');
@@ -75,12 +88,15 @@ describe('Changelog called with valid version and logs args should', () => {
     expect(writeFile).toBeCalledWith('CHANGELOG.md', expect.any(String));
   });
 
-  test('write once to the existing CHANGELOG.md file if such already exists', async () => {
+  test('append once to the existing CHANGELOG.md file if such already exists', async () => {
     expect.assertions(5);
     
     readFile.mockResolvedValue('log1');
 
-    await expect(changelog('v1.0.0', ['log2', 'log3'])).resolves.toBeUndefined();
+    await expect(changelog('v1.0.0', ['log2', 'log3'])).resolves.toEqual({
+      filename: 'CHANGELOG.md',
+      append: true
+    });
 
     expect(readFile).toBeCalledTimes(1);
     expect(readFile).toBeCalledWith('CHANGELOG.md', 'utf8');
@@ -102,7 +118,10 @@ describe('Changelog called with valid version and logs args should', () => {
       'd41ab22 Accept alias HEAD as input to the log op'
     ];
 
-    await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
+    await expect(changelog('v2.0.0', logs)).resolves.toEqual({
+      filename: 'CHANGELOG.md',
+      append: false
+    });
 
     const content = [
       `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n\n`,
@@ -122,7 +141,10 @@ describe('Changelog called with valid version and logs args should', () => {
 
     readFile.mockRejectedValue(error);
 
-    await expect(changelog('v2.0.0', [])).resolves.toBeUndefined();
+    await expect(changelog('v2.0.0', [])).resolves.toEqual({
+      filename: 'CHANGELOG.md',
+      append: false
+    });
 
     const content = `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`;
 
@@ -146,7 +168,10 @@ describe('Changelog called with valid version and logs args should', () => {
       'd41ab22 Accept alias HEAD as input to the log op'
     ];
 
-    await expect(changelog('v2.0.0', logs)).resolves.toBeUndefined();
+    await expect(changelog('v2.0.0', logs)).resolves.toEqual({
+      filename: 'CHANGELOG.md',
+      append: true
+    });
 
     const newContent = [
       `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n\n`,
@@ -169,7 +194,10 @@ describe('Changelog called with valid version and logs args should', () => {
 
     readFile.mockResolvedValue(oldContent);
 
-    await expect(changelog('v2.0.0', [])).resolves.toBeUndefined();
+    await expect(changelog('v2.0.0', [])).resolves.toEqual({
+      filename: 'CHANGELOG.md',
+      append: true
+    });
 
     const newContent = `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`;
 
