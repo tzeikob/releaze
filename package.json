@@ -1,6 +1,6 @@
 {
   "name": "releaze",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "main": "./lib/index.js",
   "scripts": {
     "test": "jest --verbose --silent --coverage --roots ./test"
