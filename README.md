@@ -85,8 +85,8 @@ The previous command gives us the following changelog style:
 ```
 v1.0.0 - July 4, 2021
 
-[`c4c8000`](http://url/commit/c4c8000daa8755e2c75...) Refactor changelog op to return metadata (Jake)
-[`0f322f4`](http://url/commit/0f322f454a0a25f76a7...) Improve console reporting (Jake)
+[`c4c8000`](http://url/commit/c4c8000da...) Refactor changelog op to return metadata (Jake)
+[`0f322f4`](http://url/commit/0f322f454...) Improve console reporting (Jake)
 ...
 ```
 
