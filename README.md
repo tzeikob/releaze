@@ -1,53 +1,147 @@
+[![npm version](https://img.shields.io/npm/v/releaze)](https://www.npmjs.com/package/releaze)
+[![downloads](https://img.shields.io/npm/dm/releaze)](https://www.npmjs.com/package/releaze)
+[![tested-jest](https://img.shields.io/badge/tested-jest-brightgreen)](https://github.com/facebook/jest)
+
 # Releaze
 
-[![npm version](https://img.shields.io/npm/v/releaze.svg)](https://www.npmjs.com/package/releaze)
-[![downloads](https://img.shields.io/npm/dm/releaze.svg)](https://www.npmjs.com/package/releaze)
-[![build](https://travis-ci.com/tzeikob/releaze.svg?branch=master)](https://travis-ci.com/tzeikob/releaze)
+Releaze is a tool for automating the process of releasing new versions of NPM packages following the [semver](https://semver.org/) notation. By now the tool supports the following features:
 
-This is an experimental package to be used as utility for side tasks related to releasing and publishing new versions.
+* Bump version in package and lock files
+* Collect last committed changes via git logs
+* Write or append changes to the `CHANGELOG.md` file
+* Create a git annotation tag matching the bumped version
 
 ## How to install
 
-In order to instal the package globally you should execute the following command:
+In order to have the tool available in your system as executable, you have to install it globally like so:
 
 ```sh
-npm install -g releaze
+npm install --global releaze
 ```
+
+Another option is to install it as a development dependency in your project, like so:
+
+```sh
+npm install --save-dev releaze
+```
+
+Both ways will work fine, which option you choose depends only on the environment of the setup and your overall workflow.
 
 ## How to use
 
-Assuming you have installed the package globally, change to the directory of your git repository. Being in the project's root folder, you can print all the commit messages by running the following command:
+Assuming you have the tool installed globally, change to the directory of your project. Now let's say you have done with your changes and have them committed so your git working directory is clean. In case you want to release the next major stable version you can do so by executing the following command:
 
 ```sh
-releaze changelog
+releaze --bump major
 ```
 
-this command will print every commit message from your git repository in the following format:
+after successful execution you can see your project has bumped up to the next major stable version, by having the version in your package files (incl. lock files) updated, any committed changes collected since the last stable released version added to your `CHANGELOG.md` file and a new git annotation tag matching this new bumped version.
+
+### Are all pre-conditions met?
+
+The tool is implemented so to run a few pre-condition checks before it starts the release operation. If any of the following pre-conditions are not met the release will abort with an exit code:
+
+* Valid NPM project with package.json
+* Valid git repository
+* A git repository with at least one commit
+* A clean git working directory
+
+## Publish a new release
+
+Currently the tool is not supporting an option to automatically publish the new version to a public or private NPM registry, so after a successful execution you have to run the following npm command:
+
+```sh
+npm publish
+```
+
+In the case you are releasing in a pre-release channel you have to send the release in a separate tag, other than the default `latest` tag:
+
+```sh
+npm publish --tag next
+```
+
+where `next` could be any valid name (alpha, beta etc.), whatever makes sense in your case.
+
+## Format lines in the changelog file
+
+By default the tool is using a pretty standard style for each changelog line, the notation of which is based on the git log's [format](https://git-scm.com/docs/git-log#_pretty_formats). The actual style is `%h %s`, where `%h` is a placeholder for the short hash and `%s` a placeholder for the message either correspond to the commit the change line is about. You can see an example bellow:
 
 ```
+v1.0.0 - July 4, 2021
+
+c4c8000 Refactor changelog op to return metadata
+0f322f4 Improve console reporting
 ...
-e8a36dd Reorganize package properties plus various demographics
-880a599 Set the version and environment of the ES
-371664a First commit
-
-Wow, that was a DRY output of 103 commits!
-
 ```
 
-### Limit commits in a given range
+In order to set your personal style you can use the `--format` option using any available git log placeholders. So let's say we want each line to start with the short hash of the commit anchored with the url pointing to the commit in the remote repository and followed by the commit message and the name of the author enclosed within a pair of parenthesis. You can do so by using the following command:
 
-Another use case could be to limit the range of commits given a starting and ending point. The starting point should be given via the argument `from` and the end point via the argument `to`, both arguments is expected to be a commit hash or a git tag.
-
-```sh
-releaze changelog --from <hash or tag> --to <hash or tag>
+```
+releaze --bump --changelog --format '[%h](https://url/commit/%H) %s (%an)'
 ```
 
-Bear in mind that you don't have to provided both arguments, you can use for instance only the `from` where the commit range should be limited to those starting from the given hash or tag otherwise you can use only the `to` argument to print only the commits up to the given has or tag.
+The previous command gives us the following changelog style:
 
-## Get help
-
-You can always get more information about the usage and options applied to the client.
-
-```sh
-releaze --help
 ```
+v1.0.0 - July 4, 2021
+
+[c4c8000](http://url/commit/c4c8000daa8755e2c75b34013b4cdc0eff7e84df) Refactor changelog op to return metadata (Jake)
+[0f322f4](http://url/commit/0f322f454a0a25f76a7c44852436268b51d4d1c3) Improve console reporting (Jake)
+...
+```
+
+## What are the options?
+
+Below you can find an extended list of all options this tool is providing:
+
+```
+-b, --bump <type>
+           The semver release type to bump the version by. Valid values are:
+           major, minor, patch, premajor, preminor, prepatch, prerelease.
+
+--preid <indentifier>
+           An identifier to be used in case of a premajor, preminor, prepatch
+           or prerelease release.
+
+--changelog
+          Use this option to write the release's changes in the CHANGELOG.md
+          file, default is true.
+
+--no-changelog
+          Use this option to skip writing the release's changes to the changelog
+          file.
+
+-f, --format <string>
+          The format to apply to each line in the changelog file, default is '%h %s'.
+          For more format options see the official git log formatnotation. The option
+          should always given along with the --changelog option.
+
+--git
+         Use this option to create a git annotation tag with a name matching
+         the release version number, default is true.
+
+--no-git
+         Use this option to skip creating a git annotation tag.
+
+-m, --message <string>
+         The message which will be used both in git commit and tag, default
+         is 'Bump to v%s' where %s is a placeholder for the version number.
+         The option should always given along with the --git option.
+         
+-h, --help
+         Prints a help report about the usage of the tool.
+
+-v, --version
+         Prints the version of the tool.
+
+--verbose
+         Use this option to print a verbose output per in operation.
+```
+
+## How you can contribute
+
+Well no contribution rules are set for the moment, so feel free to help on the following topics:
+
+* Find bugs
+* Suggest other features
+* Write an article about it
