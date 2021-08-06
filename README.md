@@ -77,7 +77,7 @@ c4c8000 Refactor changelog op to return metadata
 In order to set your personal style you can use the `--format` option using any available git log placeholders. So let's say we want each line to start with the short hash of the commit anchored with the url pointing to the commit in the remote repository and followed by the commit message and the name of the author enclosed within a pair of parenthesis. You can do so by using the following command:
 
 ```
-releaze --bump --changelog --format '[%h](https://url/commit/%H) %s (%an)'
+releaze --bump --changelog --format '[`%h`](https://url/commit/%H) %s (%an)'
 ```
 
 The previous command gives us the following changelog style:
@@ -85,8 +85,8 @@ The previous command gives us the following changelog style:
 ```
 v1.0.0 - July 4, 2021
 
-[c4c8000](http://url/commit/c4c8000daa8755e2c75b34013b4cdc0eff7e84df) Refactor changelog op to return metadata (Jake)
-[0f322f4](http://url/commit/0f322f454a0a25f76a7c44852436268b51d4d1c3) Improve console reporting (Jake)
+[`c4c8000`](http://url/commit/c4c8000daa8755e2c75...) Refactor changelog op to return metadata (Jake)
+[`0f322f4`](http://url/commit/0f322f454a0a25f76a7...) Improve console reporting (Jake)
 ...
 ```
 
