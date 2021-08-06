@@ -36,6 +36,7 @@
   "author": "Jake Ob <iakopap@gmail.com>",
   "description": "A tool to automate the release of NPM packages",
   "keywords": [
+    "release",
     "versioning",
     "changelog",
     "bump",
