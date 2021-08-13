@@ -1,0 +1,50 @@
+{
+  "extends": ["aargh"],
+  "rules": {
+    "complexity": ["error", { "max": 20 }],
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-unused-vars": ["error", {
+      "vars": "all",
+      "args": "all",
+      "caughtErrors": "none",
+      "ignoreRestSiblings": false
+    }]
+  },
+  "overrides": [
+    {
+      "files": ["./bin/releaze.js"],
+      "rules": {
+        "node/no-process-exit": "off"
+      }
+    },
+    {
+      "files": [
+        "./lib/util/logger.js",
+        "./test/util/logger.test.js"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["./test/util/logger.test.js"],
+      "rules": {
+        "no-global-assign": ["error", { "exceptions": ["console"] }]
+      }
+    },
+
+    {
+      "files": ["./test/**/*.js"],
+      "rules": {
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+        "no-unused-vars": ["error", {
+          "vars": "all",
+          "args": "after-used",
+          "caughtErrors": "all",
+          "ignoreRestSiblings": false
+        }]
+      }
+    }
+  ]
+}

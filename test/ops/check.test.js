@@ -146,6 +146,8 @@ describe('Check should make sure it is running within a git repo', () => {
       if (command === 'git status --porcelain') {
         return 'M index.js';
       }
+
+      return '';
     });
 
     const reason = 'Working directory is not clean, please stage and commit before use';

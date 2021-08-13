@@ -17,7 +17,7 @@ const {
 
 describe('Call of isGiven(value)', () => {
   test('should return true for any value except null and undefined', () => {
-    expect.assertions(14);
+    expect.assertions(13);
 
     expect(isGiven('str')).toBe(true);
     expect(isGiven('')).toBe(true);
@@ -35,22 +35,19 @@ describe('Call of isGiven(value)', () => {
     expect(isGiven([])).toBe(true);
     expect(isGiven({})).toBe(true);
     expect(isGiven(Symbol('s'))).toBe(true);
-
-    expect(isGiven(() => {})).toBe(true);
   });
 
   test('should return false for value equal to null or undefined', () => {
-    expect.assertions(3);
+    expect.assertions(2);
 
     expect(isGiven(null)).toBe(false);
-    expect(isGiven(undefined)).toBe(false);
     expect(isGiven()).toBe(false);
   });
 });
 
 describe('Call of isNotGiven(value)', () => {
   test('should return false for any value except null and undefined', () => {
-    expect.assertions(14);
+    expect.assertions(13);
 
     expect(isNotGiven('str')).toBe(false);
     expect(isNotGiven('')).toBe(false);
@@ -68,22 +65,19 @@ describe('Call of isNotGiven(value)', () => {
     expect(isNotGiven([])).toBe(false);
     expect(isNotGiven({})).toBe(false);
     expect(isNotGiven(Symbol('s'))).toBe(false);
-
-    expect(isNotGiven(() => {})).toBe(false);
   });
 
   test('should return true for value equal to null or undefined', () => {
-    expect.assertions(3);
+    expect.assertions(2);
 
     expect(isNotGiven(null)).toBe(true);
-    expect(isNotGiven(undefined)).toBe(true);
     expect(isNotGiven()).toBe(true);
   });
 });
 
 describe('Call of isNotString(value)', () => {
   test('should return true for any value except a non string', () => {
-    expect.assertions(12);
+    expect.assertions(10);
 
     expect(isNotString(123)).toBe(true);
     expect(isNotString(NaN)).toBe(true);
@@ -96,10 +90,7 @@ describe('Call of isNotString(value)', () => {
     expect(isNotString({})).toBe(true);
     expect(isNotString(Symbol('s'))).toBe(true);
 
-    expect(isNotString(() => {})).toBe(true);
-
     expect(isNotString(null)).toBe(true);
-    expect(isNotString(undefined)).toBe(true);
     expect(isNotString()).toBe(true);
   });
 
@@ -118,7 +109,7 @@ describe('Call of isNotString(value)', () => {
 
 describe('Call of isNotGitRef(value)', () => {
   test('should return true for any value except a non empty string', () => {
-    expect.assertions(13);
+    expect.assertions(11);
 
     expect(isNotGitRef(123)).toBe(true);
     expect(isNotGitRef(NaN)).toBe(true);
@@ -131,10 +122,7 @@ describe('Call of isNotGitRef(value)', () => {
     expect(isNotGitRef({})).toBe(true);
     expect(isNotGitRef(Symbol('s'))).toBe(true);
 
-    expect(isNotGitRef(() => {})).toBe(true);
-
     expect(isNotGitRef(null)).toBe(true);
-    expect(isNotGitRef(undefined)).toBe(true);
     expect(isNotGitRef()).toBe(true);
 
     expect(isNotGitRef('')).toBe(true);
@@ -223,11 +211,10 @@ describe('Call of isNotSemverReleaseType(value)', () => {
   });
 
   test('should return true for any value except `(pre)major`, `(pre)minor`, `(pre)patch` and prerelease', () => {
-    expect.assertions(30);
+    expect.assertions(28);
 
     expect(isNotSemverReleaseType()).toBe(true);
     expect(isNotSemverReleaseType(null)).toBe(true);
-    expect(isNotSemverReleaseType(undefined)).toBe(true);
 
     expect(isNotSemverReleaseType(123)).toBe(true);
     expect(isNotSemverReleaseType(NaN)).toBe(true);
@@ -239,8 +226,6 @@ describe('Call of isNotSemverReleaseType(value)', () => {
     expect(isNotSemverReleaseType([])).toBe(true);
     expect(isNotSemverReleaseType({})).toBe(true);
     expect(isNotSemverReleaseType(Symbol('s'))).toBe(true);
-
-    expect(isNotSemverReleaseType(() => {})).toBe(true);
 
     expect(isNotSemverReleaseType('')).toBe(true);
     expect(isNotSemverReleaseType('next')).toBe(true);
@@ -269,7 +254,7 @@ describe('Call of isNotSemverReleaseType(value)', () => {
 
 describe('Call of isNotSemver(value) should', () => {
   test('return true for any value except a non empty string', () => {
-    expect.assertions(13);
+    expect.assertions(11);
 
     expect(isNotSemver(123)).toBe(true);
     expect(isNotSemver(NaN)).toBe(true);
@@ -282,10 +267,7 @@ describe('Call of isNotSemver(value) should', () => {
     expect(isNotSemver({})).toBe(true);
     expect(isNotSemver(Symbol('s'))).toBe(true);
 
-    expect(isNotSemver(() => {})).toBe(true);
-
     expect(isNotSemver(null)).toBe(true);
-    expect(isNotSemver(undefined)).toBe(true);
     expect(isNotSemver()).toBe(true);
 
     expect(isNotSemver('')).toBe(true);
@@ -319,7 +301,7 @@ describe('Call of isNotSemver(value) should', () => {
 
 describe('Call of isNotArray(value) should', () => {
   test('return true for any value except an array', () => {
-    expect.assertions(12);
+    expect.assertions(10);
 
     expect(isNotArray(123)).toBe(true);
     expect(isNotArray(NaN)).toBe(true);
@@ -331,10 +313,7 @@ describe('Call of isNotArray(value) should', () => {
     expect(isNotArray({})).toBe(true);
     expect(isNotArray(Symbol('s'))).toBe(true);
 
-    expect(isNotArray(() => {})).toBe(true);
-
     expect(isNotArray(null)).toBe(true);
-    expect(isNotArray(undefined)).toBe(true);
     expect(isNotArray()).toBe(true);
 
     expect(isNotArray('')).toBe(true);
@@ -346,13 +325,13 @@ describe('Call of isNotArray(value) should', () => {
     expect(isNotArray([])).toBe(false);
     expect(isNotArray(['a', 'b', 'c'])).toBe(false);
     expect(isNotArray([1])).toBe(false);
-    expect(isNotArray([[1],[2]])).toBe(false);
+    expect(isNotArray([[1], [2]])).toBe(false);
   });
 });
 
 describe('Call of isNotBoolean(value) should', () => {
   test('return true for any value except true or false', () => {
-    expect.assertions(12);
+    expect.assertions(11);
 
     expect(isNotBoolean(123)).toBe(true);
     expect(isNotBoolean(NaN)).toBe(true);
@@ -362,10 +341,8 @@ describe('Call of isNotBoolean(value) should', () => {
     expect(isNotBoolean([])).toBe(true);
     expect(isNotBoolean(Symbol('s'))).toBe(true);
 
-    expect(isNotBoolean(() => {})).toBe(true);
-
     expect(isNotBoolean(null)).toBe(true);
-    expect(isNotBoolean(undefined)).toBe(true);
+    expect(isNotBoolean()).toBe(true);
 
     expect(isNotBoolean('')).toBe(true);
     expect(isNotBoolean('true')).toBe(true);
@@ -385,11 +362,11 @@ describe('Call of isNullish(value) should', () => {
     expect.assertions(2);
 
     expect(isNullish(null)).toBe(true);
-    expect(isNullish(undefined)).toBe(true);
+    expect(isNullish()).toBe(true);
   });
 
   test('return false for any value except null or undefined', () => {
-    expect.assertions(12);
+    expect.assertions(11);
 
     expect(isNullish(123)).toBe(false);
     expect(isNullish(NaN)).toBe(false);
@@ -401,8 +378,6 @@ describe('Call of isNullish(value) should', () => {
     expect(isNullish({})).toBe(false);
     expect(isNullish([])).toBe(false);
     expect(isNullish(Symbol('s'))).toBe(false);
-
-    expect(isNullish(() => {})).toBe(false);
 
     expect(isNullish('')).toBe(false);
     expect(isNullish('null')).toBe(false);
@@ -418,7 +393,7 @@ describe('Call of isEmptyString(value) should', () => {
   });
 
   test('return false for a non empty string value', () => {
-    expect.assertions(10);
+    expect.assertions(9);
 
     expect(isEmptyString(123)).toBe(false);
     expect(isEmptyString(NaN)).toBe(false);
@@ -431,15 +406,13 @@ describe('Call of isEmptyString(value) should', () => {
     expect(isEmptyString([])).toBe(false);
     expect(isEmptyString(Symbol('s'))).toBe(false);
 
-    expect(isEmptyString(() => {})).toBe(false);
-
     expect(isEmptyString('hello')).toBe(false);
   });
 });
 
 describe('Call of isNotObject(value) should', () => {
   test('return true for any value except a valid object', () => {
-    expect.assertions(11);
+    expect.assertions(10);
 
     expect(isNotObject(123)).toBe(true);
     expect(isNotObject(NaN)).toBe(true);
@@ -448,10 +421,8 @@ describe('Call of isNotObject(value) should', () => {
     expect(isNotObject([])).toBe(true);
     expect(isNotObject(Symbol('s'))).toBe(true);
 
-    expect(isNotObject(() => {})).toBe(true);
-
     expect(isNotObject(null)).toBe(true);
-    expect(isNotObject(undefined)).toBe(true);
+    expect(isNotObject()).toBe(true);
 
     expect(isNotObject('')).toBe(true);
     expect(isNotObject('true')).toBe(true);
@@ -470,7 +441,7 @@ describe('Call of isNotObject(value) should', () => {
 
 describe('Call of isNotPositiveNumber(value) should', () => {
   test('return true for any value except a valid positive number', () => {
-    expect.assertions(12);
+    expect.assertions(11);
 
     expect(isNotPositiveNumber(NaN)).toBe(true);
     expect(isNotPositiveNumber(Infinity)).toBe(true);
@@ -479,10 +450,8 @@ describe('Call of isNotPositiveNumber(value) should', () => {
     expect(isNotPositiveNumber([])).toBe(true);
     expect(isNotPositiveNumber(Symbol('s'))).toBe(true);
 
-    expect(isNotPositiveNumber(() => {})).toBe(true);
-
     expect(isNotPositiveNumber(null)).toBe(true);
-    expect(isNotPositiveNumber(undefined)).toBe(true);
+    expect(isNotPositiveNumber()).toBe(true);
 
     expect(isNotPositiveNumber('')).toBe(true);
     expect(isNotPositiveNumber('true')).toBe(true);

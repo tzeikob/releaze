@@ -184,10 +184,7 @@ describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
     const message = 'Release ver. %s';
 
     const args = [
-      './node', './releaze',
-      '--bump', 'major',
-      '--changelog', '--format', format,
-      '--git', '--message', message
+      './node', './releaze', '--bump', 'major', '--changelog', '--format', format, '--git', '--message', message
     ];
 
     await expect(cli.run(args)).resolves.toBeUndefined();
@@ -414,7 +411,7 @@ describe('Cli should reject immediately when', () => {
     expect(changelog).toBeCalledTimes(0);
     expect(tag).toBeCalledTimes(0);
   });
-  
+
   test('the option `--preid` is given without the `--bump` option', async () => {
     expect.assertions(7);
 

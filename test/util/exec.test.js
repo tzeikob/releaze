@@ -57,7 +57,7 @@ describe('Exec should reject with an error', () => {
 
     const reason = 'Missing file argument';
 
-    await (expect(exec())).rejects.toThrow(reason);
+    await expect(exec()).rejects.toThrow(reason);
 
     expect(execFile).toBeCalledTimes(0);
   });
@@ -67,7 +67,7 @@ describe('Exec should reject with an error', () => {
 
     const reason = 'Invalid non array args argument';
 
-    await (expect(exec('ls', 123))).rejects.toThrow(reason);
+    await expect(exec('ls', 123)).rejects.toThrow(reason);
 
     expect(execFile).toBeCalledTimes(0);
   });

@@ -103,7 +103,7 @@ describe('Changelog called with valid version and logs args should', () => {
 
   test('append once to the existing CHANGELOG.md file if such already exists', async () => {
     expect.assertions(5);
-    
+
     readFile.mockResolvedValue('log1');
 
     await expect(changelog('v1.0.0', ['log2', 'log3'])).resolves.toEqual({

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const chalk = require('chalk');
 const logger = require('../../lib/util/logger');
@@ -75,7 +75,7 @@ describe('Info method should', () => {
     expect(console.log).toBeCalledTimes(1);
     expect(console.log).toBeCalledWith('  Hello world');
   });
-  
+
   test('reject if not positive indentation size arg is given', () => {
     expect.assertions(2);
 
@@ -113,7 +113,7 @@ describe('Success method should', () => {
     expect(console.log).toBeCalledTimes(1);
     expect(console.log).toBeCalledWith('  \u2713 Hello world');
   });
-  
+
   test('reject if not positive indentation is given', () => {
     expect.assertions(3);
 

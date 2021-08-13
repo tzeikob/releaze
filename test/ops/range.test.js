@@ -16,7 +16,7 @@ const { any } = expect;
 
 beforeEach(() => {
   exec.mockResolvedValue('v1.0.0\n1.1.0');
-})
+});
 
 afterEach(() => {
   exec.mockReset();
@@ -102,7 +102,7 @@ describe('Range called for a stable release should resolve to', () => {
   test('a valid range object even though tags are given in a not sorted semver order', async () => {
     expect.assertions(1);
 
-    let tags = ['v1.1.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1'];
+    const tags = ['v1.1.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1'];
     exec.mockResolvedValue(tags.join('\n'));
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
@@ -111,7 +111,7 @@ describe('Range called for a stable release should resolve to', () => {
   test('a valid range object filtering out any tags given as not semver compatible name', async () => {
     expect.assertions(1);
 
-    let tags = ['v1.1.0', 'exp-0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1', 'stable'];
+    const tags = ['v1.1.0', 'exp-0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1', 'stable'];
     exec.mockResolvedValue(tags.join('\n'));
 
     await expect(range()).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
@@ -120,7 +120,7 @@ describe('Range called for a stable release should resolve to', () => {
   test('a HEAD bounded range when no stable tag has been found', async () => {
     expect.assertions(1);
 
-    let tags = ['exp-0', 'exp-1', 'v1.0.0-rc.0', 'v1.0.0-rc.1', 'v1.0.0-rc.2'];
+    const tags = ['exp-0', 'exp-1', 'v1.0.0-rc.0', 'v1.0.0-rc.1', 'v1.0.0-rc.2'];
     exec.mockResolvedValue(tags.join('\n'));
 
     await expect(range()).resolves.toEqual({ from: null, to: 'HEAD' });
@@ -163,7 +163,7 @@ describe('Range called for a prerelease release should resolve to', () => {
   test('a valid range object even though tags are given in a not sorted semver order', async () => {
     expect.assertions(1);
 
-    let tags = ['v1.1.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1'];
+    const tags = ['v1.1.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1'];
     exec.mockResolvedValue(tags.join('\n'));
 
     await expect(range(true)).resolves.toEqual({ from: 'v1.1.0', to: 'HEAD' });
@@ -172,7 +172,7 @@ describe('Range called for a prerelease release should resolve to', () => {
   test('a valid range object filtering out any tags given as not semver compatible name', async () => {
     expect.assertions(1);
 
-    let tags = ['v1.1.0', 'exp-0', 'v1.2.0-alpha.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1', 'stable'];
+    const tags = ['v1.1.0', 'exp-0', 'v1.2.0-alpha.0', 'v1.1.0-rc.0', 'v1.0.0', 'v1.1.0-rc.1', 'stable'];
     exec.mockResolvedValue(tags.join('\n'));
 
     await expect(range(true)).resolves.toEqual({ from: 'v1.2.0-alpha.0', to: 'HEAD' });
@@ -183,7 +183,7 @@ describe('Range should report to console via logger', () => {
   test('when the verbose property has been enabled globally', async () => {
     expect.assertions(4);
 
-    let tags = ['v1.0.0', 'v1.1.0'];
+    const tags = ['v1.0.0', 'v1.1.0'];
     exec.mockResolvedValue(tags.join('\n'));
 
     global.verbose = true;
@@ -199,7 +199,7 @@ describe('Range should report to console via logger', () => {
   test('when no last tag has been found', async () => {
     expect.assertions(4);
 
-    let tags = ['exp-0', 'exp-1', 'v1.0.0-rc.0', 'v1.0.0-rc.1', 'v1.0.0-rc.2'];
+    const tags = ['exp-0', 'exp-1', 'v1.0.0-rc.0', 'v1.0.0-rc.1', 'v1.0.0-rc.2'];
     exec.mockResolvedValue(tags.join('\n'));
 
     global.verbose = true;

@@ -2,7 +2,7 @@
 
 const exec = require('../../lib/util/exec');
 const logger = require('../../lib/util/logger');
-const log = require('../../lib/ops/log.js');
+const log = require('../../lib/ops/log');
 
 jest.mock('../../lib/util/exec');
 
@@ -78,18 +78,18 @@ describe('Log should be an async operation', () => {
     await expect(log({ to: 'v1.33.a4' })).rejects.toThrow(reason);
     await expect(log({ to: '1.33' })).rejects.toThrow(reason);
     await expect(log({ to: '01.33.a4' })).rejects.toThrow(reason);
-    await expect(log({ to: '..', })).rejects.toThrow(reason);
+    await expect(log({ to: '..' })).rejects.toThrow(reason);
     await expect(log({ to: '...' })).rejects.toThrow(reason);
     await expect(log({ to: 'head' })).rejects.toThrow(reason);
     await expect(log({ to: '' })).rejects.toThrow(reason);
 
     expect(exec).toBeCalledTimes(0);
   });
-  
+
   test('where both `from` and `to` props should be a valid git ref (hash, semver tag, HEAD)', async () => {
     expect.assertions(4);
 
-    await expect(log({ from: '', })).rejects.toThrow(Error);
+    await expect(log({ from: '' })).rejects.toThrow(Error);
     await expect(log({ to: '' })).rejects.toThrow(Error);
     await expect(log({ from: '', to: '' })).rejects.toThrow(Error);
 
@@ -113,11 +113,11 @@ describe('Log should be an async operation', () => {
   test('resolving to an array of git log strings', async () => {
     expect.assertions(2);
 
-    exec.mockResolvedValue(`line1\n`);
+    exec.mockResolvedValue('line1\n');
 
     await expect(log()).resolves.toEqual(['line1']);
 
-    exec.mockResolvedValue(`line1\nline2\nline3\n`);
+    exec.mockResolvedValue('line1\nline2\nline3\n');
 
     await expect(log()).resolves.toEqual(['line1', 'line2', 'line3']);
   });
@@ -125,7 +125,7 @@ describe('Log should be an async operation', () => {
   test('resolving to an empty array when `git log` process returns no logs', async () => {
     expect.assertions(2);
 
-    exec.mockResolvedValue(`\n`);
+    exec.mockResolvedValue('\n');
 
     await expect(log()).resolves.toEqual([]);
 
@@ -220,7 +220,7 @@ describe('Log should spawn the `git log` process once with a range notation', ()
     expect(exec).toBeCalledTimes(1);
     expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'HEAD..HEAD']);
   });
-  
+
   test('with no range notation when the range arg is given as empty object', async () => {
     expect.assertions(3);
 
@@ -280,7 +280,7 @@ describe('Log should should support ranges given as semver tag names', () => {
   test('where either `from` and `to` are given as valid semver versions in `v1.0.0` form', async () => {
     expect.assertions(3);
 
-    await expect(log({ from: 'v1.0.0', to: `v2.0.0` })).resolves.toBeDefined();
+    await expect(log({ from: 'v1.0.0', to: 'v2.0.0' })).resolves.toBeDefined();
 
     expect(exec).toBeCalledTimes(1);
     expect(exec).toBeCalledWith('git', ['log', '--no-merges', '--oneline', '--format=%h %s', 'v1.0.0..v2.0.0']);

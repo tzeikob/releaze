@@ -3,7 +3,7 @@
 const semver = require('semver');
 const exec = require('../../lib/util/exec');
 const logger = require('../../lib/util/logger');
-const tag = require('../../lib/ops/tag.js');
+const tag = require('../../lib/ops/tag');
 
 jest.mock('../../lib/util/exec', () => jest.fn());
 
@@ -20,8 +20,10 @@ beforeEach(() => {
     const command = [file, ...args].join(' ');
 
     if (command.startsWith('git commit')) {
-      return '[master d3f884f] message'
+      return '[master d3f884f] message';
     }
+
+    return '';
   });
 });
 
@@ -110,8 +112,10 @@ describe('Tag should resolve', () => {
       if (command === 'git add CHANGELOG.md') {
         throw new Error('Failed to stage file: CHANGELOG.md');
       } else if (command.startsWith('git commit')) {
-        return '[master d3f884f] message'
+        return '[master d3f884f] message';
       }
+
+      return '';
     });
 
     await expect(tag('1.0.0')).resolves.toEqual({ name: 'v1.0.0', hash: 'd3f884f' });
@@ -136,8 +140,10 @@ describe('Tag should resolve', () => {
       if (command.match(/git add (package-lock|npm-shrinkwrap).json/)) {
         throw new Error('Failed to stage file: lock file');
       } else if (command.startsWith('git commit')) {
-        return '[master d3f884f] message'
+        return '[master d3f884f] message';
       }
+
+      return '';
     });
 
     await expect(tag('1.0.0')).resolves.toEqual({ name: 'v1.0.0', hash: 'd3f884f' });
@@ -329,7 +335,7 @@ describe('Tag should reject with an error', () => {
     await expect(tag('1.0.0')).rejects.toThrow(reason);
 
     expect(exec).toBeCalledTimes(5);
-  
+
     expect(exec).nthCalledWith(1, 'git', ['add', 'package.json']);
     expect(exec).nthCalledWith(2, 'git', ['add', 'CHANGELOG.md']);
     expect(exec).nthCalledWith(3, 'git', ['add', 'package-lock.json']);
@@ -347,10 +353,12 @@ describe('Tag should reject with an error', () => {
       const command = [file, ...args].join(' ');
 
       if (command.startsWith('git commit')) {
-        return '[master d3f884f] message'
+        return '[master d3f884f] message';
       } else if (command.startsWith('git tag')) {
         throw new Error(reason);
       }
+
+      return '';
     });
 
     await expect(tag('1.0.0')).rejects.toThrow(reason);
