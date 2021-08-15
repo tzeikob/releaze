@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-const logger = require('../../lib/util/logger');
 const bump = require('../../lib/ops/bump');
 
 jest.mock('fs', () => ({
@@ -9,14 +8,6 @@ jest.mock('fs', () => ({
     readFile: jest.fn(),
     writeFile: jest.fn()
   }
-}));
-
-jest.mock('../../lib/util/logger', () => ({
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  info: jest.fn(),
-  success: jest.fn(),
-  error: jest.fn()
 }));
 
 const { readFile, writeFile } = fs.promises;
@@ -30,12 +21,6 @@ beforeEach(() => {
 afterEach(() => {
   readFile.mockReset();
   writeFile.mockReset();
-
-  logger.debug.mockReset();
-  logger.verbose.mockReset();
-  logger.info.mockReset();
-  logger.success.mockReset();
-  logger.error.mockReset();
 });
 
 describe('Bump should by an async operation', () => {
@@ -545,32 +530,6 @@ describe('Bump called with a pre release type should', () => {
       next: '0.1.1-beta.0',
       isPrerelease: true
     });
-  });
-});
-
-describe('Bump should always try to report to console via logger', () => {
-  test('only to the `VERBOSE` level via the `verbose` method', async () => {
-    expect.assertions(12);
-
-    readFile.mockResolvedValue('{ "version": "1.0.0" }');
-
-    await expect(bump('premajor', 'alpha')).resolves.toBeDefined();
-
-    expect(logger.verbose).toBeCalledTimes(6);
-
-    expect(logger.verbose).nthCalledWith(1, ' File package.json has been updated to new version:');
-    expect(logger.verbose).nthCalledWith(2, '  { "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }');
-
-    expect(logger.verbose).nthCalledWith(3, ' File package-lock.json has been updated to new version:');
-    expect(logger.verbose).nthCalledWith(4, '  { "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }');
-
-    expect(logger.verbose).nthCalledWith(5, ' File npm-shrinkwrap.json has been updated to new version:');
-    expect(logger.verbose).nthCalledWith(6, '  { "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }');
-
-    expect(logger.debug).toBeCalledTimes(0);
-    expect(logger.info).toBeCalledTimes(0);
-    expect(logger.success).toBeCalledTimes(0);
-    expect(logger.error).toBeCalledTimes(0);
   });
 });
 

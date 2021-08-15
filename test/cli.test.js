@@ -1,6 +1,5 @@
 'use strict';
 
-const { green, yellow } = require('chalk');
 const check = require('../lib/ops/check');
 const bump = require('../lib/ops/bump');
 const range = require('../lib/ops/range');
@@ -16,13 +15,6 @@ jest.mock('../lib/ops/range');
 jest.mock('../lib/ops/log');
 jest.mock('../lib/ops/changelog');
 jest.mock('../lib/ops/tag');
-
-jest.mock('../lib/util/logger', () => ({
-  level: 'INFO',
-  info: jest.fn(),
-  success: jest.fn(),
-  error: jest.fn()
-}));
 
 beforeEach(() => {
   check.mockResolvedValue({ version: '1.0.0' });
@@ -42,9 +34,6 @@ afterEach(() => {
   tag.mockReset();
 
   logger.level = 'INFO';
-  logger.info.mockReset();
-  logger.success.mockReset();
-  logger.error.mockReset();
 });
 
 describe('Cli module should export an async run operation which', () => {
@@ -245,8 +234,8 @@ describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
   });
 });
 
-describe('Cli should report progress to console via the logger', () => {
-  test('having the logging `level` set to `INFO` if the `--verbose` option is not given', async () => {
+describe('Cli should set the logging level of the logger', () => {
+  test('to `INFO` if the `--verbose` option is not given', async () => {
     expect.assertions(2);
 
     const args = ['./node', './releaze', '--bump', 'major'];
@@ -256,7 +245,7 @@ describe('Cli should report progress to console via the logger', () => {
     expect(logger.level).toBe('INFO');
   });
 
-  test('having the logging `level` set to `VERBOSE` if the `--verbose` option is given', async () => {
+  test('to `VERBOSE` if the `--verbose` option is given', async () => {
     expect.assertions(2);
 
     const args = ['./node', './releaze', '--bump', 'major', '--verbose'];
@@ -264,55 +253,6 @@ describe('Cli should report progress to console via the logger', () => {
     await expect(cli.run(args)).resolves.toBeUndefined();
 
     expect(logger.level).toBe('VERBOSE');
-  });
-
-  test('when a stable bump release is requested', async () => {
-    expect.assertions(12);
-
-    const args = ['./node', './releaze', '--bump', 'major'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(logger.info).toBeCalledTimes(5);
-    expect(logger.success).toBeCalledTimes(4);
-
-    expect(logger.info).nthCalledWith(1, 'Checking npm and git pre-conditions:');
-    expect(logger.success).nthCalledWith(1, ' All npm and git pre-conditions are met');
-
-    expect(logger.info).nthCalledWith(2, `Bumping to the next ${yellow('major')} version:`);
-    expect(logger.success).nthCalledWith(2, ` Version bumped successfully from ${yellow('1.0.0')} to ${yellow('2.0.0')}`);
-
-    expect(logger.info).nthCalledWith(3, 'Writing changes to the changelog file:');
-    expect(logger.success).nthCalledWith(3, ` A new ${yellow('CHANGELOG.md')} file has been created`);
-
-    expect(logger.info).nthCalledWith(4, 'Creating a new git annotation tag:');
-    expect(logger.success).nthCalledWith(4, ` Tag ${yellow('v2.0.0')} has been created on commit with ${yellow('d3f884f')} hash`);
-
-    expect(logger.info).nthCalledWith(5, `Release ${green('v2.0.0')} has been completed successfully!`);
-  });
-
-  test('when a pre-release is requested', async () => {
-    expect.assertions(3);
-
-    const args = ['./node', './releaze', '--bump', 'premajor', '--preid', 'alpha'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(logger.info).toBeCalledTimes(5);
-    expect(logger.info).nthCalledWith(2, `Bumping to the next ${yellow('premajor')} ${yellow('alpha')} version:`);
-  });
-
-  test('when there is an already an existing changelog file', async () => {
-    expect.assertions(3);
-
-    changelog.mockResolvedValue({ filename: 'CHANGELOG.md', append: true });
-
-    const args = ['./node', './releaze', '--bump', 'major'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(logger.success).toBeCalledTimes(4);
-    expect(logger.success).nthCalledWith(3, ` The ${yellow('CHANGELOG.md')} file has been updated`);
   });
 });
 

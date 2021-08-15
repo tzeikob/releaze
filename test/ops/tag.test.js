@@ -2,18 +2,9 @@
 
 const semver = require('semver');
 const exec = require('../../lib/util/exec');
-const logger = require('../../lib/util/logger');
 const tag = require('../../lib/ops/tag');
 
 jest.mock('../../lib/util/exec', () => jest.fn());
-
-jest.mock('../../lib/util/logger', () => ({
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  info: jest.fn(),
-  success: jest.fn(),
-  error: jest.fn()
-}));
 
 const { any } = expect;
 
@@ -31,12 +22,6 @@ beforeEach(() => {
 
 afterEach(() => {
   exec.mockReset();
-
-  logger.debug.mockReset();
-  logger.verbose.mockReset();
-  logger.info.mockReset();
-  logger.success.mockReset();
-  logger.error.mockReset();
 });
 
 describe('Tag should be an async operation', () => {
@@ -269,28 +254,6 @@ describe('Tag should try to create an annotation tag', () => {
     await expect(tag(version, message)).resolves.toBeDefined();
 
     expect(exec).toBeCalledWith('git', ['tag', '-a', any(String), '-m', `Bump to new v${semver.clean(version)}`]);
-  });
-});
-
-describe('Tag should always try to report to console via logger', () => {
-  test('only to the `VERBOSE` level via the `verbose` method', async () => {
-    expect.assertions(12);
-
-    await expect(tag('v1.0.0')).resolves.toBeDefined();
-
-    expect(logger.verbose).toBeCalledTimes(6);
-
-    expect(logger.verbose).nthCalledWith(1, ' File package.json has been staged');
-    expect(logger.verbose).nthCalledWith(2, ' File CHANGELOG.md has been staged');
-    expect(logger.verbose).nthCalledWith(3, ' File package-lock.json has been staged');
-    expect(logger.verbose).nthCalledWith(4, ' File npm-shrinkwrap.json has been staged');
-    expect(logger.verbose).nthCalledWith(5, ' Staged files have been committed:');
-    expect(logger.verbose).nthCalledWith(6, '  [master d3f884f] message');
-
-    expect(logger.debug).toBeCalledTimes(0);
-    expect(logger.info).toBeCalledTimes(0);
-    expect(logger.success).toBeCalledTimes(0);
-    expect(logger.error).toBeCalledTimes(0);
   });
 });
 

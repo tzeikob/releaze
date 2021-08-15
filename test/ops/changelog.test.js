@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const moment = require('moment');
-const logger = require('../../lib/util/logger');
 const changelog = require('../../lib/ops/changelog');
 
 jest.mock('fs', () => ({
@@ -10,14 +9,6 @@ jest.mock('fs', () => ({
     readFile: jest.fn(),
     writeFile: jest.fn()
   }
-}));
-
-jest.mock('../../lib/util/logger', () => ({
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  info: jest.fn(),
-  success: jest.fn(),
-  error: jest.fn()
 }));
 
 const { readFile, writeFile } = fs.promises;
@@ -31,12 +22,6 @@ beforeEach(() => {
 afterEach(() => {
   readFile.mockReset();
   writeFile.mockReset();
-
-  logger.debug.mockReset();
-  logger.verbose.mockReset();
-  logger.info.mockReset();
-  logger.success.mockReset();
-  logger.error.mockReset();
 });
 
 describe('Changelog should be an async operation', () => {
@@ -218,22 +203,6 @@ describe('Changelog called with valid version and logs args should', () => {
 
     expect(writeFile).toBeCalledTimes(1);
     expect(writeFile).toBeCalledWith('CHANGELOG.md', `${newContent}\n${oldContent}`);
-  });
-});
-
-describe('Changelog should always try to report to console via logger', () => {
-  test('only to the `VERBOSE` level via the `verbose` method', async () => {
-    expect.assertions(7);
-
-    await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toBeDefined();
-
-    expect(logger.verbose).toBeCalledTimes(1);
-    expect(logger.verbose).nthCalledWith(1, ' Release has been written to CHANGELOG.md');
-
-    expect(logger.debug).toBeCalledTimes(0);
-    expect(logger.info).toBeCalledTimes(0);
-    expect(logger.success).toBeCalledTimes(0);
-    expect(logger.error).toBeCalledTimes(0);
   });
 });
 
