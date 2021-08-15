@@ -38,7 +38,7 @@ describe('Log should be an async operation', () => {
   test('where `from` prop in range arg should be a valid git ref (hash, semver tag, HEAD)', async () => {
     expect.assertions(11);
 
-    const reason = 'Invalid from range argument';
+    const reason = 'Invalid git range argument';
 
     await expect(log({ from: 'c26GGG' })).rejects.toThrow(reason);
     await expect(log({ from: 'c262349^' })).rejects.toThrow(reason);
@@ -57,7 +57,7 @@ describe('Log should be an async operation', () => {
   test('where `to` prop in range arg should be a valid git ref (hash, semver tag, HEAD)', async () => {
     expect.assertions(11);
 
-    const reason = 'Invalid to range argument';
+    const reason = 'Invalid git range argument';
 
     await expect(log({ to: 'c26GGG' })).rejects.toThrow(reason);
     await expect(log({ to: 'c262349^' })).rejects.toThrow(reason);
