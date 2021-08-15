@@ -7,6 +7,8 @@ const log = require('../../lib/ops/log');
 jest.mock('../../lib/util/exec');
 
 jest.mock('../../lib/util/logger', () => ({
+  debug: jest.fn(),
+  verbose: jest.fn(),
   info: jest.fn(),
   success: jest.fn(),
   error: jest.fn()
@@ -21,11 +23,11 @@ beforeEach(() => {
 afterEach(() => {
   exec.mockReset();
 
+  logger.debug.mockReset();
+  logger.verbose.mockReset();
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
-
-  delete global.verbose;
 });
 
 describe('Log should be an async operation', () => {
@@ -287,48 +289,38 @@ describe('Log should should support ranges given as semver tag names', () => {
   });
 });
 
-describe('Log should report to console via logger', () => {
-  test('when the verbose property has been enabled globally', async () => {
-    expect.assertions(4);
+describe('Log should always try to report to console via logger', () => {
+  test('only to the `VERBOSE` level via the `verbose` method', async () => {
+    expect.assertions(8);
 
     exec.mockResolvedValue('log1\nlog2\nlog3');
 
-    global.verbose = true;
-
     await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
 
-    expect(logger.info).toBeCalledTimes(2);
+    expect(logger.verbose).toBeCalledTimes(2);
 
-    expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD', 1);
-    expect(logger.info).nthCalledWith(2, 'Found 3 total git log(s)', 1);
+    expect(logger.verbose).nthCalledWith(1, ' Collecting git logs from v1.0.0 to HEAD');
+    expect(logger.verbose).nthCalledWith(2, ' Found 3 total git log(s)');
+
+    expect(logger.debug).toBeCalledTimes(0);
+    expect(logger.info).toBeCalledTimes(0);
+    expect(logger.success).toBeCalledTimes(0);
+    expect(logger.error).toBeCalledTimes(0);
   });
 
   test('when no git logs have been found', async () => {
-    expect.assertions(4);
-
-    exec.mockResolvedValue('');
-
-    global.verbose = true;
-
-    await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
-
-    expect(logger.info).toBeCalledTimes(2);
-
-    expect(logger.info).nthCalledWith(1, 'Collecting git logs from v1.0.0 to HEAD', 1);
-    expect(logger.info).nthCalledWith(2, 'No git logs have been found', 1);
-  });
-
-  test('except when the verbose property is not set globally', async () => {
-    expect.assertions(5);
-
-    exec.mockResolvedValue('log1\nlog2\nlog3');
-
-    await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
+    expect.assertions(8);
 
     exec.mockResolvedValue('');
 
     await expect(log({ from: 'v1.0.0', to: 'HEAD' })).resolves.toBeDefined();
 
+    expect(logger.verbose).toBeCalledTimes(2);
+
+    expect(logger.verbose).nthCalledWith(1, ' Collecting git logs from v1.0.0 to HEAD');
+    expect(logger.verbose).nthCalledWith(2, ' No git logs have been found');
+
+    expect(logger.debug).toBeCalledTimes(0);
     expect(logger.info).toBeCalledTimes(0);
     expect(logger.success).toBeCalledTimes(0);
     expect(logger.error).toBeCalledTimes(0);

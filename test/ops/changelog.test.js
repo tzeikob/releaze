@@ -13,6 +13,8 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('../../lib/util/logger', () => ({
+  debug: jest.fn(),
+  verbose: jest.fn(),
   info: jest.fn(),
   success: jest.fn(),
   error: jest.fn()
@@ -30,11 +32,11 @@ afterEach(() => {
   readFile.mockReset();
   writeFile.mockReset();
 
+  logger.debug.mockReset();
+  logger.verbose.mockReset();
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
-
-  delete global.verbose;
 });
 
 describe('Changelog should be an async operation', () => {
@@ -219,23 +221,16 @@ describe('Changelog called with valid version and logs args should', () => {
   });
 });
 
-describe('Changelog should report to console via logger', () => {
-  test('when the verbose property has been enabled globally', async () => {
-    expect.assertions(3);
-
-    global.verbose = true;
+describe('Changelog should always try to report to console via logger', () => {
+  test('only to the `VERBOSE` level via the `verbose` method', async () => {
+    expect.assertions(7);
 
     await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toBeDefined();
 
-    expect(logger.info).toBeCalledTimes(1);
-    expect(logger.info).nthCalledWith(1, 'Release has been written to CHANGELOG.md', 1);
-  });
+    expect(logger.verbose).toBeCalledTimes(1);
+    expect(logger.verbose).nthCalledWith(1, ' Release has been written to CHANGELOG.md');
 
-  test('except when the verbose property is not set globally', async () => {
-    expect.assertions(4);
-
-    await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toBeDefined();
-
+    expect(logger.debug).toBeCalledTimes(0);
     expect(logger.info).toBeCalledTimes(0);
     expect(logger.success).toBeCalledTimes(0);
     expect(logger.error).toBeCalledTimes(0);

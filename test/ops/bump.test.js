@@ -12,6 +12,8 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('../../lib/util/logger', () => ({
+  debug: jest.fn(),
+  verbose: jest.fn(),
   info: jest.fn(),
   success: jest.fn(),
   error: jest.fn()
@@ -29,11 +31,11 @@ afterEach(() => {
   readFile.mockReset();
   writeFile.mockReset();
 
+  logger.debug.mockReset();
+  logger.verbose.mockReset();
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
-
-  delete global.verbose;
 });
 
 describe('Bump should by an async operation', () => {
@@ -546,35 +548,26 @@ describe('Bump called with a pre release type should', () => {
   });
 });
 
-describe('Bump should report to console via logger', () => {
-  test('only when the verbose property has been enabled globally', async () => {
-    expect.assertions(8);
-
-    readFile.mockResolvedValue('{ "version": "1.0.0" }');
-
-    global.verbose = true;
-
-    await expect(bump('premajor', 'alpha')).resolves.toBeDefined();
-
-    expect(logger.info).toBeCalledTimes(6);
-
-    expect(logger.info).nthCalledWith(1, 'File package.json has been updated to new version:', 1);
-    expect(logger.info).nthCalledWith(2, '{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }', 2);
-
-    expect(logger.info).nthCalledWith(3, 'File package-lock.json has been updated to new version:', 1);
-    expect(logger.info).nthCalledWith(4, '{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }', 2);
-
-    expect(logger.info).nthCalledWith(5, 'File npm-shrinkwrap.json has been updated to new version:', 1);
-    expect(logger.info).nthCalledWith(6, '{ "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }', 2);
-  });
-
-  test('except when the verbose property is not set globally', async () => {
-    expect.assertions(4);
+describe('Bump should always try to report to console via logger', () => {
+  test('only to the `VERBOSE` level via the `verbose` method', async () => {
+    expect.assertions(12);
 
     readFile.mockResolvedValue('{ "version": "1.0.0" }');
 
     await expect(bump('premajor', 'alpha')).resolves.toBeDefined();
 
+    expect(logger.verbose).toBeCalledTimes(6);
+
+    expect(logger.verbose).nthCalledWith(1, ' File package.json has been updated to new version:');
+    expect(logger.verbose).nthCalledWith(2, '  { "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }');
+
+    expect(logger.verbose).nthCalledWith(3, ' File package-lock.json has been updated to new version:');
+    expect(logger.verbose).nthCalledWith(4, '  { "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }');
+
+    expect(logger.verbose).nthCalledWith(5, ' File npm-shrinkwrap.json has been updated to new version:');
+    expect(logger.verbose).nthCalledWith(6, '  { "version": "1.0.0" } \u2192 { "version": "2.0.0-alpha.0" }');
+
+    expect(logger.debug).toBeCalledTimes(0);
     expect(logger.info).toBeCalledTimes(0);
     expect(logger.success).toBeCalledTimes(0);
     expect(logger.error).toBeCalledTimes(0);

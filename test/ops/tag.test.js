@@ -8,6 +8,8 @@ const tag = require('../../lib/ops/tag');
 jest.mock('../../lib/util/exec', () => jest.fn());
 
 jest.mock('../../lib/util/logger', () => ({
+  debug: jest.fn(),
+  verbose: jest.fn(),
   info: jest.fn(),
   success: jest.fn(),
   error: jest.fn()
@@ -30,11 +32,11 @@ beforeEach(() => {
 afterEach(() => {
   exec.mockReset();
 
+  logger.debug.mockReset();
+  logger.verbose.mockReset();
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
-
-  delete global.verbose;
 });
 
 describe('Tag should be an async operation', () => {
@@ -270,29 +272,22 @@ describe('Tag should try to create an annotation tag', () => {
   });
 });
 
-describe('Tag should report to console via logger', () => {
-  test('when the verbose property has been enabled globally', async () => {
-    expect.assertions(8);
-
-    global.verbose = true;
+describe('Tag should always try to report to console via logger', () => {
+  test('only to the `VERBOSE` level via the `verbose` method', async () => {
+    expect.assertions(12);
 
     await expect(tag('v1.0.0')).resolves.toBeDefined();
 
-    expect(logger.info).toBeCalledTimes(6);
+    expect(logger.verbose).toBeCalledTimes(6);
 
-    expect(logger.info).nthCalledWith(1, 'File package.json has been staged', 1);
-    expect(logger.info).nthCalledWith(2, 'File CHANGELOG.md has been staged', 1);
-    expect(logger.info).nthCalledWith(3, 'File package-lock.json has been staged', 1);
-    expect(logger.info).nthCalledWith(4, 'File npm-shrinkwrap.json has been staged', 1);
-    expect(logger.info).nthCalledWith(5, 'Staged files have been committed:', 1);
-    expect(logger.info).nthCalledWith(6, '[master d3f884f] message', 2);
-  });
+    expect(logger.verbose).nthCalledWith(1, ' File package.json has been staged');
+    expect(logger.verbose).nthCalledWith(2, ' File CHANGELOG.md has been staged');
+    expect(logger.verbose).nthCalledWith(3, ' File package-lock.json has been staged');
+    expect(logger.verbose).nthCalledWith(4, ' File npm-shrinkwrap.json has been staged');
+    expect(logger.verbose).nthCalledWith(5, ' Staged files have been committed:');
+    expect(logger.verbose).nthCalledWith(6, '  [master d3f884f] message');
 
-  test('except when the verbose property is not set globally', async () => {
-    expect.assertions(4);
-
-    await expect(tag('v1.0.0')).resolves.toBeDefined();
-
+    expect(logger.debug).toBeCalledTimes(0);
     expect(logger.info).toBeCalledTimes(0);
     expect(logger.success).toBeCalledTimes(0);
     expect(logger.error).toBeCalledTimes(0);

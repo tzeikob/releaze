@@ -7,6 +7,8 @@ const range = require('../../lib/ops/range');
 jest.mock('../../lib/util/exec');
 
 jest.mock('../../lib/util/logger', () => ({
+  debug: jest.fn(),
+  verbose: jest.fn(),
   info: jest.fn(),
   success: jest.fn(),
   error: jest.fn()
@@ -21,11 +23,11 @@ beforeEach(() => {
 afterEach(() => {
   exec.mockReset();
 
+  logger.debug.mockReset();
+  logger.verbose.mockReset();
   logger.info.mockReset();
   logger.success.mockReset();
   logger.error.mockReset();
-
-  delete global.verbose;
 });
 
 describe('Range should be an async operation', () => {
@@ -179,37 +181,43 @@ describe('Range called for a prerelease release should resolve to', () => {
   });
 });
 
-describe('Range should report to console via logger', () => {
-  test('when the verbose property has been enabled globally', async () => {
-    expect.assertions(4);
+describe('Range should always try to report to console via logger', () => {
+  test('only to the `VERBOSE` level via the `verbose` method', async () => {
+    expect.assertions(8);
 
     const tags = ['v1.0.0', 'v1.1.0'];
     exec.mockResolvedValue(tags.join('\n'));
 
-    global.verbose = true;
-
     await expect(range()).resolves.toBeDefined();
 
-    expect(logger.info).toBeCalledTimes(2);
+    expect(logger.verbose).toBeCalledTimes(2);
 
-    expect(logger.info).nthCalledWith(1, 'The last tag found is v1.1.0', 1);
-    expect(logger.info).nthCalledWith(2, "Git logs will be bounded to the range { from: 'v1.1.0', to: 'HEAD' }", 1);
+    expect(logger.verbose).nthCalledWith(1, ' The last tag found is v1.1.0');
+    expect(logger.verbose).nthCalledWith(2, " Git logs will be bounded to the range { from: 'v1.1.0', to: 'HEAD' }");
+
+    expect(logger.debug).toBeCalledTimes(0);
+    expect(logger.info).toBeCalledTimes(0);
+    expect(logger.success).toBeCalledTimes(0);
+    expect(logger.error).toBeCalledTimes(0);
   });
 
   test('when no last tag has been found', async () => {
-    expect.assertions(4);
+    expect.assertions(8);
 
     const tags = ['exp-0', 'exp-1', 'v1.0.0-rc.0', 'v1.0.0-rc.1', 'v1.0.0-rc.2'];
     exec.mockResolvedValue(tags.join('\n'));
 
-    global.verbose = true;
-
     await expect(range()).resolves.toBeDefined();
 
-    expect(logger.info).toBeCalledTimes(2);
+    expect(logger.verbose).toBeCalledTimes(2);
 
-    expect(logger.info).nthCalledWith(1, 'No last tag has been found', 1);
-    expect(logger.info).nthCalledWith(2, "Git logs will be bounded to the range { from: null, to: 'HEAD' }", 1);
+    expect(logger.verbose).nthCalledWith(1, ' No last tag has been found');
+    expect(logger.verbose).nthCalledWith(2, " Git logs will be bounded to the range { from: null, to: 'HEAD' }");
+
+    expect(logger.debug).toBeCalledTimes(0);
+    expect(logger.info).toBeCalledTimes(0);
+    expect(logger.success).toBeCalledTimes(0);
+    expect(logger.error).toBeCalledTimes(0);
   });
 
   test('when no tags have been found', async () => {
@@ -217,36 +225,12 @@ describe('Range should report to console via logger', () => {
 
     exec.mockResolvedValue('');
 
-    global.verbose = true;
-
     await expect(range()).resolves.toBeDefined();
 
-    expect(logger.info).toBeCalledTimes(2);
+    expect(logger.verbose).toBeCalledTimes(2);
 
-    expect(logger.info).nthCalledWith(1, 'No tags have been found', 1);
-    expect(logger.info).nthCalledWith(2, "Git logs will be bounded to the range { from: null, to: 'HEAD' }", 1);
-  });
-
-  test('except when the verbose property is not set globally', async () => {
-    expect.assertions(6);
-
-    let tags = ['v1.0.0', 'v1.1.0'];
-    exec.mockResolvedValue(tags.join('\n'));
-
-    await expect(range()).resolves.toBeDefined();
-
-    tags = ['exp-0', 'exp-1', 'v1.0.0-rc.0', 'v1.0.0-rc.1', 'v1.0.0-rc.2'];
-    exec.mockResolvedValue(tags.join('\n'));
-
-    await expect(range()).resolves.toBeDefined();
-
-    exec.mockResolvedValue('');
-
-    await expect(range()).resolves.toBeDefined();
-
-    expect(logger.info).toBeCalledTimes(0);
-    expect(logger.success).toBeCalledTimes(0);
-    expect(logger.error).toBeCalledTimes(0);
+    expect(logger.verbose).nthCalledWith(1, ' No tags have been found');
+    expect(logger.verbose).nthCalledWith(2, " Git logs will be bounded to the range { from: null, to: 'HEAD' }");
   });
 });
 
