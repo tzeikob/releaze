@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 describe('Logger should be an object exposing', () => {
-  test('a `level` instance property set to the default `INFO` logging level', () => {
+  test('a level instance property set to the default "INFO" logging level', () => {
     expect.assertions(2);
 
     expect(logger).toMatchObject({
@@ -27,7 +27,7 @@ describe('Logger should be an object exposing', () => {
     expect(logger.level).toBe('INFO');
   });
 
-  test('the `debug`, `verbose`, `info`, `success` and `error` instance methods', () => {
+  test('a debug, verbose, info, success and error instance methods', () => {
     expect.assertions(1);
 
     expect(logger).toMatchObject({
@@ -40,40 +40,38 @@ describe('Logger should be an object exposing', () => {
   });
 });
 
-describe('Method `debug` for a logging level set to', () => {
-  test.each([
-    'DEBUG'
-  ])('%s, should log once via the `console.log` the message passed as arg', (level) => {
+describe('Method debug for a logging level set to', () => {
+  test('"DEBUG" should log once via the console.log the message passed as arg', () => {
     expect.assertions(4);
 
-    logger.level = level;
+    logger.level = 'DEBUG';
 
     expect(logger.debug('Hello world')).toBeUndefined();
 
     expect(console.log).toBeCalledTimes(1);
     expect(console.log).toBeCalledWith('Hello world');
 
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).not.toBeCalled();
   });
 
   test.each([
     'VERBOSE', 'INFO', 'SUCCESS', 'ERROR', 'OTHER'
-  ])('%s, should skip logging', (level) => {
+  ])('%p should skip logging', (level) => {
     expect.assertions(3);
 
     logger.level = level;
 
     expect(logger.debug('Hello world')).toBeUndefined();
 
-    expect(console.log).toBeCalledTimes(0);
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.log).not.toBeCalled();
+    expect(console.error).not.toBeCalled();
   });
 });
 
-describe('Method `verbose` for a logging level set to', () => {
+describe('Method verbose for a logging level set to', () => {
   test.each([
     'DEBUG', 'VERBOSE'
-  ])('%s, should log once via the `console.log` the message passed as arg', (level) => {
+  ])('%p should log once via the console.log the message passed as arg', (level) => {
     expect.assertions(4);
 
     logger.level = level;
@@ -83,27 +81,27 @@ describe('Method `verbose` for a logging level set to', () => {
     expect(console.log).toBeCalledTimes(1);
     expect(console.log).toBeCalledWith('Hello world');
 
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).not.toBeCalled();
   });
 
   test.each([
     'INFO', 'SUCCESS', 'ERROR', 'OTHER'
-  ])('%s, should skip logging', (level) => {
+  ])('%p should skip logging', (level) => {
     expect.assertions(3);
 
     logger.level = level;
 
     expect(logger.verbose('Hello world')).toBeUndefined();
 
-    expect(console.log).toBeCalledTimes(0);
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.log).not.toBeCalled();
+    expect(console.error).not.toBeCalled();
   });
 });
 
-describe('Method `info` for a logging level set to', () => {
+describe('Method info for a logging level set to', () => {
   test.each([
     'DEBUG', 'VERBOSE', 'INFO'
-  ])('%s, should log once via the `console.log` the message passed as arg', (level) => {
+  ])('%p should log once via the console.log the message passed as arg', (level) => {
     expect.assertions(4);
 
     logger.level = level;
@@ -113,27 +111,27 @@ describe('Method `info` for a logging level set to', () => {
     expect(console.log).toBeCalledTimes(1);
     expect(console.log).toBeCalledWith('Hello world');
 
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).not.toBeCalled();
   });
 
   test.each([
     'SUCCESS', 'ERROR', 'OTHER'
-  ])('%s, should skip logging', (level) => {
+  ])('%p should skip logging', (level) => {
     expect.assertions(3);
 
     logger.level = level;
 
     expect(logger.info('Hello world')).toBeUndefined();
 
-    expect(console.log).toBeCalledTimes(0);
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.log).not.toBeCalled();
+    expect(console.error).not.toBeCalled();
   });
 });
 
-describe('Method `success` for a logging level set to', () => {
+describe('Method success for a logging level set to', () => {
   test.each([
     'DEBUG', 'VERBOSE', 'INFO', 'SUCCESS'
-  ])('%s, should log once via the `console.log` the message passed as arg', (level) => {
+  ])('%p should log once via the console.log the message passed as arg', (level) => {
     expect.assertions(4);
 
     logger.level = level;
@@ -143,27 +141,27 @@ describe('Method `success` for a logging level set to', () => {
     expect(console.log).toBeCalledTimes(1);
     expect(console.log).toBeCalledWith('\x1B[32m\u2713\x1B[39m Hello world');
 
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).not.toBeCalled();
   });
 
   test.each([
     'ERROR', 'OTHER'
-  ])('%s, should skip logging', (level) => {
+  ])('%p should skip logging', (level) => {
     expect.assertions(3);
 
     logger.level = level;
 
     expect(logger.success('Hello world')).toBeUndefined();
 
-    expect(console.log).toBeCalledTimes(0);
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.log).not.toBeCalled();
+    expect(console.error).not.toBeCalled();
   });
 });
 
-describe('Method `error` for a logging level set to', () => {
+describe('Method error for a logging level set to', () => {
   test.each([
     'DEBUG', 'VERBOSE', 'INFO', 'SUCCESS', 'ERROR'
-  ])('%s, should log once via the `console.error` the message passed as arg', (level) => {
+  ])('%p should log once via the console.error the message passed as arg', (level) => {
     expect.assertions(4);
 
     logger.level = level;
@@ -173,19 +171,17 @@ describe('Method `error` for a logging level set to', () => {
     expect(console.error).toBeCalledTimes(1);
     expect(console.error).toBeCalledWith('Hello world');
 
-    expect(console.log).toBeCalledTimes(0);
+    expect(console.log).not.toBeCalled();
   });
 
-  test.each([
-    'OTHER'
-  ])('%s, should skip logging', (level) => {
+  test('"OTHER" should skip logging', () => {
     expect.assertions(3);
 
-    logger.level = level;
+    logger.level = 'OTHER';
 
     expect(logger.error('Hello world')).toBeUndefined();
 
-    expect(console.error).toBeCalledTimes(0);
-    expect(console.log).toBeCalledTimes(0);
+    expect(console.error).not.toBeCalled();
+    expect(console.log).not.toBeCalled();
   });
 });

@@ -31,10 +31,10 @@ describe('Range should be an async operation', () => {
 
     await expect(range(123)).rejects.toThrow(reason);
 
-    expect(exec).toBeCalledTimes(0);
+    expect(exec).not.toBeCalled();
   });
 
-  test('resolving to an object with schema `{ from, to }`', async () => {
+  test('resolving to a range { from, to } object', async () => {
     expect.assertions(1);
 
     await expect(range()).resolves.toMatchObject({
@@ -43,7 +43,7 @@ describe('Range should be an async operation', () => {
     });
   });
 
-  test('have spawn the `git tag` process once', async () => {
+  test('have spawn the git tag process once', async () => {
     expect.assertions(3);
 
     await expect(range()).resolves.toBeDefined();
@@ -62,7 +62,7 @@ describe('Range called for a stable release should resolve to', () => {
     await expect(range()).resolves.toEqual({ from: null, to: 'HEAD' });
   });
 
-  test('a range with `from` to the last stable tag ignoring any intermediate prereleased tags', async () => {
+  test('a range with from to the last stable tag ignoring any intermediate prereleased tags', async () => {
     expect.assertions(4);
 
     let tags = ['v1.0.0', 'v1.1.0-rc.0', 'v1.1.0-rc.1', 'v1.1.0'];
@@ -123,7 +123,7 @@ describe('Range called for a prerelease release should resolve to', () => {
     await expect(range(true)).resolves.toEqual({ from: null, to: 'HEAD' });
   });
 
-  test('a range with `from` to the last tag either a stable or a prereleased tag', async () => {
+  test('a range with from to the last tag either a stable or a prereleased tag', async () => {
     expect.assertions(4);
 
     let tags = ['v1.0.0', 'v1.1.0-rc.0', 'v1.1.0-rc.1', 'v1.1.0'];
@@ -167,7 +167,7 @@ describe('Range called for a prerelease release should resolve to', () => {
 });
 
 describe('Range should reject with an error', () => {
-  test('when `git tag` process throws a fatal error', async () => {
+  test('when git tag process throws a fatal error', async () => {
     expect.assertions(3);
 
     const reason = 'A fatal error occurred executing: git tag';

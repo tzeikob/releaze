@@ -23,12 +23,9 @@
         "no-global-assign": ["error", { "exceptions": ["console"] }]
       }
     },
-
     {
-      "files": ["./test/**/*.js"],
+      "files": ["./test/util/exec.test.js"],
       "rules": {
-        "max-lines": "off",
-        "max-lines-per-function": "off",
         "no-unused-vars": ["error", {
           "vars": "all",
           "args": "after-used",
