@@ -1,143 +1,187 @@
-"use strict";
+'use strict';
 
-const chalk = require('chalk');
 const logger = require('../../lib/util/logger');
-
-jest.mock('chalk', () => ({
-  green: jest.fn()
-}));
 
 console = {
   log: jest.fn(),
   error: jest.fn()
 };
 
-const { any } = expect;
-
-beforeEach(() => {
-  chalk.green.mockImplementation((value) => value);
-});
+const { any, stringMatching } = expect;
 
 afterEach(() => {
-  chalk.green.mockReset();
+  logger.level = 'INFO';
+
   console.log.mockReset();
   console.error.mockReset();
 });
 
 describe('Logger should be an object exposing', () => {
-  test('an info instance method', () => {
-    expect.assertions(1);
+  test('a level instance property set to the default "INFO" logging level', () => {
+    expect.assertions(2);
 
     expect(logger).toMatchObject({
-      info: any(Function)
+      level: stringMatching(/DEBUG|VERBOSE|INFO|SUCCESS|ERROR/)
     });
+
+    expect(logger.level).toBe('INFO');
   });
 
-  test('a success instance method', () => {
+  test('a debug, verbose, info, success and error instance methods', () => {
     expect.assertions(1);
 
     expect(logger).toMatchObject({
-      success: any(Function)
-    });
-  });
-
-  test('an error instance method', () => {
-    expect.assertions(1);
-
-    expect(logger).toMatchObject({
+      debug: any(Function),
+      verbose: any(Function),
+      info: any(Function),
+      success: any(Function),
       error: any(Function)
     });
   });
 });
 
-describe('Info method should', () => {
-  test('expect a message argument returning always undefined', () => {
-    expect.assertions(2);
+describe('Method debug for a logging level set to', () => {
+  test('"DEBUG" should log once via the console.log the message passed as arg', () => {
+    expect.assertions(4);
 
-    expect(logger.info()).toBeUndefined();
-    expect(logger.info('Hello world')).toBeUndefined();
-  });
+    logger.level = 'DEBUG';
 
-  test('call once the `console.log` along with the given message argument', () => {
-    expect.assertions(2);
-
-    logger.info('Hello world');
+    expect(logger.debug('Hello world')).toBeUndefined();
 
     expect(console.log).toBeCalledTimes(1);
     expect(console.log).toBeCalledWith('Hello world');
+
+    expect(console.error).not.toBeCalled();
   });
 
-  test('indents the given message arg by the indentation size argument', () => {
-    expect.assertions(2);
-
-    logger.info('Hello world', 2);
-
-    expect(console.log).toBeCalledTimes(1);
-    expect(console.log).toBeCalledWith('  Hello world');
-  });
-  
-  test('reject if not positive indentation size arg is given', () => {
-    expect.assertions(2);
-
-    expect(() => logger.info('Hello world', -2)).toThrow(Error);
-
-    expect(console.log).not.toBeCalledTimes(1);
-  });
-});
-
-describe('Success method should', () => {
-  test('expect a message argument returning always undefined', () => {
-    expect.assertions(2);
-
-    expect(logger.success()).toBeUndefined();
-    expect(logger.success('Hello world')).toBeUndefined();
-  });
-
-  test('call once the `console.log` along with the given message prefixed with a green check (\u2713) char', () => {
-    expect.assertions(4);
-
-    logger.success('Hello world');
-
-    expect(console.log).toBeCalledTimes(1);
-    expect(console.log).toBeCalledWith('\u2713 Hello world');
-
-    expect(chalk.green).toBeCalledTimes(1);
-    expect(chalk.green).toBeCalledWith('\u2713');
-  });
-
-  test('indents the given message arg by the indentation argument', () => {
-    expect.assertions(2);
-
-    logger.success('Hello world', 2);
-
-    expect(console.log).toBeCalledTimes(1);
-    expect(console.log).toBeCalledWith('  \u2713 Hello world');
-  });
-  
-  test('reject if not positive indentation is given', () => {
+  test.each([
+    'VERBOSE', 'INFO', 'SUCCESS', 'ERROR', 'OTHER'
+  ])('%p should skip logging', (level) => {
     expect.assertions(3);
 
-    expect(() => logger.success('Hello world', -2)).toThrow(Error);
+    logger.level = level;
 
-    expect(console.log).not.toBeCalledTimes(1);
-    expect(chalk.green).not.toBeCalledTimes(1);
+    expect(logger.debug('Hello world')).toBeUndefined();
+
+    expect(console.log).not.toBeCalled();
+    expect(console.error).not.toBeCalled();
   });
 });
 
-describe('Error method should', () => {
-  test('expect a message argument returning always undefined', () => {
-    expect.assertions(2);
+describe('Method verbose for a logging level set to', () => {
+  test.each([
+    'DEBUG', 'VERBOSE'
+  ])('%p should log once via the console.log the message passed as arg', (level) => {
+    expect.assertions(4);
 
-    expect(logger.error()).toBeUndefined();
-    expect(logger.error('Hello world')).toBeUndefined();
+    logger.level = level;
+
+    expect(logger.verbose('Hello world')).toBeUndefined();
+
+    expect(console.log).toBeCalledTimes(1);
+    expect(console.log).toBeCalledWith('Hello world');
+
+    expect(console.error).not.toBeCalled();
   });
 
-  test('call once the `console.error` along with the given message argument', () => {
-    expect.assertions(2);
+  test.each([
+    'INFO', 'SUCCESS', 'ERROR', 'OTHER'
+  ])('%p should skip logging', (level) => {
+    expect.assertions(3);
 
-    logger.error('Hello world');
+    logger.level = level;
+
+    expect(logger.verbose('Hello world')).toBeUndefined();
+
+    expect(console.log).not.toBeCalled();
+    expect(console.error).not.toBeCalled();
+  });
+});
+
+describe('Method info for a logging level set to', () => {
+  test.each([
+    'DEBUG', 'VERBOSE', 'INFO'
+  ])('%p should log once via the console.log the message passed as arg', (level) => {
+    expect.assertions(4);
+
+    logger.level = level;
+
+    expect(logger.info('Hello world')).toBeUndefined();
+
+    expect(console.log).toBeCalledTimes(1);
+    expect(console.log).toBeCalledWith('Hello world');
+
+    expect(console.error).not.toBeCalled();
+  });
+
+  test.each([
+    'SUCCESS', 'ERROR', 'OTHER'
+  ])('%p should skip logging', (level) => {
+    expect.assertions(3);
+
+    logger.level = level;
+
+    expect(logger.info('Hello world')).toBeUndefined();
+
+    expect(console.log).not.toBeCalled();
+    expect(console.error).not.toBeCalled();
+  });
+});
+
+describe('Method success for a logging level set to', () => {
+  test.each([
+    'DEBUG', 'VERBOSE', 'INFO', 'SUCCESS'
+  ])('%p should log once via the console.log the message passed as arg', (level) => {
+    expect.assertions(4);
+
+    logger.level = level;
+
+    expect(logger.success('Hello world')).toBeUndefined();
+
+    expect(console.log).toBeCalledTimes(1);
+    expect(console.log).toBeCalledWith('\x1B[32m\u2713\x1B[39m Hello world');
+
+    expect(console.error).not.toBeCalled();
+  });
+
+  test.each([
+    'ERROR', 'OTHER'
+  ])('%p should skip logging', (level) => {
+    expect.assertions(3);
+
+    logger.level = level;
+
+    expect(logger.success('Hello world')).toBeUndefined();
+
+    expect(console.log).not.toBeCalled();
+    expect(console.error).not.toBeCalled();
+  });
+});
+
+describe('Method error for a logging level set to', () => {
+  test.each([
+    'DEBUG', 'VERBOSE', 'INFO', 'SUCCESS', 'ERROR'
+  ])('%p should log once via the console.error the message passed as arg', (level) => {
+    expect.assertions(4);
+
+    logger.level = level;
+
+    expect(logger.error('Hello world')).toBeUndefined();
 
     expect(console.error).toBeCalledTimes(1);
     expect(console.error).toBeCalledWith('Hello world');
+
+    expect(console.log).not.toBeCalled();
+  });
+
+  test('"OTHER" should skip logging', () => {
+    expect.assertions(3);
+
+    logger.level = 'OTHER';
+
+    expect(logger.error('Hello world')).toBeUndefined();
+
+    expect(console.error).not.toBeCalled();
+    expect(console.log).not.toBeCalled();
   });
 });

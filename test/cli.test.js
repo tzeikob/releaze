@@ -1,6 +1,5 @@
 'use strict';
 
-const { green, yellow } = require('chalk');
 const check = require('../lib/ops/check');
 const bump = require('../lib/ops/bump');
 const range = require('../lib/ops/range');
@@ -16,12 +15,6 @@ jest.mock('../lib/ops/range');
 jest.mock('../lib/ops/log');
 jest.mock('../lib/ops/changelog');
 jest.mock('../lib/ops/tag');
-
-jest.mock('../lib/util/logger', () => ({
-  info: jest.fn(),
-  success: jest.fn(),
-  error: jest.fn()
-}));
 
 beforeEach(() => {
   check.mockResolvedValue({ version: '1.0.0' });
@@ -40,11 +33,7 @@ afterEach(() => {
   changelog.mockReset();
   tag.mockReset();
 
-  logger.info.mockReset();
-  logger.success.mockReset();
-  logger.error.mockReset();
-
-  delete global.verbose;
+  logger.level = 'INFO';
 });
 
 describe('Cli module should export an async run operation which', () => {
@@ -78,119 +67,39 @@ describe('Cli module should export an async run operation which', () => {
     await expect(cli.run(args)).rejects.toThrow(reason);
 
     expect(check).toBeCalledTimes(1);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
+
+    expect(bump).not.toBeCalled();
+    expect(range).not.toBeCalled();
+    expect(log).not.toBeCalled();
+    expect(changelog).not.toBeCalled();
+    expect(tag).not.toBeCalled();
   });
 
-  test('requested the help is skipping any release operations', async () => {
+  test.each([
+    '--help', '--version'
+  ])('skips any release operations when called with %p', async (arg) => {
     expect.assertions(7);
 
-    const args = ['./node', './releaze', '--help'];
+    await expect(cli.run(['./node', './releaze', arg])).resolves.toBeUndefined();
 
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-
-  test('requested the version is skipping any release operations', async () => {
-    expect.assertions(7);
-
-    const args = ['./node', './releaze', '--version'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
+    expect(check).not.toBeCalled();
+    expect(bump).not.toBeCalled();
+    expect(range).not.toBeCalled();
+    expect(log).not.toBeCalled();
+    expect(changelog).not.toBeCalled();
+    expect(tag).not.toBeCalled();
   });
 });
 
-describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
-  test('given only the `--bump` option, using the default `--format` and `--message`', async () => {
+describe('Cli should bump, update CHANGELOG and tag when called with', () => {
+  test.each([
+    [['--bump', 'major'], '%h %s', 'Bump to v%s'],
+    [['--bump', 'major', '--changelog', '--git'], '%h %s', 'Bump to v%s'],
+    [['--bump', 'major', '--changelog', '--format', '* %h', '--git', '--message', 'Release'], '* %h', 'Release']
+  ])('%p using %p as format and %p as message', async (args, format, message) => {
     expect.assertions(17);
 
-    const args = ['./node', './releaze', '--bump', 'major'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(check).toBeCalledTimes(1);
-
-    expect(bump).toBeCalledTimes(1);
-    expect(bump).toBeCalledWith('major');
-    expect(bump).toHaveBeenCalledAfter(check);
-
-    expect(range).toBeCalledTimes(1);
-    expect(range).toBeCalledWith(false);
-    expect(range).toHaveBeenCalledAfter(bump);
-
-    expect(log).toBeCalledTimes(1);
-    expect(log).toBeCalledWith({ from: '1.0.0', to: 'HEAD' }, '%h %s');
-    expect(log).toHaveBeenCalledAfter(range);
-
-    expect(changelog).toBeCalledTimes(1);
-    expect(changelog).toBeCalledWith('2.0.0', ['log1', 'log2', 'log3']);
-    expect(changelog).toHaveBeenCalledAfter(log);
-
-    expect(tag).toBeCalledTimes(1);
-    expect(tag).toBeCalledWith('2.0.0', 'Bump to v%s');
-    expect(tag).toHaveBeenCalledAfter(changelog);
-  });
-
-  test('given the `--bump` along with only the `--changelog` and `--git` options', async () => {
-    expect.assertions(17);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--changelog', '--git'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(check).toBeCalledTimes(1);
-
-    expect(bump).toBeCalledTimes(1);
-    expect(bump).toBeCalledWith('major');
-    expect(bump).toHaveBeenCalledAfter(check);
-
-    expect(range).toBeCalledTimes(1);
-    expect(range).toBeCalledWith(false);
-    expect(range).toHaveBeenCalledAfter(bump);
-
-    expect(log).toBeCalledTimes(1);
-    expect(log).toBeCalledWith({ from: '1.0.0', to: 'HEAD' }, '%h %s');
-    expect(log).toHaveBeenCalledAfter(range);
-
-    expect(changelog).toBeCalledTimes(1);
-    expect(changelog).toBeCalledWith('2.0.0', ['log1', 'log2', 'log3']);
-    expect(changelog).toHaveBeenCalledAfter(log);
-
-    expect(tag).toBeCalledTimes(1);
-    expect(tag).toBeCalledWith('2.0.0', 'Bump to v%s');
-    expect(tag).toHaveBeenCalledAfter(changelog);
-  });
-
-  test('given the `--bump` along with `--changelog --format` and `--git --message` options', async () => {
-    expect.assertions(17);
-
-    const format = '%s';
-    const message = 'Release ver. %s';
-
-    const args = [
-      './node', './releaze',
-      '--bump', 'major',
-      '--changelog', '--format', format,
-      '--git', '--message', message
-    ];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
+    await expect(cli.run(['./node', './releaze', ...args])).resolves.toBeUndefined();
 
     expect(check).toBeCalledTimes(1);
 
@@ -215,14 +124,14 @@ describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
     expect(tag).toHaveBeenCalledAfter(changelog);
   });
 
-  test('given the `--bump` a pre-release type along with a `--preid` option', async () => {
+  test.each([
+    [['--bump', 'premajor', '--preid', 'alpha'], '%h %s', 'Bump to v%s']
+  ])('%p using %p as format and %p as message', async (args, format, message) => {
     expect.assertions(17);
 
     bump.mockResolvedValue({ current: '1.0.0', next: '2.0.0-alpha.0', isPrerelease: true });
 
-    const args = ['./node', './releaze', '--bump', 'premajor', '--preid', 'alpha'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
+    await expect(cli.run(['./node', './releaze', ...args])).resolves.toBeUndefined();
 
     expect(check).toBeCalledTimes(1);
 
@@ -235,7 +144,7 @@ describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
     expect(range).toHaveBeenCalledAfter(bump);
 
     expect(log).toBeCalledTimes(1);
-    expect(log).toBeCalledWith({ from: '1.0.0', to: 'HEAD' }, '%h %s');
+    expect(log).toBeCalledWith({ from: '1.0.0', to: 'HEAD' }, format);
     expect(log).toHaveBeenCalledAfter(range);
 
     expect(changelog).toBeCalledTimes(1);
@@ -243,74 +152,26 @@ describe('Cli should bump up, update CHANGELOG, commit and tag', () => {
     expect(changelog).toHaveBeenCalledAfter(log);
 
     expect(tag).toBeCalledTimes(1);
-    expect(tag).toBeCalledWith('2.0.0-alpha.0', 'Bump to v%s');
+    expect(tag).toBeCalledWith('2.0.0-alpha.0', message);
     expect(tag).toHaveBeenCalledAfter(changelog);
   });
 });
 
-describe('Cli should report progress to console via logger', () => {
-  test('when a stable bump release is requested', async () => {
-    expect.assertions(12);
-
-    const args = ['./node', './releaze', '--bump', 'major'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(logger.info).toBeCalledTimes(5);
-    expect(logger.success).toBeCalledTimes(4);
-
-    expect(logger.info).nthCalledWith(1, 'Checking npm and git pre-conditions:');
-    expect(logger.success).nthCalledWith(1, 'All npm and git pre-conditions are met', 1);
-
-    expect(logger.info).nthCalledWith(2, `Bumping to the next ${yellow('major')} version:`);
-    expect(logger.success).nthCalledWith(2, `Version bumped successfully from ${yellow('1.0.0')} to ${yellow('2.0.0')}`, 1);
-
-    expect(logger.info).nthCalledWith(3, 'Writing changes to the changelog file:');
-    expect(logger.success).nthCalledWith(3, `A new ${yellow('CHANGELOG.md')} file has been created`, 1);
-
-    expect(logger.info).nthCalledWith(4, 'Creating a new git annotation tag:');
-    expect(logger.success).nthCalledWith(4, `Tag ${yellow('v2.0.0')} has been created on commit with ${yellow('d3f884f')} hash`, 1);
-
-    expect(logger.info).nthCalledWith(5, `Release ${green('v2.0.0')} has been completed successfully!`);
-  });
-
-  test('when a pre-release is requested', async () => {
-    expect.assertions(3);
-
-    const args = ['./node', './releaze', '--bump', 'premajor', '--preid', 'alpha'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(logger.info).toBeCalledTimes(5);
-    expect(logger.info).nthCalledWith(2, `Bumping to the next ${yellow('premajor')} ${yellow('alpha')} version:`);
-  });
-
-  test('when there is an already an existing changelog file', async () => {
-    expect.assertions(3);
-
-    changelog.mockResolvedValue({ filename: 'CHANGELOG.md', append: true });
-
-    const args = ['./node', './releaze', '--bump', 'major'];
-
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(logger.success).toBeCalledTimes(4);
-    expect(logger.success).nthCalledWith(3, `The ${yellow('CHANGELOG.md')} file has been updated`, 1);
-  });
-
-  test('having the verbose prop enabled in global object if the `--verbose` option is given', async () => {
+describe('Cli should set the logging level of the logger', () => {
+  test.each([
+    ['INFO', ['--bump', 'major']],
+    ['VERBOSE', ['--bump', 'major', '--verbose']]
+  ])('to %p when called with %p', async (level, args) => {
     expect.assertions(2);
 
-    const args = ['./node', './releaze', '--bump', 'major', '--verbose'];
+    await expect(cli.run(['./node', './releaze', ...args])).resolves.toBeUndefined();
 
-    await expect(cli.run(args)).resolves.toBeUndefined();
-
-    expect(global.verbose).toBeTrue();
+    expect(logger.level).toBe(level);
   });
 });
 
 describe('Cli should not try to', () => {
-  test('update the CHANGELOG when the `--no-changelog` opt-out option is given', async () => {
+  test('update the CHANGELOG when the --no-changelog opt-out option is given', async () => {
     expect.assertions(11);
 
     const args = ['./node', './releaze', '--bump', 'major', '--no-changelog'];
@@ -323,16 +184,16 @@ describe('Cli should not try to', () => {
     expect(bump).toBeCalledWith('major');
     expect(bump).toHaveBeenCalledAfter(check);
 
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
+    expect(range).not.toBeCalled();
+    expect(log).not.toBeCalled();
+    expect(changelog).not.toBeCalled();
 
     expect(tag).toBeCalledTimes(1);
     expect(tag).toBeCalledWith('2.0.0', 'Bump to v%s');
     expect(tag).toHaveBeenCalledAfter(bump);
   });
 
-  test('commit and tag when the `--no-git` opt-out option is given', async () => {
+  test('commit and tag when the --no-git opt-out option is given', async () => {
     expect.assertions(15);
 
     const args = ['./node', './releaze', '--bump', 'major', '--no-git'];
@@ -357,10 +218,10 @@ describe('Cli should not try to', () => {
     expect(changelog).toBeCalledWith('2.0.0', ['log1', 'log2', 'log3']);
     expect(changelog).toHaveBeenCalledAfter(log);
 
-    expect(tag).toBeCalledTimes(0);
+    expect(tag).not.toBeCalled();
   });
 
-  test('update CHANGELOG, commit and tag when both `--no-changelog` and `--no-git` options are given', async () => {
+  test('update CHANGELOG, commit and tag when both --no-changelog and --no-git opts are given', async () => {
     expect.assertions(9);
 
     const args = ['./node', './releaze', '--bump', 'major', '--no-changelog', '--no-git'];
@@ -373,136 +234,35 @@ describe('Cli should not try to', () => {
     expect(bump).toBeCalledWith('major');
     expect(bump).toHaveBeenCalledAfter(check);
 
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
+    expect(range).not.toBeCalled();
+    expect(log).not.toBeCalled();
+    expect(changelog).not.toBeCalled();
+    expect(tag).not.toBeCalled();
   });
 });
 
 describe('Cli should reject immediately when', () => {
-  test('the option `--bump` is not given', async () => {
+  test.each([
+    [[]],
+    [['--bump', 'new']],
+    [['--bump', '']],
+    [['--preid', 'alpha']],
+    [['--bump', 'major', '--format', '%s']],
+    [['--bump', 'major', '--no-changelog', '--format', '%s']],
+    [['--bump', 'major', '--message', 'Bump to v%s']],
+    [['--bump', 'major', '--no-git', '--message', '%s']],
+    [['--bump', 'major', '--boom']]
+  ])('called with %p', async (args) => {
     expect.assertions(7);
 
-    const args = ['./node', './releaze'];
+    await expect(cli.run(['./node', './releaze', ...args])).rejects.toThrow(Error);
 
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-
-  test('the option `--bump` is not given a valid semver release type', async () => {
-    expect.assertions(8);
-
-    let args = ['./node', './releaze', '--bump', 'new'];
-
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    args = ['./node', './releaze', '--bump', ''];
-
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-  
-  test('the option `--preid` is given without the `--bump` option', async () => {
-    expect.assertions(7);
-
-    const args = ['./node', './releaze', '--preid', 'alpha'];
-
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-
-  test('the option `--format` is given without the `--changelog` option', async () => {
-    expect.assertions(7);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--format', '%s'];
-
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-
-  test('the option `--format` is given along with the `--no-changelog` opt-out option', async () => {
-    expect.assertions(7);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--no-changelog', '--format', '%s'];
-
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-
-  test('the option `--message` is given without the `--git` option', async () => {
-    expect.assertions(7);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--message', 'Bump to v%s'];
-
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-
-  test('the option `--message` is given along with the `--no-git` opt-out option', async () => {
-    expect.assertions(7);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--no-git', '--message', '%s'];
-
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
-  });
-
-  test('unknown option is given', async () => {
-    expect.assertions(7);
-
-    const args = ['./node', './releaze', '--bump', 'major', '--gito'];
-
-    await expect(cli.run(args)).rejects.toThrow(Error);
-
-    expect(check).toBeCalledTimes(0);
-    expect(bump).toBeCalledTimes(0);
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
+    expect(check).not.toBeCalled();
+    expect(bump).not.toBeCalled();
+    expect(range).not.toBeCalled();
+    expect(log).not.toBeCalled();
+    expect(changelog).not.toBeCalled();
+    expect(tag).not.toBeCalled();
   });
 });
 
@@ -518,10 +278,10 @@ describe('Cli should reject immediately skipping', () => {
 
     await expect(cli.run(args)).rejects.toThrow(reason);
 
-    expect(range).toBeCalledTimes(0);
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
+    expect(range).not.toBeCalled();
+    expect(log).not.toBeCalled();
+    expect(changelog).not.toBeCalled();
+    expect(tag).not.toBeCalled();
   });
 
   test('log, changelog and tag ops if range throws a fatal error', async () => {
@@ -535,9 +295,9 @@ describe('Cli should reject immediately skipping', () => {
 
     await expect(cli.run(args)).rejects.toThrow(reason);
 
-    expect(log).toBeCalledTimes(0);
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
+    expect(log).not.toBeCalled();
+    expect(changelog).not.toBeCalled();
+    expect(tag).not.toBeCalled();
   });
 
   test('changelog and tag ops if log throws a fatal error', async () => {
@@ -551,8 +311,8 @@ describe('Cli should reject immediately skipping', () => {
 
     await expect(cli.run(args)).rejects.toThrow(reason);
 
-    expect(changelog).toBeCalledTimes(0);
-    expect(tag).toBeCalledTimes(0);
+    expect(changelog).not.toBeCalled();
+    expect(tag).not.toBeCalled();
   });
 
   test('tag op if changelog throws a fatal error', async () => {
@@ -566,6 +326,6 @@ describe('Cli should reject immediately skipping', () => {
 
     await expect(cli.run(args)).rejects.toThrow(reason);
 
-    expect(tag).toBeCalledTimes(0);
+    expect(tag).not.toBeCalled();
   });
 });
