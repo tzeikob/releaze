@@ -1,6 +1,7 @@
 [![npm version](https://img.shields.io/npm/v/releaze)](https://www.npmjs.com/package/releaze)
 [![downloads](https://img.shields.io/npm/dm/releaze)](https://www.npmjs.com/package/releaze)
 [![tested-jest](https://img.shields.io/badge/tested-jest-brightgreen)](https://github.com/facebook/jest)
+[![code-style](https://img.shields.io/badge/style-aargh-orange)](https://github.com/tzeikob/eslint-config-aargh)
 
 # Releaze
 
@@ -46,21 +47,11 @@ The tool is implemented so to run a few pre-condition checks before it starts th
 * A git repository with at least one commit
 * A clean git working directory
 
-## Publish a new release
+## Where the changelog lines are coming from?
 
-Currently the tool is not supporting an option to automatically publish the new version to a public or private NPM registry, so after a successful execution you have to run the following npm command:
+In order to keep the exact history of every change committed to the repository being under release, the tool is using the outcome of the `git log <range>` process. This way every commit belonging to the tree path bounded within the `range` will be included into the changelog file. Keep in mind that the `range` notation in computed internally with respect to the current version and the already created tags.
 
-```sh
-npm publish
-```
-
-In the case you are releasing in a pre-release channel you have to send the release in a separate tag, other than the default `latest` tag:
-
-```sh
-npm publish --tag next
-```
-
-where `next` could be any valid name (alpha, beta etc.), whatever makes sense in your case.
+> Note that the tool is set to ignore any merge commits via the `--no-merges` option.
 
 ## Format lines in the changelog file
 
@@ -137,6 +128,22 @@ Below you can find an extended list of all options this tool is providing:
 --verbose
          Use this option to print a verbose output per in operation.
 ```
+
+## Publish a new release
+
+Currently the tool is not supporting an option to automatically publish the new version to a public or private NPM registry, so after a successful execution you have to run the following npm command:
+
+```sh
+npm publish
+```
+
+In the case you are releasing in a pre-release channel you have to send the release in a separate tag, other than the default `latest` tag:
+
+```sh
+npm publish --tag next
+```
+
+where `next` could be any valid name (alpha, beta etc.), whatever makes sense in your case.
 
 ## How you can contribute
 

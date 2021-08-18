@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const moment = require('moment');
-const logger = require('../../lib/util/logger');
 const changelog = require('../../lib/ops/changelog');
 
 jest.mock('fs', () => ({
@@ -10,12 +9,6 @@ jest.mock('fs', () => ({
     readFile: jest.fn(),
     writeFile: jest.fn()
   }
-}));
-
-jest.mock('../../lib/util/logger', () => ({
-  info: jest.fn(),
-  success: jest.fn(),
-  error: jest.fn()
 }));
 
 const { readFile, writeFile } = fs.promises;
@@ -29,22 +22,16 @@ beforeEach(() => {
 afterEach(() => {
   readFile.mockReset();
   writeFile.mockReset();
-
-  logger.info.mockReset();
-  logger.success.mockReset();
-  logger.error.mockReset();
-
-  delete global.verbose;
 });
 
 describe('Changelog should be an async operation', () => {
-  test('getting as input a version and a logs args', async () => {
+  test('getting as input a version number and a logs arguments', async () => {
     expect.assertions(1);
 
     await expect(changelog('v1.0.0', ['log1', 'log2', 'log3'])).resolves.toBeDefined();
   });
 
-  test('where version arg should always be given and be a string', async () => {
+  test('where the version arg should always be given and be a string', async () => {
     expect.assertions(5);
 
     const reason = 'Invalid or missing version argument';
@@ -53,8 +40,8 @@ describe('Changelog should be an async operation', () => {
     await expect(changelog(null)).rejects.toThrow(reason);
     await expect(changelog(123)).rejects.toThrow(reason);
 
-    expect(readFile).toBeCalledTimes(0);
-    expect(writeFile).toBeCalledTimes(0);
+    expect(readFile).not.toBeCalled();
+    expect(writeFile).not.toBeCalled();
   });
 
   test('where logs arg should always be given and be an array', async () => {
@@ -66,11 +53,11 @@ describe('Changelog should be an async operation', () => {
     await expect(changelog('v1.0.0', null)).rejects.toThrow(reason);
     await expect(changelog('v1.0.0', 123)).rejects.toThrow(reason);
 
-    expect(readFile).toBeCalledTimes(0);
-    expect(writeFile).toBeCalledTimes(0);
+    expect(readFile).not.toBeCalled();
+    expect(writeFile).not.toBeCalled();
   });
 
-  test('resolving to an object', async () => {
+  test('resolving to an object with schema { filename, append }', async () => {
     expect.assertions(1);
 
     await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toMatchObject({
@@ -80,46 +67,9 @@ describe('Changelog should be an async operation', () => {
   });
 });
 
-describe('Changelog called with valid version and logs args should', () => {
-  test('create a new CHANGELOG.md file if not yet exists', async () => {
+describe('Changelog should create a new CHANGELOG.md if not yet exists and', () => {
+  test('write the version and logs in the correct format', async () => {
     expect.assertions(5);
-
-    const error = new Error("ENOENT: no such file or directory, open 'CHANGELOG.md'");
-    error.code = 'ENOENT';
-
-    readFile.mockRejectedValue(error);
-
-    await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toEqual({
-      filename: 'CHANGELOG.md',
-      append: false
-    });
-
-    expect(readFile).toBeCalledTimes(1);
-    expect(readFile).toBeCalledWith('CHANGELOG.md', 'utf8');
-
-    expect(writeFile).toBeCalledTimes(1);
-    expect(writeFile).toBeCalledWith('CHANGELOG.md', expect.any(String));
-  });
-
-  test('append once to the existing CHANGELOG.md file if such already exists', async () => {
-    expect.assertions(5);
-    
-    readFile.mockResolvedValue('log1');
-
-    await expect(changelog('v1.0.0', ['log2', 'log3'])).resolves.toEqual({
-      filename: 'CHANGELOG.md',
-      append: true
-    });
-
-    expect(readFile).toBeCalledTimes(1);
-    expect(readFile).toBeCalledWith('CHANGELOG.md', 'utf8');
-
-    expect(writeFile).toBeCalledTimes(1);
-    expect(writeFile).toBeCalledWith('CHANGELOG.md', expect.any(String));
-  });
-
-  test('write the logs to a new CHANGELOG.md in the correct format', async () => {
-    expect.assertions(3);
 
     const error = new Error("ENOENT: no such file or directory, open 'CHANGELOG.md'");
     error.code = 'ENOENT';
@@ -135,6 +85,9 @@ describe('Changelog called with valid version and logs args should', () => {
       filename: 'CHANGELOG.md',
       append: false
     });
+
+    expect(readFile).toBeCalledTimes(1);
+    expect(readFile).toBeCalledWith('CHANGELOG.md', 'utf8');
 
     const content = [
       `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n\n`,
@@ -146,8 +99,8 @@ describe('Changelog called with valid version and logs args should', () => {
     expect(writeFile).toBeCalledWith('CHANGELOG.md', `${content}`);
   });
 
-  test('write an empty release head to a new CHANGELOG.md when an empty array of logs is given', async () => {
-    expect.assertions(3);
+  test('write an empty version head when an empty array of logs is given', async () => {
+    expect.assertions(5);
 
     const error = new Error("ENOENT: no such file or directory, open 'CHANGELOG.md'");
     error.code = 'ENOENT';
@@ -159,14 +112,19 @@ describe('Changelog called with valid version and logs args should', () => {
       append: false
     });
 
+    expect(readFile).toBeCalledTimes(1);
+    expect(readFile).toBeCalledWith('CHANGELOG.md', 'utf8');
+
     const content = `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`;
 
     expect(writeFile).toBeCalledTimes(1);
     expect(writeFile).toBeCalledWith('CHANGELOG.md', `${content}`);
   });
+});
 
-  test('append the logs on top of an existing CHANGELOG.md in the correct format', async () => {
-    expect.assertions(3);
+describe('Changelog should read the CHANGELOG.md if such exists and', () => {
+  test('append the version and logs on top of the existing content in the correct format', async () => {
+    expect.assertions(5);
 
     const oldContent = [
       `v1.5.2 - ${moment().format('MMMM D, YYYY')}\n\n`,
@@ -186,6 +144,9 @@ describe('Changelog called with valid version and logs args should', () => {
       append: true
     });
 
+    expect(readFile).toBeCalledTimes(1);
+    expect(readFile).toBeCalledWith('CHANGELOG.md', 'utf8');
+
     const newContent = [
       `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n\n`,
       '* 54ff0cd Restrict bump release types to lowercase only\n',
@@ -196,8 +157,8 @@ describe('Changelog called with valid version and logs args should', () => {
     expect(writeFile).toBeCalledWith('CHANGELOG.md', `${newContent}\n${oldContent}`);
   });
 
-  test('append just an empty release head when an empty array of logs is given', async () => {
-    expect.assertions(3);
+  test('append an empty version head when an empty array of logs is given', async () => {
+    expect.assertions(5);
 
     const oldContent = [
       `v1.5.2 - ${moment().format('MMMM D, YYYY')}\n\n`,
@@ -212,33 +173,13 @@ describe('Changelog called with valid version and logs args should', () => {
       append: true
     });
 
+    expect(readFile).toBeCalledTimes(1);
+    expect(readFile).toBeCalledWith('CHANGELOG.md', 'utf8');
+
     const newContent = `v2.0.0 - ${moment().format('MMMM D, YYYY')}\n`;
 
     expect(writeFile).toBeCalledTimes(1);
     expect(writeFile).toBeCalledWith('CHANGELOG.md', `${newContent}\n${oldContent}`);
-  });
-});
-
-describe('Changelog should report to console via logger', () => {
-  test('when the verbose property has been enabled globally', async () => {
-    expect.assertions(3);
-
-    global.verbose = true;
-
-    await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toBeDefined();
-
-    expect(logger.info).toBeCalledTimes(1);
-    expect(logger.info).nthCalledWith(1, 'Release has been written to CHANGELOG.md', 1);
-  });
-
-  test('except when the verbose property is not set globally', async () => {
-    expect.assertions(4);
-
-    await expect(changelog('v1.0.0', ['log1', 'log2'])).resolves.toBeDefined();
-
-    expect(logger.info).toBeCalledTimes(0);
-    expect(logger.success).toBeCalledTimes(0);
-    expect(logger.error).toBeCalledTimes(0);
   });
 });
 

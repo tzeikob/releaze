@@ -106,7 +106,7 @@ describe('Check should make sure it is running within a NPM project', () => {
 });
 
 describe('Check should make sure it is running within a git repo', () => {
-  test('rejecting with an error if `.git/index` file does not exist', async () => {
+  test('rejecting with an error if .git/index file does not exist', async () => {
     expect.assertions(3);
 
     const reason = 'Unable to access file: .git/index';
@@ -146,6 +146,8 @@ describe('Check should make sure it is running within a git repo', () => {
       if (command === 'git status --porcelain') {
         return 'M index.js';
       }
+
+      return '';
     });
 
     const reason = 'Working directory is not clean, please stage and commit before use';

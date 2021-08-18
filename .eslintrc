@@ -1,0 +1,38 @@
+{
+  "extends": ["aargh"],
+  "rules": {},
+  "overrides": [
+    {
+      "files": ["./bin/releaze.js"],
+      "rules": {
+        "node/no-process-exit": "off"
+      }
+    },
+    {
+      "files": [
+        "./lib/util/logger.js",
+        "./test/util/logger.test.js"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["./test/util/logger.test.js"],
+      "rules": {
+        "no-global-assign": ["error", { "exceptions": ["console"] }]
+      }
+    },
+    {
+      "files": ["./test/util/exec.test.js"],
+      "rules": {
+        "no-unused-vars": ["error", {
+          "vars": "all",
+          "args": "after-used",
+          "caughtErrors": "all",
+          "ignoreRestSiblings": false
+        }]
+      }
+    }
+  ]
+}

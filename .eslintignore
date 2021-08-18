@@ -1,0 +1,10 @@
+# Npm and bower packages and modules (default)
+node_modules/*
+bower_components/*
+
+# Built and distribution files
+build/*
+dist/*
+
+# Test coverage files
+coverage/*

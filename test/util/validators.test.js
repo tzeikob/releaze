@@ -15,171 +15,97 @@ const {
   isNotPositiveNumber
 } = require('../../lib/util/validators');
 
-describe('Call of isGiven(value)', () => {
-  test('should return true for any value except null and undefined', () => {
-    expect.assertions(14);
+describe('Call of isGiven with', () => {
+  test.each([
+    1, 'hello', '', 0, -0, 0n, NaN, false, [], {}
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isGiven('str')).toBe(true);
-    expect(isGiven('')).toBe(true);
-
-    expect(isGiven(123)).toBe(true);
-    expect(isGiven(0)).toBe(true);
-    expect(isGiven(-0)).toBe(true);
-    expect(isGiven(0n)).toBe(true);
-    expect(isGiven(NaN)).toBe(true);
-    expect(isGiven(Infinity)).toBe(true);
-
-    expect(isGiven(true)).toBe(true);
-    expect(isGiven(false)).toBe(true);
-
-    expect(isGiven([])).toBe(true);
-    expect(isGiven({})).toBe(true);
-    expect(isGiven(Symbol('s'))).toBe(true);
-
-    expect(isGiven(() => {})).toBe(true);
+    expect(isGiven(value)).toBe(true);
   });
 
-  test('should return false for value equal to null or undefined', () => {
-    expect.assertions(3);
+  test('null or undefined should return false', () => {
+    expect.assertions(2);
 
     expect(isGiven(null)).toBe(false);
-    expect(isGiven(undefined)).toBe(false);
     expect(isGiven()).toBe(false);
   });
 });
 
-describe('Call of isNotGiven(value)', () => {
-  test('should return false for any value except null and undefined', () => {
-    expect.assertions(14);
+describe('Call of isNotGiven with', () => {
+  test.each([
+    1, 'hello', '', 0, -0, 0n, NaN, false, [], {}
+  ])('%p should return false', (value) => {
+    expect.assertions(1);
 
-    expect(isNotGiven('str')).toBe(false);
-    expect(isNotGiven('')).toBe(false);
-
-    expect(isNotGiven(123)).toBe(false);
-    expect(isNotGiven(0)).toBe(false);
-    expect(isNotGiven(-0)).toBe(false);
-    expect(isNotGiven(0n)).toBe(false);
-    expect(isNotGiven(NaN)).toBe(false);
-    expect(isNotGiven(Infinity)).toBe(false);
-
-    expect(isNotGiven(true)).toBe(false);
-    expect(isNotGiven(false)).toBe(false);
-
-    expect(isNotGiven([])).toBe(false);
-    expect(isNotGiven({})).toBe(false);
-    expect(isNotGiven(Symbol('s'))).toBe(false);
-
-    expect(isNotGiven(() => {})).toBe(false);
+    expect(isNotGiven(value)).toBe(false);
   });
 
-  test('should return true for value equal to null or undefined', () => {
-    expect.assertions(3);
+  test('null or undefined should return true', () => {
+    expect.assertions(2);
 
     expect(isNotGiven(null)).toBe(true);
-    expect(isNotGiven(undefined)).toBe(true);
     expect(isNotGiven()).toBe(true);
   });
 });
 
-describe('Call of isNotString(value)', () => {
-  test('should return true for any value except a non string', () => {
-    expect.assertions(12);
+describe('Call of isNotString with', () => {
+  test.each([
+    '', 1, NaN, true, false, [], {}, Symbol('s')
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isNotString(123)).toBe(true);
-    expect(isNotString(NaN)).toBe(true);
-    expect(isNotString(Infinity)).toBe(true);
+    expect(isNotString(value)).toBe(true);
+  });
 
-    expect(isNotString(true)).toBe(true);
-    expect(isNotString(false)).toBe(true);
-
-    expect(isNotString([])).toBe(true);
-    expect(isNotString({})).toBe(true);
-    expect(isNotString(Symbol('s'))).toBe(true);
-
-    expect(isNotString(() => {})).toBe(true);
+  test('null or undefined should return true', () => {
+    expect.assertions(2);
 
     expect(isNotString(null)).toBe(true);
-    expect(isNotString(undefined)).toBe(true);
     expect(isNotString()).toBe(true);
   });
 
-  test('should return true for empty string value', () => {
+  test('any non-empty string should return false', () => {
     expect.assertions(1);
 
-    expect(isNotString('')).toBe(true);
-  });
-
-  test('should return false for value equal to only a non empty string', () => {
-    expect.assertions(1);
-
-    expect(isNotString('str')).toBe(false);
+    expect(isNotString('hello')).toBe(false);
   });
 });
 
-describe('Call of isNotGitRef(value)', () => {
-  test('should return true for any value except a non empty string', () => {
-    expect.assertions(13);
+describe('Call of isNotGitRef with', () => {
+  test.each([
+    1, '', NaN, true, false, [], {}, Symbol('s')
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isNotGitRef(123)).toBe(true);
-    expect(isNotGitRef(NaN)).toBe(true);
-    expect(isNotGitRef(Infinity)).toBe(true);
+    expect(isNotGitRef(value)).toBe(true);
+  });
 
-    expect(isNotGitRef(true)).toBe(true);
-    expect(isNotGitRef(false)).toBe(true);
-
-    expect(isNotGitRef([])).toBe(true);
-    expect(isNotGitRef({})).toBe(true);
-    expect(isNotGitRef(Symbol('s'))).toBe(true);
-
-    expect(isNotGitRef(() => {})).toBe(true);
+  test('null or undefined should return true', () => {
+    expect.assertions(2);
 
     expect(isNotGitRef(null)).toBe(true);
-    expect(isNotGitRef(undefined)).toBe(true);
     expect(isNotGitRef()).toBe(true);
-
-    expect(isNotGitRef('')).toBe(true);
   });
 
-  test('should return true for a not valid git commit hash (sha1)', () => {
-    expect.assertions(20);
+  test('an invalid git commit hash should return true', () => {
+    expect.assertions(2);
 
     expect(isNotGitRef('12s4')).toBe(true);
-    expect(isNotGitRef('1.2s.4')).toBe(true);
-    expect(isNotGitRef('a')).toBe(true);
     expect(isNotGitRef('4ec99f747f787984e7f7e94d56ef6309747b215f5')).toBe(true);
-
-    expect(isNotGitRef('c71f64b^')).toBe(true);
-    expect(isNotGitRef('c71f64b^^')).toBe(true);
-    expect(isNotGitRef('c71f64b^2')).toBe(true);
-    expect(isNotGitRef('^c71f64b')).toBe(true);
-    expect(isNotGitRef('c71f64b~')).toBe(true);
-    expect(isNotGitRef('c71f64b~~')).toBe(true);
-    expect(isNotGitRef('c71f64b~2')).toBe(true);
-    expect(isNotGitRef('~c71f64b')).toBe(true);
-
-    expect(isNotGitRef('..')).toBe(true);
-    expect(isNotGitRef('c71f64b..')).toBe(true);
-    expect(isNotGitRef('c71f64b..c71f64b')).toBe(true);
-    expect(isNotGitRef('..c71f64b')).toBe(true);
-
-    expect(isNotGitRef('...')).toBe(true);
-    expect(isNotGitRef('c71f64b...')).toBe(true);
-    expect(isNotGitRef('c71f64b...c71f64b')).toBe(true);
-    expect(isNotGitRef('...c71f64b')).toBe(true);
   });
 
-  test('should return true for a not valid semver tag name', () => {
-    expect.assertions(6);
+  test('an invalid semver tag name should return true', () => {
+    expect.assertions(5);
 
     expect(isNotGitRef('v01.02.03')).toBe(true);
     expect(isNotGitRef('01.02.03')).toBe(true);
     expect(isNotGitRef('.1.3')).toBe(true);
-    expect(isNotGitRef('3')).toBe(true);
     expect(isNotGitRef('123')).toBe(true);
     expect(isNotGitRef('head')).toBe(true);
   });
 
-  test('should return false for a valid git commit hash (sha1)', () => {
+  test('a valid git commit hash should return false', () => {
     expect.assertions(3);
 
     expect(isNotGitRef('4ec99f747f787984e7f7e94d56ef6309747b215f')).toBe(false);
@@ -187,79 +113,61 @@ describe('Call of isNotGitRef(value)', () => {
     expect(isNotGitRef('4ec99')).toBe(false);
   });
 
-  test('should return false for a valid semver tag name', () => {
-    expect.assertions(6);
+  test('a valid semver tag name should return false', () => {
+    expect.assertions(4);
 
-    expect(isNotGitRef('v9.9.9')).toBe(false);
     expect(isNotGitRef('v1.2.3')).toBe(false);
     expect(isNotGitRef('v1.2.3-next.2.beta.0+build.exp')).toBe(false);
 
-    expect(isNotGitRef('9.9.9')).toBe(false);
     expect(isNotGitRef('1.2.3')).toBe(false);
     expect(isNotGitRef('1.2.3-next.2.beta.0+build.exp')).toBe(false);
   });
 
-  test('should return false for the `HEAD` alias tag', () => {
+  test('the valid HEAD ref should return false', () => {
     expect.assertions(1);
 
     expect(isNotGitRef('HEAD')).toBe(false);
   });
 });
 
-describe('Call of isNotSemverReleaseType(value)', () => {
-  test('should return false for the string values `(pre)major`, `(pre)minor`, `(pre)patch` and `prerelease`', () => {
-    expect.assertions(7);
+describe('Call of isNotSemverReleaseType with', () => {
+  test.each([
+    'major', 'premajor', 'minor', 'preminor', 'patch', 'prepatch', 'prerelease'
+  ])('%p should return false', (value) => {
+    expect.assertions(1);
 
-    expect(isNotSemverReleaseType('major')).toBe(false);
-    expect(isNotSemverReleaseType('premajor')).toBe(false);
-
-    expect(isNotSemverReleaseType('minor')).toBe(false);
-    expect(isNotSemverReleaseType('preminor')).toBe(false);
-
-    expect(isNotSemverReleaseType('patch')).toBe(false);
-    expect(isNotSemverReleaseType('prepatch')).toBe(false);
-
-    expect(isNotSemverReleaseType('prerelease')).toBe(false);
+    expect(isNotSemverReleaseType(value)).toBe(false);
   });
 
-  test('should return true for any value except `(pre)major`, `(pre)minor`, `(pre)patch` and prerelease', () => {
-    expect.assertions(30);
+  test.each([
+    1, '', NaN, true, false, [], {}, Symbol('s')
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isNotSemverReleaseType()).toBe(true);
+    expect(isNotSemverReleaseType(value)).toBe(true);
+  });
+
+  test('null or undefined should return true', () => {
+    expect.assertions(2);
+
     expect(isNotSemverReleaseType(null)).toBe(true);
-    expect(isNotSemverReleaseType(undefined)).toBe(true);
+    expect(isNotSemverReleaseType()).toBe(true);
+  });
 
-    expect(isNotSemverReleaseType(123)).toBe(true);
-    expect(isNotSemverReleaseType(NaN)).toBe(true);
-    expect(isNotSemverReleaseType(Infinity)).toBe(true);
+  test('any invalid semver release type should return true', () => {
+    expect.assertions(11);
 
-    expect(isNotSemverReleaseType(true)).toBe(true);
-    expect(isNotSemverReleaseType(false)).toBe(true);
-
-    expect(isNotSemverReleaseType([])).toBe(true);
-    expect(isNotSemverReleaseType({})).toBe(true);
-    expect(isNotSemverReleaseType(Symbol('s'))).toBe(true);
-
-    expect(isNotSemverReleaseType(() => {})).toBe(true);
-
-    expect(isNotSemverReleaseType('')).toBe(true);
     expect(isNotSemverReleaseType('next')).toBe(true);
     expect(isNotSemverReleaseType('new')).toBe(true);
-    expect(isNotSemverReleaseType('latest')).toBe(true);
-    expect(isNotSemverReleaseType('majority')).toBe(true);
-    expect(isNotSemverReleaseType('minority')).toBe(true);
-    expect(isNotSemverReleaseType('pat')).toBe(true);
+    expect(isNotSemverReleaseType('major major')).toBe(true);
 
     expect(isNotSemverReleaseType('MAJOR')).toBe(true);
-    expect(isNotSemverReleaseType('major major')).toBe(true);
     expect(isNotSemverReleaseType('PREMAJOR')).toBe(true);
 
     expect(isNotSemverReleaseType('MINOR')).toBe(true);
-    expect(isNotSemverReleaseType('minor minor')).toBe(true);
     expect(isNotSemverReleaseType('PREMINOR')).toBe(true);
 
     expect(isNotSemverReleaseType('PATCH')).toBe(true);
-    expect(isNotSemverReleaseType('patch patch')).toBe(true);
     expect(isNotSemverReleaseType('PREPATCH')).toBe(true);
 
     expect(isNotSemverReleaseType('PRERELEASE')).toBe(true);
@@ -267,32 +175,24 @@ describe('Call of isNotSemverReleaseType(value)', () => {
   });
 });
 
-describe('Call of isNotSemver(value) should', () => {
-  test('return true for any value except a non empty string', () => {
-    expect.assertions(13);
+describe('Call of isNotSemver with', () => {
+  test.each([
+    1, '', NaN, true, false, [], {}, Symbol('s')
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isNotSemver(123)).toBe(true);
-    expect(isNotSemver(NaN)).toBe(true);
-    expect(isNotSemver(Infinity)).toBe(true);
-
-    expect(isNotSemver(true)).toBe(true);
-    expect(isNotSemver(false)).toBe(true);
-
-    expect(isNotSemver([])).toBe(true);
-    expect(isNotSemver({})).toBe(true);
-    expect(isNotSemver(Symbol('s'))).toBe(true);
-
-    expect(isNotSemver(() => {})).toBe(true);
-
-    expect(isNotSemver(null)).toBe(true);
-    expect(isNotSemver(undefined)).toBe(true);
-    expect(isNotSemver()).toBe(true);
-
-    expect(isNotSemver('')).toBe(true);
+    expect(isNotSemver(value)).toBe(true);
   });
 
-  test('return true for a not valid semver number', () => {
-    expect.assertions(8);
+  test('null or undefined should return true', () => {
+    expect.assertions(2);
+
+    expect(isNotSemver(null)).toBe(true);
+    expect(isNotSemver()).toBe(true);
+  });
+
+  test('an invalid semver number should return true', () => {
+    expect.assertions(6);
 
     expect(isNotSemver('v01.02.03')).toBe(true);
     expect(isNotSemver('01.02.03')).toBe(true);
@@ -300,79 +200,60 @@ describe('Call of isNotSemver(value) should', () => {
     expect(isNotSemver('1.3')).toBe(true);
     expect(isNotSemver('3')).toBe(true);
     expect(isNotSemver('123')).toBe(true);
-    expect(isNotSemver('HEAD')).toBe(true);
-    expect(isNotSemver('head')).toBe(true);
   });
 
-  test('return false for a valid semver number', () => {
-    expect.assertions(6);
+  test('a valid semver number should return false', () => {
+    expect.assertions(4);
 
-    expect(isNotSemver('v9.9.9')).toBe(false);
     expect(isNotSemver('v1.2.3')).toBe(false);
     expect(isNotSemver('v1.2.3-next.2.beta.0+build.exp')).toBe(false);
 
-    expect(isNotSemver('9.9.9')).toBe(false);
     expect(isNotSemver('1.2.3')).toBe(false);
     expect(isNotSemver('1.2.3-next.2.beta.0+build.exp')).toBe(false);
   });
 });
 
-describe('Call of isNotArray(value) should', () => {
-  test('return true for any value except an array', () => {
-    expect.assertions(12);
+describe('Call of isNotArray with', () => {
+  test.each([
+    1, '', NaN, true, false, {}, Symbol('s')
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isNotArray(123)).toBe(true);
-    expect(isNotArray(NaN)).toBe(true);
-    expect(isNotArray(Infinity)).toBe(true);
-
-    expect(isNotArray(true)).toBe(true);
-    expect(isNotArray(false)).toBe(true);
-
-    expect(isNotArray({})).toBe(true);
-    expect(isNotArray(Symbol('s'))).toBe(true);
-
-    expect(isNotArray(() => {})).toBe(true);
-
-    expect(isNotArray(null)).toBe(true);
-    expect(isNotArray(undefined)).toBe(true);
-    expect(isNotArray()).toBe(true);
-
-    expect(isNotArray('')).toBe(true);
+    expect(isNotArray(value)).toBe(true);
   });
 
-  test('return false for any valid array value', () => {
-    expect.assertions(4);
+  test('null or undefined should return true', () => {
+    expect.assertions(2);
+
+    expect(isNotArray(null)).toBe(true);
+    expect(isNotArray()).toBe(true);
+  });
+
+  test('any valid array should return false', () => {
+    expect.assertions(2);
 
     expect(isNotArray([])).toBe(false);
     expect(isNotArray(['a', 'b', 'c'])).toBe(false);
-    expect(isNotArray([1])).toBe(false);
-    expect(isNotArray([[1],[2]])).toBe(false);
   });
 });
 
-describe('Call of isNotBoolean(value) should', () => {
-  test('return true for any value except true or false', () => {
-    expect.assertions(12);
+describe('Call of isNotBoolean with', () => {
+  test.each([
+    1, '', NaN, [], {}, Symbol('s'), 'true', 'false'
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isNotBoolean(123)).toBe(true);
-    expect(isNotBoolean(NaN)).toBe(true);
-    expect(isNotBoolean(Infinity)).toBe(true);
-
-    expect(isNotBoolean({})).toBe(true);
-    expect(isNotBoolean([])).toBe(true);
-    expect(isNotBoolean(Symbol('s'))).toBe(true);
-
-    expect(isNotBoolean(() => {})).toBe(true);
-
-    expect(isNotBoolean(null)).toBe(true);
-    expect(isNotBoolean(undefined)).toBe(true);
-
-    expect(isNotBoolean('')).toBe(true);
-    expect(isNotBoolean('true')).toBe(true);
-    expect(isNotBoolean('false')).toBe(true);
+    expect(isNotBoolean(value)).toBe(true);
   });
 
-  test('return false for the values true and false', () => {
+  test('null or undefined should return true', () => {
+    expect.assertions(2);
+
+    expect(isNotBoolean(null)).toBe(true);
+    expect(isNotBoolean()).toBe(true);
+  });
+
+  test('true or false should return false', () => {
     expect.assertions(2);
 
     expect(isNotBoolean(true)).toBe(false);
@@ -380,85 +261,56 @@ describe('Call of isNotBoolean(value) should', () => {
   });
 });
 
-describe('Call of isNullish(value) should', () => {
-  test('return true for a value equal to null or undefined', () => {
+describe('Call of isNullish with', () => {
+  test('null or undefined should return true', () => {
     expect.assertions(2);
 
     expect(isNullish(null)).toBe(true);
-    expect(isNullish(undefined)).toBe(true);
+    expect(isNullish()).toBe(true);
   });
 
-  test('return false for any value except null or undefined', () => {
-    expect.assertions(12);
+  test.each([
+    1, '', NaN, true, false, 0, -0, 0n, [], {}, Symbol('s'), 'null', 'undefined'
+  ])('%p should return false', (value) => {
+    expect.assertions(1);
 
-    expect(isNullish(123)).toBe(false);
-    expect(isNullish(NaN)).toBe(false);
-    expect(isNullish(Infinity)).toBe(false);
-
-    expect(isNullish(true)).toBe(false);
-    expect(isNullish(false)).toBe(false);
-
-    expect(isNullish({})).toBe(false);
-    expect(isNullish([])).toBe(false);
-    expect(isNullish(Symbol('s'))).toBe(false);
-
-    expect(isNullish(() => {})).toBe(false);
-
-    expect(isNullish('')).toBe(false);
-    expect(isNullish('null')).toBe(false);
-    expect(isNullish('undefined')).toBe(false);
+    expect(isNullish(value)).toBe(false);
   });
 });
 
-describe('Call of isEmptyString(value) should', () => {
-  test('return true for an empty string value only', () => {
+describe('Call of isEmptyString with', () => {
+  test('empty string should return true', () => {
     expect.assertions(1);
 
     expect(isEmptyString('')).toBe(true);
   });
 
-  test('return false for a non empty string value', () => {
-    expect.assertions(10);
+  test.each([
+    1, 'hello', NaN, true, false, [], {}, Symbol('s')
+  ])('%p should return false', (value) => {
+    expect.assertions(1);
 
-    expect(isEmptyString(123)).toBe(false);
-    expect(isEmptyString(NaN)).toBe(false);
-    expect(isEmptyString(Infinity)).toBe(false);
-
-    expect(isEmptyString(true)).toBe(false);
-    expect(isEmptyString(false)).toBe(false);
-
-    expect(isEmptyString({})).toBe(false);
-    expect(isEmptyString([])).toBe(false);
-    expect(isEmptyString(Symbol('s'))).toBe(false);
-
-    expect(isEmptyString(() => {})).toBe(false);
-
-    expect(isEmptyString('hello')).toBe(false);
+    expect(isEmptyString(value)).toBe(false);
   });
 });
 
-describe('Call of isNotObject(value) should', () => {
-  test('return true for any value except a valid object', () => {
-    expect.assertions(11);
+describe('Call of isNotObject with', () => {
+  test.each([
+    1, 'hello', '', NaN, [], Symbol('s')
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isNotObject(123)).toBe(true);
-    expect(isNotObject(NaN)).toBe(true);
-    expect(isNotObject(Infinity)).toBe(true);
-
-    expect(isNotObject([])).toBe(true);
-    expect(isNotObject(Symbol('s'))).toBe(true);
-
-    expect(isNotObject(() => {})).toBe(true);
-
-    expect(isNotObject(null)).toBe(true);
-    expect(isNotObject(undefined)).toBe(true);
-
-    expect(isNotObject('')).toBe(true);
-    expect(isNotObject('true')).toBe(true);
-    expect(isNotObject('false')).toBe(true);
+    expect(isNotObject(value)).toBe(true);
   });
 
-  test('return false for any valid object value', () => {
+  test('null or undefined should return true', () => {
+    expect.assertions(2);
+
+    expect(isNotObject(null)).toBe(true);
+    expect(isNotObject()).toBe(true);
+  });
+
+  test('any valid object should return false', () => {
     expect.assertions(4);
 
     expect(isNotObject({})).toBe(false);
@@ -468,33 +320,26 @@ describe('Call of isNotObject(value) should', () => {
   });
 });
 
-describe('Call of isNotPositiveNumber(value) should', () => {
-  test('return true for any value except a valid positive number', () => {
-    expect.assertions(12);
+describe('Call of isNotPositiveNumber with', () => {
+  test.each([
+    -1, '-1', '', 0, -0, 0n, NaN, -Infinity, Infinity, [], {}, Symbol('s')
+  ])('%p should return true', (value) => {
+    expect.assertions(1);
 
-    expect(isNotPositiveNumber(NaN)).toBe(true);
-    expect(isNotPositiveNumber(Infinity)).toBe(true);
-    expect(isNotPositiveNumber(-Infinity)).toBe(true);
-
-    expect(isNotPositiveNumber([])).toBe(true);
-    expect(isNotPositiveNumber(Symbol('s'))).toBe(true);
-
-    expect(isNotPositiveNumber(() => {})).toBe(true);
-
-    expect(isNotPositiveNumber(null)).toBe(true);
-    expect(isNotPositiveNumber(undefined)).toBe(true);
-
-    expect(isNotPositiveNumber('')).toBe(true);
-    expect(isNotPositiveNumber('true')).toBe(true);
-    expect(isNotPositiveNumber('false')).toBe(true);
-    expect(isNotPositiveNumber('1')).toBe(true);
+    expect(isNotPositiveNumber(value)).toBe(true);
   });
 
-  test('return false for any valid positive number value', () => {
-    expect.assertions(3);
+  test('null ord undefined should return true', () => {
+    expect.assertions(2);
+
+    expect(isNotPositiveNumber(null)).toBe(true);
+    expect(isNotPositiveNumber()).toBe(true);
+  });
+
+  test('any valid positive number should return false', () => {
+    expect.assertions(2);
 
     expect(isNotPositiveNumber(1)).toBe(false);
     expect(isNotPositiveNumber(1.5)).toBe(false);
-    expect(isNotPositiveNumber(0.1)).toBe(false);
   });
 });
