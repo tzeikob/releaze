@@ -1,3 +1,19 @@
+v1.0.1 - August 18, 2021
+
+* [`a869439`](https://github.com/tzeikob/releaze/commit/a869439b99783ebbd6f13a11056bb32e6dfd18b2) Explain how the changelog lines are composed
+* [`52b72da`](https://github.com/tzeikob/releaze/commit/52b72da56bae73871b3e1f18cafe9179fa420161) Use test.each to reduce code lines (fixes #17)
+* [`e5d4188`](https://github.com/tzeikob/releaze/commit/e5d4188651bb0b90da331e0a757470a0f72a9a4b) Overcome template literal default stringification
+* [`5b58dc0`](https://github.com/tzeikob/releaze/commit/5b58dc0a2eefbc4fac5679e831fd0ac790765017) Refactor log op to reduce complexity (refs #17)
+* [`39f4dc6`](https://github.com/tzeikob/releaze/commit/39f4dc66f4cf51fba7ceb207a4495696b24a1b26) Report to debug level instead of ignore errors
+* [`022569e`](https://github.com/tzeikob/releaze/commit/022569ec27c0d18d6e39726988f3d7b9456f082a) Relax testing for logging (refs #17)
+* [`7135b7e`](https://github.com/tzeikob/releaze/commit/7135b7ea594e12f8d03f41778f945f5bdd297712) Refactor ops to follow the new logger design (refs #17)
+* [`49272b1`](https://github.com/tzeikob/releaze/commit/49272b18b7db0fccdc2ff7b16990cebd62da7af6) Refactor logger to reduce complexity (refs #17)
+* [`779c344`](https://github.com/tzeikob/releaze/commit/779c344c09de414ed580bbd88a2dfb8a847ff812) Lint via eslint and aargh config
+* [`4722632`](https://github.com/tzeikob/releaze/commit/4722632bc86151e6c0d021093935c59194f4556c) Update minor styles in readme file
+* [`2080712`](https://github.com/tzeikob/releaze/commit/2080712c96b2a3ec8a9e04d2179467d7d81a7ffd) Add more NPM meta-tags in package.json
+* [`801c5cc`](https://github.com/tzeikob/releaze/commit/801c5cc0e02bf662bad874d65deed9e0be463407) Fix minor styles in the readme file
+* [`8830ded`](https://github.com/tzeikob/releaze/commit/8830ded1c9cc396bb98687ceb73702d8cb564a39) Remove bump logs from the changelog file
+
 v1.0.0 - August 6, 2021
 
 * [`850da8b`](https://github.com/tzeikob/releaze/commit/850da8b604865c5155bd2dda0cf4f31dde54926a) Update docs for the first stable release (fixes #28)
